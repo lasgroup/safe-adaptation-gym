@@ -1,6 +1,8 @@
 # learn2learn-safely
 A Safety-Gym based benchmark suite for safe meta reinforcement learning
 
+Separate into two categories: MDP variations due to reward and CMDP variations due to costs.
+
 
 # TODO 
 1. Think of the different classes of task. For instance, where does the variability in tasks arises from?
