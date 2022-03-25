@@ -21,8 +21,11 @@ class GoToGoal(Objective):
     return {'goal': (None, self.GOAL_KEEPOUT)}
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
-    return po.get_goal('goal', self.GOAL_SIZE, layout['goal'],
-                       utils.random_rot(rs))
+    return {
+        'geoms':
+            po.get_goal('goal', self.GOAL_SIZE, layout['goal'],
+                        utils.random_rot(rs))
+    }
 
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState, robot: Robot,
@@ -47,7 +50,7 @@ class GoToGoal(Objective):
     layout['goal'] = goal_xy
     robot_pos = world.body_pos('robot')
     self._last_goal_distance = np.linalg.norm(robot_pos - goal_xy)
-    goal_body_id = world.model.body_name2id('goal')
+    goal_body_id = world.model.name2id('goal', 'body')
     world.model.body_pos[goal_body_id][:2] = goal_xy
     world.sim.forward()
 

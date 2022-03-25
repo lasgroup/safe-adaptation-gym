@@ -20,7 +20,7 @@ def update_layout(layout: dict, world: World):
   """ Update layout dictionary with new places of objects """
   for k in list(layout.keys()):
     # Mocap objects have to be handled separately
-    if 'gremlin' in k:
+    if 'mocap' in k:
       continue
     layout[k] = world.body_pos(k)[:2].copy()
 

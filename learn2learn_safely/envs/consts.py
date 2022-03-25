@@ -1,4 +1,10 @@
+import os
+
 import numpy as np
+
+import learn2learn_safely
+
+BASE_DIR = os.path.join(os.path.dirname(learn2learn_safely.__file__), 'assets')
 
 PLACEMENT_EXTENTS = [-2, -2, 2, 2]
 
