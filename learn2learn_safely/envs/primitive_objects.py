@@ -69,3 +69,21 @@ def get_pillar(name: str,
       'group': c.GROUP_OBSTACLES,
       'rgba': color
   }
+
+
+def get_goal(name: str,
+             size: float,
+             xy: np.ndarray,
+             rot: float,
+             color: np.ndarray = c.GOAL_COLOR * [1, 1, 1, 0.25]) -> dict:
+  return {
+      'name': name,
+      'size': [size, size / 2.],
+      'pos': np.r_[xy, size / 2. + 1e-2],
+      'rot': rot,
+      'type': 'cylinder',
+      'contype': 0,
+      'conaffinity': 0,
+      'group': c.GROUP_GOAL,
+      'rgba': color
+  }

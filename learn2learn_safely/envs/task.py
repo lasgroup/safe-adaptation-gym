@@ -1,25 +1,19 @@
-from types import SimpleNamespace
-from typing import List, Mapping, Tuple
-
 from copy import deepcopy
+from types import SimpleNamespace
+from typing import List, Mapping
 
 import numpy as np
 
 import consts as c
-import obstacle_utils as ou
+import primitive_objects as po
+import utils
 from objectives.objective import Objective
 from robot import Robot
 from world import World
 
 
-class ResamplingError(AssertionError):
-  """ Raised when we fail to sample a valid distribution of objects or goals """
-  pass
-
-
 class Task:
   DEFAULT = {
-      'placement_extents': [-2, -2, 2, 2],
       'placements_margin': 0.0,
       'robot_keepout': 0.4,
       'num_obstacles': 10,
@@ -36,10 +30,10 @@ class Task:
     tmp_config = deepcopy(self.DEFAULT)
     tmp_config.update(config)
     self.config = SimpleNamespace(**tmp_config)
-    self._placements = None
     self.objective = objective
     self._seed = seed
     self.rs = np.random.RandomState(seed)
+    self._placements = self.setup_placements()
     self._obstacle_sizes = self.rs.normal([
         self.config.hazards_size, self.config.vases_size,
         self.config.pillars_size, self.config.gremlins_size
@@ -77,26 +71,26 @@ class Task:
     world_config = {
         'robot_path': robot_base_path,
         'robot_xy': layout['robot'],
-        'robot_rot': self.random_rot()
+        'robot_rot': utils.random_rot(self.rs)
     }
     for name, xy in layout.items():
       if 'vase' in name:
-        _object = ou.get_vase(name, self._obstacle_sizes[0], xy,
-                              self.random_rot())
+        _object = po.get_vase(name, self._obstacle_sizes[0], xy,
+                              utils.random_rot(self.rs))
         world_config['objects'][name] = _object
       elif 'gremlin' in name:
-        rot = self.random_rot()
-        _object = ou.get_gremlin(name + 'obj', self._obstacle_sizes[1], xy, rot)
-        mocap = ou.get_gremlin(name + 'mocap', self._obstacle_sizes[1], xy, rot)
+        rot = utils.random_rot(self.rs)
+        _object = po.get_gremlin(name + 'obj', self._obstacle_sizes[1], xy, rot)
+        mocap = po.get_gremlin(name + 'mocap', self._obstacle_sizes[1], xy, rot)
         world_config['objects'][name + 'obj'] = _object
         world_config['mocaps'][name + 'mocap'] = mocap
       elif 'hazard' in name:
-        _object = ou.get_hazard(name, self._obstacle_sizes[2], xy,
-                                self.random_rot())
+        _object = po.get_hazard(name, self._obstacle_sizes[2], xy,
+                                utils.random_rot(self.rs))
         world_config['objects'][name] = _object
       elif 'pillar' in name:
-        _object = ou.get_pillar(name, self._obstacle_sizes[3], xy,
-                                self.random_rot())
+        _object = po.get_pillar(name, self._obstacle_sizes[3], xy,
+                                utils.random_rot(self.rs))
         world_config['objects'][name] = _object
     world_config.update(self.objective.build_world_config())
     return world_config
@@ -117,12 +111,10 @@ class Task:
       if new_layout is not None:
         return new_layout
     else:
-      raise ResamplingError('Failed to sample layout of objects')
+      raise utils.ResamplingError('Failed to sample layout of objects')
 
   def _sample_layout(self) -> dict:
     """ Sample a single layout, returning True if successful, else False. """
-    if self._placements is None:
-      self._placements = self.setup_placements()
 
     def placement_is_valid(xy: np.ndarray, layout: dict):
       for other_name, other_xy in layout.items():
@@ -136,7 +128,7 @@ class Task:
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
       for _ in range(100):
-        xy = self._draw_placement(placements, keepout)
+        xy = utils.draw_placement(self.rs, placements, keepout)
         if placement_is_valid(xy, layout):
           conflicted = False
           break
@@ -144,55 +136,6 @@ class Task:
         return {}
       layout[name] = xy
     return layout
-
-  def _draw_placement(self, placements, keepout):
-    """
-    Sample an (x,y) location, based on potential placement areas.
-
-    Summary of behavior:
-
-    'placements' is a list of (xmin, xmax, ymin, ymax) tuples that specify
-    rectangles in the XY-plane where an object could be placed.
-
-    'keepout' describes how much space an object is required to have
-    around it, where that keepout space overlaps with the placement rectangle.
-
-    To sample an (x,y) pair, first randomly select which placement rectangle
-    to sample from, where the probability of a rectangle is weighted by its
-    area. If the rectangles are disjoint, there's an equal chance the (x,y)
-    location will wind up anywhere in the placement space. If they overlap, then
-    overlap areas are double-counted and will have higher density. This allows
-    the user some flexibility in building placement distributions. Finally,
-    randomly draw a uniform point within the selected rectangle.
-
-    """
-
-    def constrain_placement(placement, keepout):
-      """ Helper function to constrain a single placement by the keepout
-      radius """
-      xmin, ymin, xmax, ymax = placement
-      return xmin + keepout, ymin + keepout, xmax - keepout, ymax - keepout
-
-    if placements is None:
-      choice = constrain_placement(self.config.placements_extents, keepout)
-    else:
-      # Draw from placements according to placeable area
-      constrained = []
-      for placement in placements:
-        xmin, ymin, xmax, ymax = constrain_placement(placement, keepout)
-        if xmin > xmax or ymin > ymax:
-          continue
-        constrained.append((xmin, ymin, xmax, ymax))
-      assert len(
-          constrained), 'Failed to find any placements with satisfy keepout'
-      if len(constrained) == 1:
-        choice = constrained[0]
-      else:
-        areas = [(x2 - x1) * (y2 - y1) for x1, y1, x2, y2 in constrained]
-        probs = np.array(areas) / np.sum(areas)
-        choice = constrained[self.rs.choice(len(constrained), p=probs)]
-    xmin, ymin, xmax, ymax = choice
-    return np.array([self.rs.uniform(xmin, xmax), self.rs.uniform(ymin, ymax)])
 
   @property
   def obstacles(self) -> List[np.ndarray]:
@@ -205,7 +148,3 @@ class Task:
   @property
   def object(self) -> np.ndarray:
     pass
-
-  def random_rot(self):
-    """ Use internal random state to get a random rotation in radians """
-    return self.rs.uniform(0, 2 * np.pi)
