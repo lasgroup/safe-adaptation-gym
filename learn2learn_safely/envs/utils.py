@@ -3,6 +3,7 @@ from typing import Union
 import numpy as np
 
 import consts as c
+from world import World
 
 
 class ResamplingError(AssertionError):
@@ -13,6 +14,15 @@ class ResamplingError(AssertionError):
 def random_rot(rs: np.random.RandomState) -> float:
   """ Use internal random state to get a random rotation in radians """
   return rs.uniform(0, 2 * np.pi)
+
+
+def update_layout(layout: dict, world: World):
+  """ Update layout dictionary with new places of objects """
+  for k in list(layout.keys()):
+    # Mocap objects have to be handled separately
+    if 'gremlin' in k:
+      continue
+    layout[k] = world.body_pos(k)[:2].copy()
 
 
 def constrain_placement(placement: tuple, keepout: float) -> tuple:
