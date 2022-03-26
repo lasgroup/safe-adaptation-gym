@@ -1,13 +1,14 @@
 import os
-import xmltodict
-from types import SimpleNamespace
-import numpy as np
-from copy import deepcopy
 from collections import OrderedDict
+from copy import deepcopy
+from types import SimpleNamespace
+
+import numpy as np
+import xmltodict
 from dm_control import mujoco
 
-from learn2learn_safely.envs.robot import Robot
-import consts as c
+import learn2learn_safely.consts as c
+from learn2learn_safely.robot import Robot
 
 
 def convert(v):
@@ -28,7 +29,7 @@ class World:
   # *NOTE:* Changes to this configuration should also be reflected in
   # `Engine` configuration
   DEFAULT = {
-      'robot_base': 'xmls/car.xml',  # Which robot XML to use as the base
+      'robot_base': 'car.xml',  # Which robot XML to use as the base
       'robot_xy': np.zeros(2),  # Robot XY location
       'robot_rot': 0,  # Robot rotation about Z axis
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
@@ -67,8 +68,7 @@ class World:
     self.robot_base_path = os.path.join(c.BASE_DIR, self.config.robot_base)
     with open(self.robot_base_path) as f:
       self.robot_base_xml = f.read()
-    self.xml = xmltodict.parse(
-        self.robot_base_xml)  # Nested OrderedDict objects
+    self.xml = xmltodict.parse(self.robot_base_xml)
 
     # Convenience accessor for xml dictionary
     worldbody = self.xml['mujoco']['worldbody']
@@ -162,8 +162,8 @@ class World:
         yp=0 * (-np.sin(theta)) + (-2) * np.cos(theta),
         zp=2)
     track_camera = xmltodict.parse("""<b>
-            <camera name="track" mode="track" pos="{xp} {yp} {zp}" xyaxes="{
-            x1} {x2} {x3} {y1} {y2} {y3}"/>
+            <camera name="track" mode="track" pos="{xp} {yp} {zp}" 
+            xyaxes="{x1} {x2} {x3} {y1} {y2} {y3}"/>
             </b>""".format(**pos, **xyaxes))
     worldbody['body'][0]['camera'] = [
         worldbody['body'][0]['camera'], track_camera['b']['camera']
@@ -174,6 +174,9 @@ class World:
       assert object['name'] == name, f'Inconsistent {name} {object}'
       object = object.copy()  # don't modify original object
       object['quat'] = rot2quat(object['rot'])
+      # TODO (yarden): make this scalable!!! (So that other objects are loaded)
+      # The interace should exist within the objective class, which should expose
+      # how objects are loaded. Perhaps add an optional key that describes the object?
       if name == 'box':
         dim = object['size'][0]
         object['dim'] = dim
@@ -205,8 +208,7 @@ class World:
                     <body name="{name}" pos="{pos}" quat="{quat}">
                         <freejoint name="{name}"/>
                         <geom name="{name}" type="{type}" size="{size}" 
-                        density="{density}"
-                            rgba="{rgba}" group="{group}"/>
+                        density="{density}" rgba="{rgba}" group="{group}"/>
                     </body>
                 """.format(**{k: convert(v) for k, v in object.items()}))
       # Append new body to world, making it a list optionally
@@ -223,10 +225,9 @@ class World:
       mocap['quat'] = rot2quat(mocap['rot'])
       body = xmltodict.parse("""
                 <body name="{name}" mocap="true">
-                    <geom name="{name}" type="{type}" size="{size}" rgba="{
-                    rgba}"
-                        pos="{pos}" quat="{quat}" contype="0" conaffinity="0" 
-                        group="{group}"/>
+                    <geom name="{name}" type="{type}" size="{size}" 
+                    rgba="{rgba}" pos="{pos}" quat="{quat}" 
+                    contype="0" conaffinity="0" group="{group}"/>
                 </body>
             """.format(**{k: convert(v) for k, v in mocap.items()}))
       worldbody['body'].append(body['body'])
@@ -247,9 +248,9 @@ class World:
       geom['conaffinity'] = geom.get('conaffinity', 1)
       body = xmltodict.parse("""
                 <body name="{name}" pos="{pos}" quat="{quat}">
-                    <geom name="{name}" type="{type}" size="{size}" rgba="{
-                    rgba}" group="{group}"
-                        contype="{contype}" conaffinity="{conaffinity}"/>
+                    <geom name="{name}" type="{type}" size="{size}"
+                     rgba="{rgba}" group="{group}" contype="{contype}" 
+                     conaffinity="{conaffinity}"/>
                 </body>
             """.format(**{k: convert(v) for k, v in geom.items()}))
       # Append new body to world, making it a list optionally
@@ -279,11 +280,6 @@ class World:
       self.sim.set_state(old_state)
     self.sim.forward()
 
-  def reset(self, build=True):
-    """ Reset the world (sim is accessed through self.sim) """
-    if build:
-      self.build()
-
   def robot_com(self):
     """ Get the position of the robot center of mass in the simulator world
     reference frame """
@@ -305,23 +301,20 @@ class World:
   def body_com(self, name):
     """ Get the center of mass of a named body in the simulator world
     reference frame """
-    return self.data.subtree_com[self.model.name2id(name, 'body')].copy()
+    return self.data.named.subtree_com[name].copy()
 
   def body_pos(self, name):
     """ Get the position of a named body in the simulator world reference
     frame """
-    id = self.model.name2id(name, 'body')
-    return self.data.xpos[id].copy()
+    return self.data.named.xpos[name].copy()
 
   def body_mat(self, name):
     """ Get the rotation matrix of a named body in the simulator world
     reference frame """
-    id = self.model.name2id(name, 'body')
-    return self.data.xmat[id].reshape([3, 3])
+    return self.data.named.xmat[name].reshape([3, 3])
 
   def body_vel(self, name):
     """ Get the velocity of a named body in the simulator world reference
     frame """
-    id = self.model.name2id(name, 'body')
-    vel = self.data.object_velocity(id, 'body')
+    vel = self.data.named.object_velocity(id, 'body')
     return vel[0]

@@ -8,7 +8,7 @@ BASE_DIR = os.path.join(os.path.dirname(learn2learn_safely.__file__), 'assets')
 
 PLACEMENT_EXTENTS = [-2, -2, 2, 2]
 
-OBSTACLES = ['hazard', 'vase', 'gremlin', 'pillar']
+OBSTACLES = ['hazards', 'vases', 'gremlins', 'pillars']
 
 GROUP_OBSTACLES = 0
 GROUP_GOAL = 1

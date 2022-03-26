@@ -2,8 +2,8 @@ from typing import Union
 
 import numpy as np
 
-import consts as c
-from world import World
+import learn2learn_safely.consts as c
+from learn2learn_safely.world import World
 
 
 class ResamplingError(AssertionError):
@@ -73,3 +73,21 @@ def draw_placement(rs: np.random.RandomState, placements: Union[dict, None],
       choice = constrained[rs.choice(len(constrained), p=probs)]
   xmin, ymin, xmax, ymax = choice
   return np.array([rs.uniform(xmin, xmax), rs.uniform(ymin, ymax)])
+
+
+# https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries/24088493#24088493
+def merge(a, b, path=None):
+  """ merges b into a """
+  if path is None:
+    path = []
+  for key in b:
+    if key in a:
+      if isinstance(a[key], dict) and isinstance(b[key], dict):
+        merge(a[key], b[key], path + [str(key)])
+      elif a[key] == b[key]:
+        pass  # same leaf value
+      else:
+        raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+    else:
+      a[key] = b[key]
+  return a

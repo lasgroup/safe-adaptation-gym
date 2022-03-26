@@ -26,7 +26,8 @@ Separate into three categories: MDP variations due to reward and CMDP variations
 14. How parametric and non-parametric transfer can be tested together in a more intelligent way than metaworlds.
 15. Think of more tasks
 16. Cross validate tasks: in each experiment make a different mixture of training, testing splits.
-17. Randomly moving obstacles 
+17. Randomly moving obstacles
+18. Egg shaped objects (easier to roll in a certain direction.)
 
 # Possible tasks
 ## Objective (keep dynamics and objects, change reward)

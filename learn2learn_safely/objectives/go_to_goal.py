@@ -2,12 +2,11 @@ from typing import Mapping, Tuple
 
 import numpy as np
 
-import learn2learn_safely.envs.utils as utils
-from learn2learn_safely.envs.robot import Robot
-from learn2learn_safely.envs.world import World
-from objective import Objective
+import learn2learn_safely.utils as utils
+from learn2learn_safely.world import World
+from learn2learn_safely.objectives.objective import Objective
 
-import learn2learn_safely.envs.primitive_objects as po
+import learn2learn_safely.primitive_objects as po
 
 
 class GoToGoal(Objective):
@@ -22,13 +21,15 @@ class GoToGoal(Objective):
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     return {
-        'geoms':
-            po.get_goal('goal', self.GOAL_SIZE, layout['goal'],
-                        utils.random_rot(rs))
+        'geoms': {
+            'goal':
+                po.get_goal('goal', self.GOAL_SIZE, layout['goal'],
+                            utils.random_rot(rs))
+        }
     }
 
   def compute_reward(self, layout: dict, placements: dict,
-                     rs: np.random.RandomState, robot: Robot,
+                     rs: np.random.RandomState,
                      world: World) -> Tuple[float, dict]:
     goal_pos = np.asarray(world.body_pos('goal'))
     robot_pos = world.body_pos('robot')
@@ -39,12 +40,12 @@ class GoToGoal(Objective):
     if distance <= self.GOAL_SIZE:
       info['goal_met'] = True
       utils.update_layout(layout, world)
-      self.build(layout, placements, rs, robot, world)
+      self.build(layout, placements, rs, world)
       reward += 1.
     return reward, info
 
   def build(self, layout: dict, placements: dict, rs: np.random.RandomState,
-            robot: Robot, world: World):
+            world: World):
     # TODO (yarden): possibly need to update the Task's world config?
     goal_xy = self._resample_goal_position(layout, placements, rs)
     layout['goal'] = goal_xy

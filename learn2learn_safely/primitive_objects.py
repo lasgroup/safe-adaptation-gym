@@ -1,6 +1,6 @@
 import numpy as np
 
-import consts as c
+import learn2learn_safely.consts as c
 
 
 def get_vase(name: str,
