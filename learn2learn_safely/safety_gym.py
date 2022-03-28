@@ -2,7 +2,7 @@ from typing import Tuple, Union, Optional
 import gym
 from gym.core import ActType, ObsType
 
-from task import Task
+from world import World
 
 
 # TODO (yarden): what is the best interface to sample and load new tasks?

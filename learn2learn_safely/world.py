@@ -1,320 +1,177 @@
-import os
-from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace
+from typing import List, Mapping, Tuple, Union
 
 import numpy as np
-import xmltodict
-from dm_control import mujoco
 
 import learn2learn_safely.consts as c
-from learn2learn_safely.robot import Robot
-
-
-def convert(v):
-  """ Convert a value into a string for mujoco XML """
-  if isinstance(v, (int, float, str)):
-    return str(v)
-  # Numpy arrays and lists
-  return ' '.join(str(i) for i in np.asarray(v))
-
-
-def rot2quat(theta):
-  """ Get a quaternion rotated only about the Z axis """
-  return np.array([np.cos(theta / 2), 0, 0, np.sin(theta / 2)], dtype='float64')
+import learn2learn_safely.primitive_objects as po
+import learn2learn_safely.utils as utils
+from learn2learn_safely.tasks.task import Task
+from learn2learn_safely.mujoco_bridge import MujocoBridge
 
 
 class World:
-  # Default configuration (this should not be nested since it gets copied)
-  # *NOTE:* Changes to this configuration should also be reflected in
-  # `Engine` configuration
   DEFAULT = {
-      'robot_base': 'car.xml',  # Which robot XML to use as the base
-      'robot_xy': np.zeros(2),  # Robot XY location
-      'robot_rot': 0,  # Robot rotation about Z axis
-      'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
-
-      # Objects -- this is processed and added by the Engine class
-      'objects': {},  # map from name -> object dict
-      # Geoms -- similar to objects, but they are immovable and fixed in the
-      # scene.
-      'geoms': {},  # map from name -> geom dict
-      # Mocaps -- mocap objects which are used to control other objects
-      'mocaps': {},
+      'placements_margin': 0.0,
+      'robot_keepout': 0.4,
+      'num_obstacles': 10,
+      'hazards_size': 0.3,
+      'vases_size': 0.1,
+      'pillars_size': 0.2,
+      'gremlins_size': 0.1,
+      'hazards_keepout': 0.18,
+      'gremlins_keepout': 0.4,
+      'vases_keepout': 0.15,
+      'pillars_keepout': 0.3,
+      'obstacles_size_noise': 0.025,
+      'keepout_noise': 0.025
   }
 
-  def __init__(self, config=None):
-    """ config - JSON string or dict of configuration. """
+  def __init__(self,
+               rs: np.random.RandomState,
+               task: Task,
+               robot_base: str,
+               config=None):
     if config is None:
       config = {}
-    self.config = deepcopy(self.DEFAULT)
-    self.config.update(deepcopy(config))
-    self.config = SimpleNamespace(**self.config)
-    self.robot = Robot(self.config.robot_base)
+    tmp_config = deepcopy(self.DEFAULT)
+    tmp_config.update(config)
+    self.config = SimpleNamespace(**tmp_config)
+    self.task = task
+    self.rs = rs
+    self.robot_base = robot_base
+    self._obstacle_sizes = self.rs.normal([
+        self.config.hazards_size, self.config.vases_size,
+        self.config.pillars_size, self.config.gremlins_size
+    ], self.config.obstacles_size_noise * np.ones(len(c.OBSTACLES)))
+    self._obstacle_keepouts = self.rs.normal([
+        self.config.hazards_keepout, self.config.vases_keepout,
+        self.config.pillars_keepout, self.config.gremlins_keepout
+    ], self.config.keepout_noise * np.ones(len(c.OBSTACLES)))
+    self._placements = self._setup_placements()
+    self._layout = None
 
-  # TODO: remove this when mujoco-py fix is merged and a new version is pushed
-  # https://github.com/openai/mujoco-py/pull/354
-  # Then all uses of `self.world.get_sensor()` should change to
-  # `self.data.get_sensor`.
-  def get_sensor(self, name):
-    id = self.model.sensor_name2id(name)
-    adr = self.model.sensor_adr[id]
-    dim = self.model.sensor_dim[id]
-    return self.data.sensordata[adr:adr + dim].copy()
+  def _setup_placements(self):
+    """ Build a dict of placements. """
+    # TODO (yarden): Should the probability of different obstacle types be
+    #  different?
+    obstacle_samples = self.rs.multinomial(
+        self.config.num_obstacles, [1 / len(c.OBSTACLES)] * len(c.OBSTACLES))
+    placements = {
+        **self._placement_dict_from_object('robot', 1),
+    }
+    for obstacle, num in zip(c.OBSTACLES, obstacle_samples):
+      placements.update(self._placement_dict_from_object(obstacle, num))
+    utils.merge(placements, self.task.setup_placements())
+    return placements
+
+  def _placement_dict_from_object(self, name: str,
+                                  num_placements) -> Mapping[str, tuple]:
+    """ Get the placements' dict subset just for a given object name """
+    placements_dict = {}
+    object_fmt = name + '{i}' if name != 'robot' else name
+    object_keepout = {
+        'hazards': self._obstacle_keepouts[0],
+        'vases': self._obstacle_keepouts[1],
+        'pillars': self._obstacle_keepouts[2],
+        'gremlins': self._obstacle_keepouts[3],
+        'robot': self.config.robot_keepout
+    }[name]
+    for i in range(num_placements):
+      # Set placements to None so that obstacles positions are sampled randomly.
+      placements = None
+      placements_dict[object_fmt.format(i=i)] = (placements, object_keepout)
+    return placements_dict
 
   def build(self):
-    """ Build a world, including generating XML and moving objects """
-    # Read in the base XML (contains robot, camera, floor, etc)
-    self.robot_base_path = os.path.join(c.BASE_DIR, self.config.robot_base)
-    with open(self.robot_base_path) as f:
-      self.robot_base_xml = f.read()
-    self.xml = xmltodict.parse(self.robot_base_xml)
+    # TODO (yarden): might need to clear layout upon reset?
+    self._layout = self._generate_new_layout()
+    return self._build_world_config()
 
-    # Convenience accessor for xml dictionary
-    worldbody = self.xml['mujoco']['worldbody']
+  def _build_world_config(self):
+    """ Create a world_config from our own config """
+    world_config = {
+        'robot_base': self.robot_base,
+        'robot_xy': self._layout['robot'],
+        'robot_rot': utils.random_rot(self.rs),
+        'bodies': {}
+    }
+    for name, xy in self._layout.items():
+      if 'vase' in name:
+        world_config['bodies'][name] = po.get_vase(name,
+                                                   self._obstacle_sizes[0], xy,
+                                                   utils.random_rot(self.rs))
+      elif 'gremlin' in name:
+        world_config['bodies'][name] = po.get_gremlin(name,
+                                                      self._obstacle_sizes[1],
+                                                      xy,
+                                                      utils.random_rot(self.rs))
+      elif 'hazard' in name:
+        world_config['bodies'][name] = po.get_hazard(name,
+                                                     self._obstacle_sizes[2],
+                                                     xy,
+                                                     utils.random_rot(self.rs))
+      elif 'pillar' in name:
+        world_config['bodies'][name] = po.get_pillar(name,
+                                                     self._obstacle_sizes[3],
+                                                     xy,
+                                                     utils.random_rot(self.rs))
+    utils.merge(world_config,
+                self.task.build_world_config(self._layout, self.rs))
+    return world_config
 
-    # Move robot position to starting position
-    worldbody['body']['@pos'] = convert(np.r_[self.config.robot_xy,
-                                              self.robot.z_height])
-    worldbody['body']['@quat'] = convert(rot2quat(self.config.robot_rot))
+  def compute_reward(self, world: MujocoBridge) -> Tuple[float, dict]:
+    return self.task.compute_reward(self._layout, self._placements, self.rs,
+                                    world)
 
-    # We need this because xmltodict skips over single-item lists in the tree
-    worldbody['body'] = [worldbody['body']]
-    if 'geom' in worldbody:
-      worldbody['geom'] = [worldbody['geom']]
+  def reset(self):
+    """ Resets the task. Allows the concrete implementation to perform
+    specialized reset """
+    # TODO (yarden): How is this function to be used?
+    pass
+
+  def _generate_new_layout(self):
+    """ Rejection sample a placement of objects to find a layout. """
+    for _ in range(10000):
+      new_layout = self._sample_layout()
+      if new_layout is not None:
+        return new_layout
     else:
-      worldbody['geom'] = []
+      raise utils.ResamplingError('Failed to sample layout of objects')
 
-    # Add equality section if missing
-    if 'equality' not in self.xml['mujoco']:
-      self.xml['mujoco']['equality'] = OrderedDict()
-    equality = self.xml['mujoco']['equality']
-    if 'weld' not in equality:
-      equality['weld'] = []
+  def _sample_layout(self) -> Union[dict, None]:
+    """ Sample a single layout, returning True if successful, else False. """
 
-    # Add asset section if missing
-    if 'asset' not in self.xml['mujoco']:
-      # old default rgb1: ".4 .5 .6"
-      # old default rgb2: "0 0 0"
-      # light pink: "1 0.44 .81"
-      # light blue: "0.004 0.804 .996"
-      # light purple: ".676 .547 .996"
-      # med blue: "0.527 0.582 0.906"
-      # indigo: "0.293 0 0.508"
-      asset = xmltodict.parse("""
-                <asset>
-                    <texture type="skybox" builtin="gradient" rgb1="0.527 
-                    0.582 0.906" rgb2="0.1 0.1 0.35"
-                        width="800" height="800" markrgb="1 1 1" 
-                        mark="random" random="0.001"/>
-                    <texture name="texplane" builtin="checker" height="100" 
-                    width="100"
-                        rgb1="0.7 0.7 0.7" rgb2="0.8 0.8 0.8" type="2d"/>
-                    <material name="MatPlane" reflectance="0.1" 
-                    shininess="0.1" specular="0.1"
-                        texrepeat="10 10" texture="texplane"/>
-                </asset>
-                """)
-      self.xml['mujoco']['asset'] = asset['asset']
+    def placement_is_valid(xy: np.ndarray, layout: dict):
+      for other_name, other_xy in layout.items():
+        other_keepout = self._placements[other_name][1]
+        dist = np.sqrt(np.sum(np.square(xy - other_xy)))
+        if dist < other_keepout + self.config.placements_margin + keepout:
+          return False
+      return True
 
-    # Add light to the XML dictionary
-    light = xmltodict.parse("""<b>
-            <light cutoff="100" diffuse="1 1 1" dir="0 0 -1" directional="true"
-                exponent="1" pos="0 0 0.5" specular="0 0 0" castshadow="false"/>
-            </b>""")
-    worldbody['light'] = light['b']['light']
+    layout = {}
+    for name, (placements, keepout) in self._placements.items():
+      conflicted = True
+      for _ in range(100):
+        xy = utils.draw_placement(self.rs, placements, keepout)
+        if placement_is_valid(xy, layout):
+          conflicted = False
+          break
+      if conflicted:
+        return None
+      layout[name] = xy
+    return layout
 
-    # Add floor to the XML dictionary if missing
-    if not any(g.get('@name') == 'floor' for g in worldbody['geom']):
-      floor = xmltodict.parse("""
-                <geom name="floor" type="plane" condim="6"/>
-                """)
-      worldbody['geom'].append(floor['geom'])
+  @property
+  def obstacles(self) -> List[np.ndarray]:
+    pass
 
-    # Make sure floor renders the same for every world
-    for g in worldbody['geom']:
-      if g['@name'] == 'floor':
-        g.update({
-            '@size': convert(self.config.floor_size),
-            '@rgba': '1 1 1 1',
-            '@material': 'MatPlane'
-        })
+  @property
+  def goal(self) -> np.ndarray:
+    pass
 
-    # Add cameras to the XML dictionary
-    cameras = xmltodict.parse("""<b>
-            <camera name="fixednear" pos="0 -2 2" zaxis="0 -1 1"/>
-            <camera name="fixedfar" pos="0 -5 5" zaxis="0 -1 1"/>
-            </b>""")
-    worldbody['camera'] = cameras['b']['camera']
-
-    # Build and add a tracking camera (logic needed to ensure orientation
-    # correct)
-    theta = self.config.robot_rot
-    xyaxes = dict(
-        x1=np.cos(theta),
-        x2=-np.sin(theta),
-        x3=0,
-        y1=np.sin(theta),
-        y2=np.cos(theta),
-        y3=1)
-    pos = dict(
-        xp=0 * np.cos(theta) + (-2) * np.sin(theta),
-        yp=0 * (-np.sin(theta)) + (-2) * np.cos(theta),
-        zp=2)
-    track_camera = xmltodict.parse("""<b>
-            <camera name="track" mode="track" pos="{xp} {yp} {zp}" 
-            xyaxes="{x1} {x2} {x3} {y1} {y2} {y3}"/>
-            </b>""".format(**pos, **xyaxes))
-    worldbody['body'][0]['camera'] = [
-        worldbody['body'][0]['camera'], track_camera['b']['camera']
-    ]
-
-    # Add objects to the XML dictionary
-    for name, object in self.config.objects.items():
-      assert object['name'] == name, f'Inconsistent {name} {object}'
-      object = object.copy()  # don't modify original object
-      object['quat'] = rot2quat(object['rot'])
-      # TODO (yarden): make this scalable!!! (So that other objects are loaded)
-      # The interace should exist within the objective class, which should expose
-      # how objects are loaded. Perhaps add an optional key that describes the object?
-      if name == 'box':
-        dim = object['size'][0]
-        object['dim'] = dim
-        object['width'] = dim / 2
-        object['x'] = dim
-        object['y'] = dim
-        body = xmltodict.parse("""
-                    <body name="{name}" pos="{pos}" quat="{quat}">
-                        <freejoint name="{name}"/>
-                        <geom name="{name}" type="{type}" size="{size}" 
-                        density="{density}"
-                            rgba="{rgba}" group="{group}"/>
-                        <geom name="col1" type="{type}" size="{width} {width} 
-                        {dim}" density="{density}"
-                            rgba="{rgba}" group="{group}" pos="{x} {y} 0"/>
-                        <geom name="col2" type="{type}" size="{width} {width} 
-                        {dim}" density="{density}"
-                            rgba="{rgba}" group="{group}" pos="-{x} {y} 0"/>
-                        <geom name="col3" type="{type}" size="{width} {width} 
-                        {dim}" density="{density}"
-                            rgba="{rgba}" group="{group}" pos="{x} -{y} 0"/>
-                        <geom name="col4" type="{type}" size="{width} {width} 
-                        {dim}" density="{density}"
-                            rgba="{rgba}" group="{group}" pos="-{x} -{y} 0"/>
-                    </body>
-                """.format(**{k: convert(v) for k, v in object.items()}))
-      else:
-        body = xmltodict.parse("""
-                    <body name="{name}" pos="{pos}" quat="{quat}">
-                        <freejoint name="{name}"/>
-                        <geom name="{name}" type="{type}" size="{size}" 
-                        density="{density}" rgba="{rgba}" group="{group}"/>
-                    </body>
-                """.format(**{k: convert(v) for k, v in object.items()}))
-      # Append new body to world, making it a list optionally
-      # Add the object to the world
-      worldbody['body'].append(body['body'])
-    # Add mocaps to the XML dictionary
-    for name, mocap in self.config.mocaps.items():
-      # Mocap names are suffixed with 'mocap'
-      assert mocap['name'] == name, f'Inconsistent {name} {object}'
-      assert name.replace(
-          'mocap', 'obj') in self.config.objects, f'missing object for {name}'
-      # Add the object to the world
-      mocap = mocap.copy()  # don't modify original object
-      mocap['quat'] = rot2quat(mocap['rot'])
-      body = xmltodict.parse("""
-                <body name="{name}" mocap="true">
-                    <geom name="{name}" type="{type}" size="{size}" 
-                    rgba="{rgba}" pos="{pos}" quat="{quat}" 
-                    contype="0" conaffinity="0" group="{group}"/>
-                </body>
-            """.format(**{k: convert(v) for k, v in mocap.items()}))
-      worldbody['body'].append(body['body'])
-      # Add weld to equality list
-      mocap['body1'] = name
-      mocap['body2'] = name.replace('mocap', 'obj')
-      weld = xmltodict.parse("""
-                <weld name="{name}" body1="{body1}" body2="{body2}" 
-                solref=".02 1.5"/>
-            """.format(**{k: convert(v) for k, v in mocap.items()}))
-      equality['weld'].append(weld['weld'])
-    # Add geoms to XML dictionary
-    for name, geom in self.config.geoms.items():
-      assert geom['name'] == name, f'Inconsistent {name} {geom}'
-      geom = geom.copy()  # don't modify original object
-      geom['quat'] = rot2quat(geom['rot'])
-      geom['contype'] = geom.get('contype', 1)
-      geom['conaffinity'] = geom.get('conaffinity', 1)
-      body = xmltodict.parse("""
-                <body name="{name}" pos="{pos}" quat="{quat}">
-                    <geom name="{name}" type="{type}" size="{size}"
-                     rgba="{rgba}" group="{group}" contype="{contype}" 
-                     conaffinity="{conaffinity}"/>
-                </body>
-            """.format(**{k: convert(v) for k, v in geom.items()}))
-      # Append new body to world, making it a list optionally
-      # Add the object to the world
-      worldbody['body'].append(body['body'])
-
-    # Instantiate simulator
-    self.xml_string = xmltodict.unparse(self.xml)
-    self.sim = mujoco.Physics.from_xml_string(self.xml_string)
-    self.model = self.sim.model
-    self.data = self.sim.data
-
-    # Recompute simulation intrinsics from new position
-    self.sim.forward()
-
-  def rebuild(self, config=None, state=True):
-    """ Build a new sim from a model if the model changed """
-    if config is None:
-      config = {}
-    if state:
-      old_state = self.sim.get_state()
-    self.config = deepcopy(self.DEFAULT)
-    self.config.update(deepcopy(config))
-    self.config = SimpleNamespace(**self.config)
-    self.build()
-    if state:
-      self.sim.set_state(old_state)
-    self.sim.forward()
-
-  def robot_com(self):
-    """ Get the position of the robot center of mass in the simulator world
-    reference frame """
-    return self.body_com('robot')
-
-  def robot_pos(self):
-    """ Get the position of the robot in the simulator world reference frame """
-    return self.body_pos('robot')
-
-  def robot_mat(self):
-    """ Get the rotation matrix of the robot in the simulator world reference
-    frame """
-    return self.body_mat('robot')
-
-  def robot_vel(self):
-    """ Get the velocity of the robot in the simulator world reference frame """
-    return self.body_vel('robot')
-
-  def body_com(self, name):
-    """ Get the center of mass of a named body in the simulator world
-    reference frame """
-    return self.data.named.subtree_com[name].copy()
-
-  def body_pos(self, name):
-    """ Get the position of a named body in the simulator world reference
-    frame """
-    return self.data.named.xpos[name].copy()
-
-  def body_mat(self, name):
-    """ Get the rotation matrix of a named body in the simulator world
-    reference frame """
-    return self.data.named.xmat[name].reshape([3, 3])
-
-  def body_vel(self, name):
-    """ Get the velocity of a named body in the simulator world reference
-    frame """
-    vel = self.data.named.object_velocity(id, 'body')
-    return vel[0]
+  @property
+  def object(self) -> np.ndarray:
+    pass

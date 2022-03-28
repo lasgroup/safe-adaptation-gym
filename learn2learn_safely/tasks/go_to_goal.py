@@ -3,13 +3,13 @@ from typing import Mapping, Tuple
 import numpy as np
 
 import learn2learn_safely.utils as utils
-from learn2learn_safely.world import World
-from learn2learn_safely.objectives.objective import Objective
+from learn2learn_safely.mujoco_bridge import MujocoBridge
+from learn2learn_safely.tasks.task import Task
 
 import learn2learn_safely.primitive_objects as po
 
 
-class GoToGoal(Objective):
+class GoToGoal(Task):
   GOAL_SIZE = 0.3
   GOAL_KEEPOUT = 0.305
 
@@ -30,7 +30,7 @@ class GoToGoal(Objective):
 
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
-                     world: World) -> Tuple[float, dict]:
+                     world: MujocoBridge) -> Tuple[float, dict]:
     goal_pos = np.asarray(world.body_pos('goal'))
     robot_pos = world.body_pos('robot')
     distance = np.linalg.norm(robot_pos - goal_pos)
@@ -45,8 +45,8 @@ class GoToGoal(Objective):
     return reward, info
 
   def build(self, layout: dict, placements: dict, rs: np.random.RandomState,
-            world: World):
-    # TODO (yarden): possibly need to update the Task's world config?
+            world: MujocoBridge):
+    # TODO (yarden): possibly need to update the World's world config?
     goal_xy = self._resample_goal_position(layout, placements, rs)
     layout['goal'] = goal_xy
     robot_pos = world.body_pos('robot')

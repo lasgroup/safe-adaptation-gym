@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 
 import learn2learn_safely.consts as c
-from learn2learn_safely.world import World
+from learn2learn_safely.mujoco_bridge import MujocoBridge
 
 
 class ResamplingError(AssertionError):
@@ -16,7 +16,7 @@ def random_rot(rs: np.random.RandomState) -> float:
   return rs.uniform(0, 2 * np.pi)
 
 
-def update_layout(layout: dict, world: World):
+def update_layout(layout: dict, world: MujocoBridge):
   """ Update layout dictionary with new places of objects """
   for k in list(layout.keys()):
     # Mocap objects have to be handled separately
@@ -91,3 +91,16 @@ def merge(a, b, path=None):
     else:
       a[key] = b[key]
   return a
+
+
+def rot2quat(theta):
+  """ Get a quaternion rotated only about the Z axis """
+  return np.array([np.cos(theta / 2), 0, 0, np.sin(theta / 2)], dtype='float64')
+
+
+def convert_to_text(v):
+  """ Convert a value into a string for mujoco XML """
+  if isinstance(v, (int, float, str)):
+    return str(v)
+  # Numpy arrays and lists
+  return ' '.join(str(i) for i in np.asarray(v))
