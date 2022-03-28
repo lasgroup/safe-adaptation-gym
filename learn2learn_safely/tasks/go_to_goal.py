@@ -21,7 +21,7 @@ class GoToGoal(Task):
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     return {
-        'geoms': {
+        'bodies': {
             'goal':
                 po.get_goal('goal', self.GOAL_SIZE, layout['goal'],
                             utils.random_rot(rs))
@@ -53,7 +53,7 @@ class GoToGoal(Task):
     self._last_goal_distance = np.linalg.norm(robot_pos - goal_xy)
     goal_body_id = world.model.name2id('goal', 'body')
     world.model.body_pos[goal_body_id][:2] = goal_xy
-    world.sim.forward()
+    world.physics.forward()
 
   def _resample_goal_position(self, layout: dict, placements: dict,
                               rs: np.random.RandomState):

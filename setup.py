@@ -7,7 +7,7 @@ required = [
     'xmltodict>=0.12.0'
 ]
 
-extras = {'dev': ['pytest>=4.4.0']}
+extras = {'dev': ['pytest>=4.4.0', 'Pillow', 'matplotlib']}
 
 package_data = {'learn2learn_safely': ['assets/*']}
 

@@ -32,14 +32,15 @@ class MujocoBridge:
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
     self.robot = Robot(self.config.robot_base)
-    self.sim = None
+    self.physics = None
     self.model = None
     self.data = None
+    self._build()
 
   def get_sensor(self, name):
     return self.data.named.sensordata[name].copy()
 
-  def build(self):
+  def _build(self):
     """ Build a world, including generating XML and moving objects """
     # Read in the base XML (contains robot, camera, floor, etc)
     robot_base_path = os.path.join(c.BASE_DIR, self.config.robot_base)
@@ -147,28 +148,28 @@ class MujocoBridge:
         equality['weld'].append(xmltodict.parse(weld_str)['weld'])
     # Instantiate simulator
     xml_string = xmltodict.unparse(xml)
-    self.sim = mujoco.Physics.from_xml_string(xml_string)
-    self.model = self.sim.model
-    self.data = self.sim.data
+    self.physics = mujoco.Physics.from_xml_string(xml_string)
+    self.model = self.physics.model
+    self.data = self.physics.data
 
     # Recompute simulation intrinsics from new position
-    self.sim.forward()
+    self.physics.forward()
 
   def rebuild(self, config=None, state=True):
     # TODO (yarden): rebuild should only reposition the objects. There is no
     #  need to recreate the whole XML tree from scratch
-    """ Build a new sim from a model if the model changed """
+    """ Build a new physics from a model if the model changed """
     if config is None:
       config = {}
     if state:
-      old_state = self.sim.get_state()
+      old_state = self.physics.get_state()
     self.config = deepcopy(self.DEFAULT)
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
-    self.build()
+    self._build()
     if state:
-      self.sim.set_state(old_state)
-    self.sim.forward()
+      self.physics.set_state(old_state)
+    self.physics.forward()
 
   def robot_com(self):
     """ Get the position of the robot center of mass in the simulator world
