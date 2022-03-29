@@ -161,18 +161,28 @@ class MujocoBridge:
     """ Sets the new positions of the resampled bodies. """
     assert config['bodies'].keys() == self.config.bodies.keys(), (
         'Some bodies were added or discarded')
+
+    def to_qpos(pos, quat):
+      return np.concatenate([pos, quat])
+
     with self.physics.reset_context():
-      for name, (body_strings, _) in config['bodies'].items():
+      for _, (body_strings, _) in config['bodies'].items():
         for xml_string in body_strings:
           body_xml = xmltodict.parse(xml_string)['body']
+          name = body_xml['@name']
           if body_xml.get('@mocap', False):
             continue
           quat = utils.convert_from_text(body_xml['@quat'])
           pos = utils.convert_from_text(body_xml['@pos'])
-          self.set_body_pos(body_xml['@name'], pos)
-          self.set_body_quat(body_xml['@name'], quat)
-      self.set_body_pos('robot', config['robot_xy'])
-      self.set_body_quat('robot', utils.rot2quat(config['robot_rot']))
+          if 'freejoint' in body_xml.keys():
+            self.physics.named.data.qpos[name] = to_qpos(pos, quat)
+          else:
+            self.physics.named.data.xpos[name] = pos
+            self.physics.named.data.xquat[name] = quat
+      robot_pos = self.robot_pos()
+      robot_pos[:2] = config['robot_xy']
+      self.physics.named.data.qpos['robot'] = to_qpos(
+          robot_pos, utils.rot2quat(config['robot_rot']))
 
   def robot_com(self) -> np.ndarray:
     """ Get the position of the robot center of mass in the simulator world
@@ -200,12 +210,12 @@ class MujocoBridge:
   def body_pos(self, name: str) -> np.ndarray:
     """ Get the position of a named body in the simulator world reference
     frame """
-    return self.physics.named.xpos[name].copy()
+    return self.physics.named.data.xpos[name].copy()
 
   def body_mat(self, name: str) -> np.ndarray:
     """ Get the rotation matrix of a named body in the simulator world
     reference frame """
-    return self.physics.named.xmat[name].reshape([3, 3]).copy()
+    return self.physics.named.data.xmat[name].reshape([3, 3]).copy()
 
   def body_vel(self, name: str) -> np.ndarray:
     """ Get the velocity of a named body in the simulator world reference

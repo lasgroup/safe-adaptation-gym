@@ -11,7 +11,7 @@ from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.robot import Robot
 from learn2learn_safely.tasks.task import Task
 
-
+# TODO (yarden): found bug: keepout is not respected?
 class World:
   DEFAULT = {
       'placements_margin': 0.0,

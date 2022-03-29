@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 
+import matplotlib.pyplot as plt
+
 from learn2learn_safely import tasks
 from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.utils import ResamplingError
@@ -27,8 +29,15 @@ def test_layout_sampling(world):
 
 def test_reset(world):
   mujoco_bridge = MujocoBridge(world.sample_layout())
-  init_state = mujoco_bridge.physics.get_state()
+  plt.figure()
+  plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
+  init_state = mujoco_bridge.physics.get_state().copy()
   mujoco_bridge.reset(world.sample_layout())
+  plt.figure()
+  plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
   mujoco_bridge.physics.reset()
   mujoco_bridge.physics.forward()
+  plt.figure()
+  plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
+  plt.show()
   assert (init_state == mujoco_bridge.physics.get_state()).all() # noqa
