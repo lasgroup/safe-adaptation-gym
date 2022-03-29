@@ -60,7 +60,7 @@ class SafetyGym(gym.Env):
     self._seed += 1
     self.rs = np.random.RandomState(self._seed)
     self._world.rs = self.rs
-    self.mujoco_bridge.reset(self._world.sample_layout())
+    self.mujoco_bridge.rebuild(self._world.sample_layout())
     return self.observation
 
   def render(self, mode="human"):

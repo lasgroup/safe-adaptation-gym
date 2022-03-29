@@ -18,8 +18,17 @@ def test_layout_sampling(world):
   fails = 0
   for _ in range(1000):
     try:
-      mujoco_bridge.rebuild(world.sample_layout(), state=False)
+      mujoco_bridge.reset(world.sample_layout())
     except ResamplingError:
       fails += 1
   # Make sure that the fail rate is smaller than 0.5%
   assert fails <= 5
+
+
+def test_reset(world):
+  mujoco_bridge = MujocoBridge(world.sample_layout())
+  init_state = mujoco_bridge.physics.get_state()
+  mujoco_bridge.reset(world.sample_layout())
+  mujoco_bridge.physics.reset()
+  mujoco_bridge.physics.forward()
+  assert (init_state == mujoco_bridge.physics.get_state()).all() # noqa

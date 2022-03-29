@@ -3,7 +3,6 @@ from typing import Union
 import numpy as np
 
 import learn2learn_safely.consts as c
-from learn2learn_safely.mujoco_bridge import MujocoBridge
 
 
 class ResamplingError(AssertionError):
@@ -16,13 +15,13 @@ def random_rot(rs: np.random.RandomState) -> float:
   return rs.uniform(0, 2 * np.pi)
 
 
-def update_layout(layout: dict, world: MujocoBridge):
+def update_layout(layout: dict, mujoco_bridge):
   """ Update layout dictionary with new places of objects """
   for k in list(layout.keys()):
     # Mocap objects have to be handled separately
     if 'mocap' in k:
       continue
-    layout[k] = world.body_pos(k)[:2].copy()
+    layout[k] = mujoco_bridge.body_pos(k)[:2].copy()
 
 
 def constrain_placement(placement: tuple, keepout: float) -> tuple:
@@ -98,9 +97,14 @@ def rot2quat(theta):
   return np.array([np.cos(theta / 2), 0, 0, np.sin(theta / 2)], dtype='float64')
 
 
-def convert_to_text(v):
+def convert_to_text(v: Union[int, float, str, np.ndarray]) -> str:
   """ Convert a value into a string for mujoco XML """
   if isinstance(v, (int, float, str)):
     return str(v)
   # Numpy arrays and lists
   return ' '.join(str(i) for i in np.asarray(v))
+
+
+def convert_from_text(txt: str) -> np.ndarray:
+  """ Convert a string vector into a numpy array """
+  return np.array(txt.split(), dtype=np.float32)

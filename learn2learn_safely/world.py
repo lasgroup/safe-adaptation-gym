@@ -43,7 +43,7 @@ class World:
     self.task = task
     self.rs = rs
     self.robot_base = robot_base
-    self.robot = Robot(self.config.robot_base)
+    self.robot = Robot(self.robot_base)
     self._obstacle_sizes = self.rs.normal([
         self.config.hazards_size, self.config.vases_size,
         self.config.pillars_size, self.config.gremlins_size

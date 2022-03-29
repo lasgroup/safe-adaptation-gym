@@ -3,6 +3,8 @@ from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace
 
+from typing import Optional
+
 import numpy as np
 import xmltodict
 from dm_control import mujoco
@@ -12,9 +14,6 @@ import learn2learn_safely.utils as utils
 
 
 class MujocoBridge:
-  # Default configuration (this should not be nested since it gets copied)
-  # *NOTE:* Changes to this configuration should also be reflected in
-  # `Engine` configuration
   DEFAULT = {
       'robot_base': 'car.xml',  # Which robot XML to use as the base
       'robot_xy': np.zeros(2),  # Robot XY location
@@ -32,12 +31,10 @@ class MujocoBridge:
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
     self.physics = None
-    self.model = None
-    self.data = None
     self._build()
 
   def get_sensor(self, name: str) -> np.ndarray:
-    return self.data.named.sensordata[name].copy()
+    return self.physics.named.sensordata[name].copy()
 
   def _build(self):
     """ Build a world, including generating XML and moving objects """
@@ -148,9 +145,8 @@ class MujocoBridge:
     # Instantiate simulator
     xml_string = xmltodict.unparse(xml)
     self.physics = mujoco.Physics.from_xml_string(xml_string)
-    self.model = self.physics.model
-    self.data = self.physics.data
-    self.model.actuator_ctrlrange[:] *= self.config.robot_ctrl_range_scale
+    self.physics.model.actuator_ctrlrange[:] *= (
+        self.config.robot_ctrl_range_scale[:, None])
     # Recompute simulation intrinsics from new position
     self.physics.forward()
 
@@ -161,12 +157,22 @@ class MujocoBridge:
     self.config = SimpleNamespace(**self.config)
     self._build()
 
-  def reset(self, config):
-    # TODO (yarden): rebuild should only reposition the objects. There is no
-    #  need to recreate the whole XML tree from scratch
-    # Reset does not rebuilds but just moves the existing objects to their
-    # new positions.
-    pass
+  def reset(self, config: dict):
+    """ Sets the new positions of the resampled bodies. """
+    assert config['bodies'].keys() == self.config.bodies.keys(), (
+        'Some bodies were added or discarded')
+    with self.physics.reset_context():
+      for name, (body_strings, _) in config['bodies'].items():
+        for xml_string in body_strings:
+          body_xml = xmltodict.parse(xml_string)['body']
+          if body_xml.get('@mocap', False):
+            continue
+          quat = utils.convert_from_text(body_xml['@quat'])
+          pos = utils.convert_from_text(body_xml['@pos'])
+          self.set_body_pos(body_xml['@name'], pos)
+          self.set_body_quat(body_xml['@name'], quat)
+      self.set_body_pos('robot', config['robot_xy'])
+      self.set_body_quat('robot', utils.rot2quat(config['robot_rot']))
 
   def robot_com(self) -> np.ndarray:
     """ Get the position of the robot center of mass in the simulator world
@@ -189,20 +195,33 @@ class MujocoBridge:
   def body_com(self, name: str) -> np.ndarray:
     """ Get the center of mass of a named body in the simulator world
     reference frame """
-    return self.data.named.subtree_com[name].copy()
+    return self.physics.named.subtree_com[name].copy()
 
   def body_pos(self, name: str) -> np.ndarray:
     """ Get the position of a named body in the simulator world reference
     frame """
-    return self.data.named.xpos[name].copy()
+    return self.physics.named.xpos[name].copy()
 
   def body_mat(self, name: str) -> np.ndarray:
     """ Get the rotation matrix of a named body in the simulator world
     reference frame """
-    return self.data.named.xmat[name].reshape([3, 3])
+    return self.physics.named.xmat[name].reshape([3, 3]).copy()
 
   def body_vel(self, name: str) -> np.ndarray:
     """ Get the velocity of a named body in the simulator world reference
     frame """
-    vel = self.data.named.object_velocity(name, 'body')
+    vel = self.physics.named.object_velocity(name, 'body').copy()
     return vel[0]
+
+  def set_body_pos(self, name: str, pos: np.ndarray):
+    """ Sets position for a given body name """
+    dim = np.prod(pos.shape)
+    self.physics.named.model.body_pos[name][:dim] = pos
+
+  def set_body_quat(self, name: str, quat: np.ndarray):
+    """ Sets quaternion for a given body name """
+    self.physics.named.model.body_quat[name] = quat
+
+  def set_control(self, action: np.ndarray):
+    """ Sets the control """
+    self.physics.set_control(action)

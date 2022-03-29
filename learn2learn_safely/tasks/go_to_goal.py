@@ -44,15 +44,13 @@ class GoToGoal(Task):
     return reward, info
 
   def build(self, layout: dict, placements: dict, rs: np.random.RandomState,
-            world: MujocoBridge):
-    # TODO (yarden): possibly need to update the World's world config?
+            mujoco_bridge: MujocoBridge):
     goal_xy = self._resample_goal_position(layout, placements, rs)
     layout['goal'] = goal_xy
-    robot_pos = world.body_pos('robot')
+    robot_pos = mujoco_bridge.body_pos('robot')
     self._last_goal_distance = np.linalg.norm(robot_pos - goal_xy)
-    goal_body_id = world.model.name2id('goal', 'body')
-    world.model.body_pos[goal_body_id][:2] = goal_xy
-    world.physics.forward()
+    mujoco_bridge.set_body_pos('goal', goal_xy)
+    mujoco_bridge.physics.forward()
 
   def _resample_goal_position(self, layout: dict, placements: dict,
                               rs: np.random.RandomState):
