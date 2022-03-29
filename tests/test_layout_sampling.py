@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 
 from learn2learn_safely import tasks
-from learn2learn_safely.world import World
-from learn2learn_safely.utils import ResamplingError
 from learn2learn_safely.mujoco_bridge import MujocoBridge
+from learn2learn_safely.utils import ResamplingError
+from learn2learn_safely.world import World
 
 
 @pytest.fixture(params=[tasks.GoToGoal()])

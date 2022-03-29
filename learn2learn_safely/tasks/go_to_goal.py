@@ -2,11 +2,10 @@ from typing import Mapping, Tuple
 
 import numpy as np
 
+import learn2learn_safely.primitive_objects as po
 import learn2learn_safely.utils as utils
 from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.tasks.task import Task
-
-import learn2learn_safely.primitive_objects as po
 
 
 class GoToGoal(Task):

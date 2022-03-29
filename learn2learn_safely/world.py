@@ -7,8 +7,9 @@ import numpy as np
 import learn2learn_safely.consts as c
 import learn2learn_safely.primitive_objects as po
 import learn2learn_safely.utils as utils
-from learn2learn_safely.tasks.task import Task
 from learn2learn_safely.mujoco_bridge import MujocoBridge
+from learn2learn_safely.robot import Robot
+from learn2learn_safely.tasks.task import Task
 
 
 class World:
@@ -25,7 +26,8 @@ class World:
       'vases_keepout': 0.15,
       'pillars_keepout': 0.3,
       'obstacles_size_noise': 0.025,
-      'keepout_noise': 0.025
+      'keepout_noise': 0.025,
+      'action_noise': 0.01
   }
 
   def __init__(self,
@@ -41,6 +43,7 @@ class World:
     self.task = task
     self.rs = rs
     self.robot_base = robot_base
+    self.robot = Robot(self.config.robot_base)
     self._obstacle_sizes = self.rs.normal([
         self.config.hazards_size, self.config.vases_size,
         self.config.pillars_size, self.config.gremlins_size
@@ -94,6 +97,10 @@ class World:
     world_config = {
         'robot_base': self.robot_base,
         'robot_xy': self._layout['robot'],
+        'robot_z_height': self.robot.z_height,
+        # https://keisan.casio.com/exec/system/1180573169
+        'robot_ctrl_range_scale':
+            (self.rs.standard_cauchy(self.robot.nu) * 0.05 + 1.0),
         'robot_rot': utils.random_rot(self.rs),
         'bodies': {}
     }
@@ -121,9 +128,10 @@ class World:
                 self.task.build_world_config(self._layout, self.rs))
     return world_config
 
-  def compute_reward(self, world: MujocoBridge) -> Tuple[float, dict]:
+  def compute_reward(self,
+                     mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
     return self.task.compute_reward(self._layout, self._placements, self.rs,
-                                    world)
+                                    mujoco_bridge)
 
   def reset(self):
     """ Resets the task. Allows the concrete implementation to perform

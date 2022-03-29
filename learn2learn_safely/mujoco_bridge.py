@@ -9,7 +9,6 @@ from dm_control import mujoco
 
 import learn2learn_safely.consts as c
 import learn2learn_safely.utils as utils
-from learn2learn_safely.robot import Robot
 
 
 class MujocoBridge:
@@ -19,6 +18,7 @@ class MujocoBridge:
   DEFAULT = {
       'robot_base': 'car.xml',  # Which robot XML to use as the base
       'robot_xy': np.zeros(2),  # Robot XY location
+      'robot_z_height': 0.22,
       'robot_rot': 0,  # Robot rotation about Z axis
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
       'bodies': {}
@@ -31,13 +31,12 @@ class MujocoBridge:
     self.config = deepcopy(self.DEFAULT)
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
-    self.robot = Robot(self.config.robot_base)
     self.physics = None
     self.model = None
     self.data = None
     self._build()
 
-  def get_sensor(self, name):
+  def get_sensor(self, name: str) -> np.ndarray:
     return self.data.named.sensordata[name].copy()
 
   def _build(self):
@@ -53,7 +52,7 @@ class MujocoBridge:
 
     # Move robot position to starting position
     worldbody['body']['@pos'] = utils.convert_to_text(
-        np.r_[self.config.robot_xy, self.robot.z_height])
+        np.r_[self.config.robot_xy, self.config.robot_z_height])
     worldbody['body']['@quat'] = utils.convert_to_text(
         utils.rot2quat(self.config.robot_rot))
 
@@ -151,61 +150,59 @@ class MujocoBridge:
     self.physics = mujoco.Physics.from_xml_string(xml_string)
     self.model = self.physics.model
     self.data = self.physics.data
-
+    self.model.actuator_ctrlrange[:] *= self.config.robot_ctrl_range_scale
     # Recompute simulation intrinsics from new position
     self.physics.forward()
 
-  def rebuild(self, config=None, state=True):
-    # TODO (yarden): rebuild should only reposition the objects. There is no
-    #  need to recreate the whole XML tree from scratch
+  def rebuild(self, config):
     """ Build a new physics from a model if the model changed """
-    if config is None:
-      config = {}
-    if state:
-      old_state = self.physics.get_state()
     self.config = deepcopy(self.DEFAULT)
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
     self._build()
-    if state:
-      self.physics.set_state(old_state)
-    self.physics.forward()
 
-  def robot_com(self):
+  def reset(self, config):
+    # TODO (yarden): rebuild should only reposition the objects. There is no
+    #  need to recreate the whole XML tree from scratch
+    # Reset does not rebuilds but just moves the existing objects to their
+    # new positions.
+    pass
+
+  def robot_com(self) -> np.ndarray:
     """ Get the position of the robot center of mass in the simulator world
     reference frame """
     return self.body_com('robot')
 
-  def robot_pos(self):
+  def robot_pos(self) -> np.ndarray:
     """ Get the position of the robot in the simulator world reference frame """
     return self.body_pos('robot')
 
-  def robot_mat(self):
+  def robot_mat(self) -> np.ndarray:
     """ Get the rotation matrix of the robot in the simulator world reference
     frame """
     return self.body_mat('robot')
 
-  def robot_vel(self):
+  def robot_vel(self) -> np.ndarray:
     """ Get the velocity of the robot in the simulator world reference frame """
     return self.body_vel('robot')
 
-  def body_com(self, name):
+  def body_com(self, name: str) -> np.ndarray:
     """ Get the center of mass of a named body in the simulator world
     reference frame """
     return self.data.named.subtree_com[name].copy()
 
-  def body_pos(self, name):
+  def body_pos(self, name: str) -> np.ndarray:
     """ Get the position of a named body in the simulator world reference
     frame """
     return self.data.named.xpos[name].copy()
 
-  def body_mat(self, name):
+  def body_mat(self, name: str) -> np.ndarray:
     """ Get the rotation matrix of a named body in the simulator world
     reference frame """
     return self.data.named.xmat[name].reshape([3, 3])
 
-  def body_vel(self, name):
+  def body_vel(self, name: str) -> np.ndarray:
     """ Get the velocity of a named body in the simulator world reference
     frame """
-    vel = self.data.named.object_velocity(id, 'body')
+    vel = self.data.named.object_velocity(name, 'body')
     return vel[0]

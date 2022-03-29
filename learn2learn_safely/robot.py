@@ -25,7 +25,6 @@ class Robot:
     # Needed to figure out action space
     self.nu = self.sim.model.nu
     # Needed to figure out observation space
-    # See engine.py for an explanation for why we treat these separately
     self.hinge_pos_names = []
     self.hinge_vel_names = []
     self.ballquat_names = []

@@ -1,13 +1,11 @@
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-import matplotlib
-import matplotlib.animation as animation
-import matplotlib.pyplot as plt
-
-from learn2learn_safely.world import World
 from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.tasks import GoToGoal
+from learn2learn_safely.world import World
 
 
 @pytest.fixture
