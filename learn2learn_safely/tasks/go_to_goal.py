@@ -43,9 +43,6 @@ class GoToGoal(Task):
       reward += 1.
     return reward, False, info
 
-  def compute_cost(self, mujoco_bridge: MujocoBridge):
-    pass
-
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     pass
 

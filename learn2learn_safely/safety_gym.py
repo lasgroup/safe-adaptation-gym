@@ -47,7 +47,7 @@ class SafetyGym(gym.Env):
         return self.observation, -10., True, {'cost': 0.}
     self.mujoco_bridge.physics.forward()
     reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
-    # info = {'cost': self._world.compute_cost(self.mujoco_bridge)}
+    info = {'cost': self._world.compute_cost(self.mujoco_bridge)}
     return self.observation, reward, terminal, info
 
   def reset(

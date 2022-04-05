@@ -254,7 +254,11 @@ class MujocoBridge:
 
   @property
   def contacts(self):
-    return self.physics.name.data.contact
+    contacts = self.physics.data.contact
+    geom1, geom2 = contacts.geom1, contacts.geom2
+    geom1 = map(lambda id_: self.physics.model.id2name(id_, 'geom'), geom1)
+    geom2 = map(lambda id_: self.physics.model.id2name(id_, 'geom'), geom2)
+    return list(zip(geom1, geom2))
 
   @property
   def actuator_ctrlrange(self):

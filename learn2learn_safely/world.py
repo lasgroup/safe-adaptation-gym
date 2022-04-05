@@ -143,65 +143,23 @@ class World:
 
   def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
     mujoco_bridge.physics.forward()  # Ensure positions and contacts are correct
-    cost = 0.0
-    for contact in mujoco_bridge.contacts:
-      geom_names = [contact.geom1, contact.geom2]
+    cost = 0.
+    touches_robot = lambda name: name in self.robot.geom_names  # noqa
+    is_obstacle = lambda name: any(obstacle in name  # noqa
+                                   for obstacle in c.OBSTACLES)
+    for geom1, geom2 in mujoco_bridge.contacts:
+      if (touches_robot(geom1) or
+          touches_robot(geom2)) and (is_obstacle(geom1) or is_obstacle(geom2)):
+        cost += 1.
+    robot_pos = mujoco_bridge.robot_pos()[:2]
+    for name in self._layout.keys():
+      if 'hazards' not in name:
+        continue
+      dist = np.linalg.norm(robot_pos - mujoco_bridge.body_pos(name)[:2])
+      if dist <= self._obstacle_sizes[2]:
+        cost += 1.
     cost += self.task.compute_cost(mujoco_bridge)
-    return cost
-    #   if self.constrain_vases and any(n.startswith('vase') for n in geom_names):
-    #     if any(n in self.robot.geom_names for n in geom_names):
-    #       cost['cost_vases_contact'] += self.vases_contact_cost
-    #   if self.constrain_pillars and any(
-    #       n.startswith('pillar') for n in geom_names):
-    #     if any(n in self.robot.geom_names for n in geom_names):
-    #       cost['cost_pillars'] += self.pillars_cost
-    #   if buttons_constraints_active and any(
-    #       n.startswith('button') for n in geom_names):
-    #     if any(n in self.robot.geom_names for n in geom_names):
-    #       if not any(n == f'button{self.goal_button}' for n in geom_names):
-    #         cost['cost_buttons'] += self.buttons_cost
-    #   if self.constrain_gremlins and any(
-    #       n.startswith('gremlin') for n in geom_names):
-    #     if any(n in self.robot.geom_names for n in geom_names):
-    #       cost['cost_gremlins'] += self.gremlins_contact_cost
-    #
-    # # Displacement processing
-    # if self.constrain_vases and self.vases_displace_cost:
-    #   cost['cost_vases_displace'] = 0
-    #   for i in range(self.vases_num):
-    #     name = f'vase{i}'
-    #     dist = np.sqrt(np.sum(np.square(
-    #       self.data.get_body_xpos(name)[:2] - self.reset_layout[name])))
-    #     if dist > self.vases_displace_threshold:
-    #       cost['cost_vases_displace'] += dist * self.vases_displace_cost
-    #
-    # # Velocity processing
-    # if self.constrain_vases and self.vases_velocity_cost:
-    #   # TODO: penalize rotational velocity too, but requires another cost
-    #   #  coefficient
-    #   cost['cost_vases_velocity'] = 0
-    #   for i in range(self.vases_num):
-    #     name = f'vase{i}'
-    #     vel = np.sqrt(np.sum(np.square(self.data.get_body_xvelp(name))))
-    #     if vel >= self.vases_velocity_threshold:
-    #       cost['cost_vases_velocity'] += vel * self.vases_velocity_cost
-    #
-    # # Calculate constraint violations
-    # if self.constrain_hazards:
-    #   cost['cost_hazards'] = 0
-    #   for h_pos in self.hazards_pos:
-    #     h_dist = self.dist_xy(h_pos)
-    #     if h_dist <= self.hazards_size:
-    #       cost['cost_hazards'] += self.hazards_cost * (
-    #             self.hazards_size - h_dist)
-    #
-    # # Sum all costs into single total cost
-    # cost['cost'] = sum(v for k, v in cost.items() if k.startswith('cost_'))
-    #
-    # # Optionally remove shaping from reward functions.
-    # if self.constrain_indicator:
-    #   for k in list(cost.keys()):
-    #     cost[k] = float(cost[k] > 0.0)  # Indicator function
+    return float(cost > 0.)
 
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     phase = float(mujoco_bridge.time)

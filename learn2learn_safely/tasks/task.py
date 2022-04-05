@@ -30,11 +30,11 @@ class Task(abc.ABC):
     goal/object position resampling
     """
 
-  @abc.abstractmethod
-  def compute_cost(self, mujoco_bridge: MujocoBridge):
+  def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
     """
     Computes the task specific costs.
     """
+    return 0.
 
   @abc.abstractmethod
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
