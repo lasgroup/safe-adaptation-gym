@@ -11,13 +11,14 @@ from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.robot import Robot
 from learn2learn_safely.tasks.task import Task
 
+
 # TODO (yarden): found bug: keepout is not respected?
 class World:
   DEFAULT = {
       'placements_margin': 0.0,
       'robot_keepout': 0.4,
       'num_obstacles': 10,
-      'hazards_size': 0.3,
+      'hazards_size': 0.2,
       'vases_size': 0.1,
       'pillars_size': 0.2,
       'gremlins_size': 0.1,
@@ -25,8 +26,7 @@ class World:
       'gremlins_keepout': 0.4,
       'vases_keepout': 0.15,
       'pillars_keepout': 0.3,
-      'obstacles_size_noise': 0.025,
-      'keepout_noise': 0.025,
+      'obstacles_size_noise_scale': 0.025,
       'action_noise': 0.01
   }
 
@@ -44,14 +44,17 @@ class World:
     self.rs = rs
     self.robot_base = robot_base
     self.robot = Robot(self.robot_base)
-    self._obstacle_sizes = self.rs.normal([
+    obstacle_sizes_scale = self.rs.standard_cauchy(len(
+        c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
+    self._obstacle_sizes = obstacle_sizes_scale * np.asarray([
         self.config.hazards_size, self.config.vases_size,
         self.config.pillars_size, self.config.gremlins_size
-    ], self.config.obstacles_size_noise * np.ones(len(c.OBSTACLES)))
-    self._obstacle_keepouts = self.rs.normal([
+    ])
+    keepouts = obstacle_sizes_scale * np.asarray([
         self.config.hazards_keepout, self.config.vases_keepout,
         self.config.pillars_keepout, self.config.gremlins_keepout
-    ], self.config.keepout_noise * np.ones(len(c.OBSTACLES)))
+    ])
+    self._obstacle_keepouts = keepouts
     self._placements = self._setup_placements()
     self._layout = None
 
@@ -95,13 +98,17 @@ class World:
   def _build_world_config(self):
     """ Create a world_config from our own config """
     world_config = {
-        'robot_base': self.robot_base,
-        'robot_xy': self._layout['robot'],
-        'robot_z_height': self.robot.z_height,
+        'robot_base':
+            self.robot_base,
+        'robot_xy':
+            self._layout['robot'],
+        'robot_z_height':
+            self.robot.z_height,
         # https://keisan.casio.com/exec/system/1180573169
         'robot_ctrl_range_scale':
-            (self.rs.standard_cauchy(self.robot.nu) * 0.05 + 1.0),
-        'robot_rot': utils.random_rot(self.rs),
+            self.rs.standard_cauchy(self.robot.nu) * 0.05 + 1.0,
+        'robot_rot':
+            utils.random_rot(self.rs),
         'bodies': {}
     }
     for name, xy in self._layout.items():
@@ -151,10 +158,10 @@ class World:
   def _sample_layout(self) -> Union[dict, None]:
     """ Sample a single layout, returning True if successful, else False. """
 
-    def placement_is_valid(xy: np.ndarray, layout: dict):
+    def placement_is_valid(xy: np.ndarray):
       for other_name, other_xy in layout.items():
         other_keepout = self._placements[other_name][1]
-        dist = np.sqrt(np.sum(np.square(xy - other_xy)))
+        dist = np.linalg.norm(xy - other_xy)
         if dist < other_keepout + self.config.placements_margin + keepout:
           return False
       return True
@@ -164,7 +171,7 @@ class World:
       conflicted = True
       for _ in range(100):
         xy = utils.draw_placement(self.rs, placements, keepout)
-        if placement_is_valid(xy, layout):
+        if placement_is_valid(xy):
           conflicted = False
           break
       if conflicted:

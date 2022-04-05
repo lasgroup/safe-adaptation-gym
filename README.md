@@ -28,6 +28,7 @@ Separate into three categories: MDP variations due to reward and CMDP variations
 16. Cross validate tasks: in each experiment make a different mixture of training, testing splits.
 17. Randomly moving obstacles
 18. Egg shaped objects (easier to roll in a certain direction.)
+19. All obstacles are red - new task with different shape of obstacle - see if it can generalize.
 
 # Possible tasks
 ## Objective (keep dynamics and objects, change reward)
@@ -51,15 +52,15 @@ Separate into three categories: MDP variations due to reward and CMDP variations
 ## All tasks
 1. Push box to location (box, goal locations)
 2. Press buttons (needed button, other buttons)
-3. Go to goal (goal location)
+3. Go to goal (static goal location)
 4. Billiard (hit/roll a ball -> make it hit another specific ball, impose costs on the number of hits? If touched ball on prev state but this state not give more reward? Better use gating as in original safety gym. Better not give reward if both robot and second ball are inside goal area. Or reward given the distance of the second ball traveled) (ball to hit, ball that the white ball should hit)
 5. Follow a circle trajectory (-)
 6. Follow a square trajectory (-)
 7. Follow a triangle trajectory (-)
 8. Drive box to a platform. (direction to the slope and then change to center.)
 9. Hit/roll a ball to a goal. (same ball as billiard?, but just go to goal area)
-10. Collect trash (e.g. five balls that get attached to the robot somehow), put in garbage (e.g. for each trash inside garbage plus point)
-11. Follow the leader but don't hit it.
+10. Collect trash (e.g. five balls that get attached to the robot somehow), put in garbage (e.g. for each trash inside garbage plus point) (https://www.roboti.us/forum/index.php?threads/connect-two-object-when-contact.4094/, https://github.com/openai/mujoco-py/issues/570)
+11. Follow the leader but don't hit it (Generate random circular splines: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html, https://stackoverflow.com/questions/64796809/how-to-avoid-spline-overlap-with-random-blobby-circle)/Catch a moving goal (instead of follow the leader?)
 
 # Train & Test tasks
 ## Train

@@ -171,14 +171,17 @@ class MujocoBridge:
           body_xml = xmltodict.parse(xml_string)['body']
           name = body_xml['@name']
           if body_xml.get('@mocap', False):
+            new_pos = utils.convert_from_text(body_xml['geom']['@pos'])
+            old_pos = self.physics.named.data.xpos[name.replace('mocap', 'obj')]
+            self.physics.named.data.mocap_pos[name] = new_pos - old_pos
             continue
-          quat = utils.convert_from_text(body_xml['@quat'])
           pos = utils.convert_from_text(body_xml['@pos'])
+          quat = utils.convert_from_text(body_xml['@quat'])
           if 'freejoint' in body_xml.keys():
             self.physics.named.data.qpos[name] = to_qpos(pos, quat)
           else:
-            self.physics.named.data.xpos[name] = pos
-            self.physics.named.data.xquat[name] = quat
+            self.physics.named.model.body_pos[name] = pos
+            self.physics.named.model.body_quat[name] = quat
       robot_pos = self.robot_pos()
       robot_pos[:2] = config['robot_xy']
       self.physics.named.data.qpos['robot'] = to_qpos(
