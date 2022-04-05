@@ -59,7 +59,7 @@ def get_gremlin(
     rot: float,
     color: np.ndarray = c.GREMLINS_COLOR) -> Tuple[Iterable[str], str]:
   gremlin_obj_dict = {
-      'name': name + 'obj',
+      'name': name,
       'size': np.ones(3) * size,
       'type': 'box',
       'density': c.GREMLINS_DENSITY,
@@ -76,7 +76,7 @@ def get_gremlin(
   gremlin_mocap_dict['name'] = name + 'mocap'
   weld_constraint = """<weld name="{name}" body1="{body1}" body2="{body2}" 
     solref=".02 1.5"/>""".format(
-      name=name, body1=name + 'mocap', body2=name + 'obj')
+      name=name, body1=name + 'mocap', body2=name)
   return [
       object_attributes_to_xml(gremlin_obj_dict),
       mocap_attributes_to_xml(gremlin_mocap_dict)

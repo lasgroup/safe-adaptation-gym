@@ -46,16 +46,24 @@ class World:
     self.robot = Robot(self.robot_base)
     obstacle_sizes_scale = self.rs.standard_cauchy(len(
         c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
-    self._obstacle_sizes = obstacle_sizes_scale * np.asarray([
-        self.config.hazards_size, self.config.vases_size,
-        self.config.pillars_size, self.config.gremlins_size
-    ])
+    self._obstacle_sizes = {
+        k: scale * value
+        for k, scale, value in zip(c.OBSTACLES, obstacle_sizes_scale, [
+            self.config.hazards_size, self.config.vases_size,
+            self.config.gremlins_size, self.config.pillars_size
+        ])
+    }
     keepouts = obstacle_sizes_scale * np.asarray([
         self.config.hazards_keepout, self.config.vases_keepout,
-        self.config.pillars_keepout, self.config.gremlins_keepout
+        self.config.gremlins_keepout, self.config.pillars_keepout
     ])
-    self._obstacle_keepouts = np.where(keepouts < self._obstacle_sizes,
-                                       self._obstacle_sizes, keepouts)
+    obstacle_size_array = np.asarray(list(self._obstacle_sizes.values()))
+    keepouts = np.where(keepouts < obstacle_size_array, obstacle_size_array,
+                        keepouts)
+    self._obstacle_keepouts = {
+        k: value for k, value in zip(c.OBSTACLES, keepouts)
+    }
+    self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
     self._layout = None
 
@@ -78,13 +86,7 @@ class World:
     """ Get the placements' dict subset just for a given object name """
     placements_dict = {}
     object_fmt = name + '{i}' if name != 'robot' else name
-    object_keepout = {
-        'hazards': self._obstacle_keepouts[0],
-        'vases': self._obstacle_keepouts[1],
-        'pillars': self._obstacle_keepouts[2],
-        'gremlins': self._obstacle_keepouts[3],
-        'robot': self.config.robot_keepout
-    }[name]
+    object_keepout = self._obstacle_keepouts[name]
     for i in range(num_placements):
       # Set placements to None so that obstacles positions are sampled randomly.
       placements = None
@@ -114,24 +116,20 @@ class World:
     }
     for name, xy in self._layout.items():
       if 'vase' in name:
-        world_config['bodies'][name] = po.get_vase(name,
-                                                   self._obstacle_sizes[0], xy,
-                                                   utils.random_rot(self.rs))
+        world_config['bodies'][name] = po.get_vase(
+            name, self._obstacle_sizes['vases'], xy, utils.random_rot(self.rs))
       elif 'gremlin' in name:
-        world_config['bodies'][name] = po.get_gremlin(name,
-                                                      self._obstacle_sizes[1],
-                                                      xy,
-                                                      utils.random_rot(self.rs))
+        world_config['bodies'][name] = po.get_gremlin(
+            name, self._obstacle_sizes['gremlins'], xy,
+            utils.random_rot(self.rs))
       elif 'hazard' in name:
-        world_config['bodies'][name] = po.get_hazard(name,
-                                                     self._obstacle_sizes[2],
-                                                     xy,
-                                                     utils.random_rot(self.rs))
+        world_config['bodies'][name] = po.get_hazard(
+            name, self._obstacle_sizes['hazards'], xy,
+            utils.random_rot(self.rs))
       elif 'pillar' in name:
-        world_config['bodies'][name] = po.get_pillar(name,
-                                                     self._obstacle_sizes[3],
-                                                     xy,
-                                                     utils.random_rot(self.rs))
+        world_config['bodies'][name] = po.get_pillar(
+            name, self._obstacle_sizes['pillars'], xy,
+            utils.random_rot(self.rs))
     utils.merge(world_config,
                 self.task.build_world_config(self._layout, self.rs))
     return world_config
@@ -156,7 +154,7 @@ class World:
       if 'hazards' not in name:
         continue
       dist = np.linalg.norm(robot_pos - mujoco_bridge.body_pos(name)[:2])
-      if dist <= self._obstacle_sizes[2]:
+      if dist <= self._obstacle_sizes['hazards']:
         cost += 1.
     cost += self.task.compute_cost(mujoco_bridge)
     return float(cost > 0.)

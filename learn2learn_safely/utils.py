@@ -17,10 +17,7 @@ def random_rot(rs: np.random.RandomState) -> float:
 
 def update_layout(layout: dict, mujoco_bridge):
   """ Update layout dictionary with new places of objects """
-  for k in list(layout.keys()):
-    # Mocap objects have to be handled separately
-    if 'mocap' in k:
-      continue
+  for k in layout.keys():
     layout[k] = mujoco_bridge.body_pos(k)[:2].copy()
 
 
