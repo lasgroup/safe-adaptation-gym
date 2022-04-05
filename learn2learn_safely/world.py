@@ -12,7 +12,6 @@ from learn2learn_safely.robot import Robot
 from learn2learn_safely.tasks.task import Task
 
 
-# TODO (yarden): found bug: keepout is not respected?
 class World:
   DEFAULT = {
       'placements_margin': 0.0,
@@ -54,7 +53,8 @@ class World:
         self.config.hazards_keepout, self.config.vases_keepout,
         self.config.pillars_keepout, self.config.gremlins_keepout
     ])
-    self._obstacle_keepouts = keepouts
+    self._obstacle_keepouts = np.where(keepouts < self._obstacle_sizes,
+                                       self._obstacle_sizes, keepouts)
     self._placements = self._setup_placements()
     self._layout = None
 
