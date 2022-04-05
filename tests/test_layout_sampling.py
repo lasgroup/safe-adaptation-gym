@@ -29,7 +29,7 @@ def bad_world(request):
 
 
 def layout_sampling(world):
-  mujoco_bridge = MujocoBridge(world.sample_layout())
+  mujoco_bridge = MujocoBridge('xmls/doggo.xml', world.sample_layout())
   fails = 0
   for _ in range(1000):
     try:
@@ -49,14 +49,14 @@ def test_layout_sampling(good_world):
 def test_layout_impossible(bad_world):
   ok = False
   try:
-    MujocoBridge(bad_world.sample_layout())
+    MujocoBridge('xmls/doggo.xml', bad_world.sample_layout())
   except ResamplingError:
     ok = True
   assert ok
 
 
 def test_reset(good_world):
-  mujoco_bridge = MujocoBridge(good_world.sample_layout())
+  mujoco_bridge = MujocoBridge('xmls/doggo.xml', good_world.sample_layout())
   plt.figure()
   plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
   mujoco_bridge.reset(good_world.sample_layout())

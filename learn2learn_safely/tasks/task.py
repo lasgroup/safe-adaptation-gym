@@ -26,7 +26,20 @@ class Task(abc.ABC):
                      rs: np.random.RandomState,
                      mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
     """
-    Computes the task-specific reward.
+    Computes the task-specific reward. Exposes the layout and placements for
+    goal/object position resampling
+    """
+
+  @abc.abstractmethod
+  def compute_cost(self, mujoco_bridge: MujocoBridge):
+    """
+    Computes the task specific costs.
+    """
+
+  @abc.abstractmethod
+  def set_mocaps(self, mujoco_bridge: MujocoBridge):
+    """
+    Sets up the task specific mocap objects.
     """
 
   @abc.abstractmethod

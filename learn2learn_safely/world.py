@@ -25,6 +25,7 @@ class World:
       'gremlins_keepout': 0.4,
       'vases_keepout': 0.15,
       'pillars_keepout': 0.3,
+      'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
       'action_noise': 0.01
   }
@@ -140,11 +141,82 @@ class World:
     return self.task.compute_reward(self._layout, self._placements, self.rs,
                                     mujoco_bridge)
 
-  def reset(self):
+  def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
+    mujoco_bridge.physics.forward()  # Ensure positions and contacts are correct
+    cost = 0.0
+    for contact in mujoco_bridge.contacts:
+      geom_names = [contact.geom1, contact.geom2]
+    cost += self.task.compute_cost(mujoco_bridge)
+    return cost
+    #   if self.constrain_vases and any(n.startswith('vase') for n in geom_names):
+    #     if any(n in self.robot.geom_names for n in geom_names):
+    #       cost['cost_vases_contact'] += self.vases_contact_cost
+    #   if self.constrain_pillars and any(
+    #       n.startswith('pillar') for n in geom_names):
+    #     if any(n in self.robot.geom_names for n in geom_names):
+    #       cost['cost_pillars'] += self.pillars_cost
+    #   if buttons_constraints_active and any(
+    #       n.startswith('button') for n in geom_names):
+    #     if any(n in self.robot.geom_names for n in geom_names):
+    #       if not any(n == f'button{self.goal_button}' for n in geom_names):
+    #         cost['cost_buttons'] += self.buttons_cost
+    #   if self.constrain_gremlins and any(
+    #       n.startswith('gremlin') for n in geom_names):
+    #     if any(n in self.robot.geom_names for n in geom_names):
+    #       cost['cost_gremlins'] += self.gremlins_contact_cost
+    #
+    # # Displacement processing
+    # if self.constrain_vases and self.vases_displace_cost:
+    #   cost['cost_vases_displace'] = 0
+    #   for i in range(self.vases_num):
+    #     name = f'vase{i}'
+    #     dist = np.sqrt(np.sum(np.square(
+    #       self.data.get_body_xpos(name)[:2] - self.reset_layout[name])))
+    #     if dist > self.vases_displace_threshold:
+    #       cost['cost_vases_displace'] += dist * self.vases_displace_cost
+    #
+    # # Velocity processing
+    # if self.constrain_vases and self.vases_velocity_cost:
+    #   # TODO: penalize rotational velocity too, but requires another cost
+    #   #  coefficient
+    #   cost['cost_vases_velocity'] = 0
+    #   for i in range(self.vases_num):
+    #     name = f'vase{i}'
+    #     vel = np.sqrt(np.sum(np.square(self.data.get_body_xvelp(name))))
+    #     if vel >= self.vases_velocity_threshold:
+    #       cost['cost_vases_velocity'] += vel * self.vases_velocity_cost
+    #
+    # # Calculate constraint violations
+    # if self.constrain_hazards:
+    #   cost['cost_hazards'] = 0
+    #   for h_pos in self.hazards_pos:
+    #     h_dist = self.dist_xy(h_pos)
+    #     if h_dist <= self.hazards_size:
+    #       cost['cost_hazards'] += self.hazards_cost * (
+    #             self.hazards_size - h_dist)
+    #
+    # # Sum all costs into single total cost
+    # cost['cost'] = sum(v for k, v in cost.items() if k.startswith('cost_'))
+    #
+    # # Optionally remove shaping from reward functions.
+    # if self.constrain_indicator:
+    #   for k in list(cost.keys()):
+    #     cost[k] = float(cost[k] > 0.0)  # Indicator function
+
+  def set_mocaps(self, mujoco_bridge: MujocoBridge):
+    phase = float(mujoco_bridge.time)
+    for name, _ in self._layout.items():
+      if 'gremlins' in name:
+        target = np.array([np.sin(phase), np.cos(phase)
+                          ]) * self.config.gremlins_travel
+        pos = np.r_[target, [self.config.gremlins_size]]
+        mujoco_bridge.set_mocap_pos(name + 'mocap', pos)
+    self.task.set_mocaps(mujoco_bridge)
+
+  def reset(self, mujoco_bridge: MujocoBridge):
     """ Resets the task. Allows the concrete implementation to perform
     specialized reset """
-    # TODO (yarden): How is this function to be used?
-    pass
+    self.task.build(self._layout, self._placements, self.rs, mujoco_bridge)
 
   def _generate_new_layout(self):
     """ Rejection sample a placement of objects to find a layout. """

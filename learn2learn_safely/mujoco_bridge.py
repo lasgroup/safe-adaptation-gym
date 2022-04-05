@@ -15,21 +15,22 @@ import learn2learn_safely.utils as utils
 
 class MujocoBridge:
   DEFAULT = {
-      'robot_base': 'car.xml',  # Which robot XML to use as the base
       'robot_xy': np.zeros(2),  # Robot XY location
       'robot_z_height': 0.22,
       'robot_rot': 0,  # Robot rotation about Z axis
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
-      'bodies': {}
+      'bodies': {},
+      'robot_ctrl_range_scale': None
   }
 
-  def __init__(self, config=None):
+  def __init__(self, robot_base, config=None):
     """ config - JSON string or dict of configuration. """
     if config is None:
       config = {}
     self.config = deepcopy(self.DEFAULT)
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
+    self.robot_base = robot_base
     self.physics = None
     self._build()
 
@@ -39,7 +40,7 @@ class MujocoBridge:
   def _build(self):
     """ Build a world, including generating XML and moving objects """
     # Read in the base XML (contains robot, camera, floor, etc)
-    robot_base_path = os.path.join(c.BASE_DIR, self.config.robot_base)
+    robot_base_path = os.path.join(c.BASE_DIR, self.robot_base)
     with open(robot_base_path) as f:
       robot_base_xml = f.read()
     xml = xmltodict.parse(robot_base_xml)
@@ -145,8 +146,9 @@ class MujocoBridge:
     # Instantiate simulator
     xml_string = xmltodict.unparse(xml)
     self.physics = mujoco.Physics.from_xml_string(xml_string)
-    self.physics.model.actuator_ctrlrange[:] *= (
-        self.config.robot_ctrl_range_scale[:, None])
+    if self.config.robot_ctrl_range_scale is not None:
+      self.physics.model.actuator_ctrlrange[:] *= (
+          self.config.robot_ctrl_range_scale[:, None])
     # Recompute simulation intrinsics from new position
     self.physics.forward()
 
@@ -173,7 +175,7 @@ class MujocoBridge:
           if body_xml.get('@mocap', False):
             new_pos = utils.convert_from_text(body_xml['geom']['@pos'])
             old_pos = self.physics.named.data.xpos[name.replace('mocap', 'obj')]
-            self.physics.named.data.mocap_pos[name] = new_pos - old_pos
+            self.set_mocap_pos(name, new_pos - old_pos)
             continue
           pos = utils.convert_from_text(body_xml['@pos'])
           quat = utils.convert_from_text(body_xml['@quat'])
@@ -231,6 +233,9 @@ class MujocoBridge:
     dim = np.prod(pos.shape)
     self.physics.named.model.body_pos[name][:dim] = pos
 
+  def set_mocap_pos(self, name: str, pos: np.ndarray):
+    self.physics.named.data.mocap_pos[name] = pos
+
   def set_body_quat(self, name: str, quat: np.ndarray):
     """ Sets quaternion for a given body name """
     self.physics.named.model.body_quat[name] = quat
@@ -238,3 +243,19 @@ class MujocoBridge:
   def set_control(self, action: np.ndarray):
     """ Sets the control """
     self.physics.set_control(action)
+
+  @property
+  def time(self):
+    return self.physics.data.time
+
+  @property
+  def nu(self):
+    return self.physics.model.nu
+
+  @property
+  def contacts(self):
+    return self.physics.name.data.contact
+
+  @property
+  def actuator_ctrlrange(self):
+    return self.physics.model.actuator_ctrlrange
