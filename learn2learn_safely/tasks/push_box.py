@@ -1,25 +1,97 @@
-dim = object['size'][0]
-object['dim'] = dim
-object['width'] = dim / 2
-object['x'] = dim
-object['y'] = dim
-body = xmltodict.parse("""
-            <body name="{name}" pos="{pos}" quat="{quat}">
+from typing import Dict, Tuple
+
+import numpy as np
+
+import learn2learn_safely.utils as utils
+from learn2learn_safely.mujoco_bridge import MujocoBridge
+from learn2learn_safely.tasks.go_to_goal import GoToGoal
+import learn2learn_safely.consts as c
+
+
+class PushBox(GoToGoal):
+  BOX_SIZE = 0.2
+  BOX_KEEPOUT = 0.2
+  BOX_COLOR = np.array([1, 1, 0, 0.25])
+  BOX_DENSITY = 0.001
+
+  def __init__(self):
+    super(PushBox, self).__init__()
+    self._last_goal_distance = None
+    self._last_box_distance = None
+    self._last_box_goal_distance = None
+
+  def setup_placements(self) -> Dict[str, tuple]:
+    goal_placement = super(PushBox, self).setup_placements()
+    goal_placement.update({'box': (None, self.BOX_KEEPOUT)})
+    return goal_placement
+
+  def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
+    goal_config = super(PushBox, self).build_world_config(layout, rs)
+    box = {
+        'name': 'box',
+        'type': 'box',
+        'size': np.ones(3) * self.BOX_SIZE,
+        'pos': np.r_[layout['box'], self.BOX_SIZE],
+        'quat': utils.rot2quat(utils.random_rot(rs)),
+        'density': self.BOX_DENSITY,
+        'group': c.GROUP_OBJECT,
+        'rgba': self.BOX_COLOR
+    }
+    dim = box['size'][0]
+    box['dim'] = dim
+    box['width'] = dim / 2
+    box['x'] = dim
+    box['y'] = dim
+    box_config = {
+        'bodies': {
+            'box': ([
+                """<body name="{name}" pos="{pos}" quat="{quat}">
                 <freejoint name="{name}"/>
-                <geom name="{name}" type="{type}" size="{size}" 
+                <geom name="{name}" type="{type}" size="{size}"
                 density="{density}"
                     rgba="{rgba}" group="{group}"/>
-                <geom name="col1" type="{type}" size="{width} {width} 
+                <geom name="col1" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
                     rgba="{rgba}" group="{group}" pos="{x} {y} 0"/>
-                <geom name="col2" type="{type}" size="{width} {width} 
+                <geom name="col2" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
                     rgba="{rgba}" group="{group}" pos="-{x} {y} 0"/>
-                <geom name="col3" type="{type}" size="{width} {width} 
+                <geom name="col3" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
                     rgba="{rgba}" group="{group}" pos="{x} -{y} 0"/>
-                <geom name="col4" type="{type}" size="{width} {width} 
+                <geom name="col4" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
                     rgba="{rgba}" group="{group}" pos="-{x} -{y} 0"/>
             </body>
-        """.format(**{k: convert(v) for k, v in object.items()}))
+        """.format(**{k: utils.convert_to_text(v) for k, v in box.items()})
+            ], '')
+        }
+    }
+    utils.merge(goal_config, box_config)
+    return goal_config
+
+  def compute_reward(self, layout: dict, placements: dict,
+                     rs: np.random.RandomState,
+                     world: MujocoBridge) -> Tuple[float, dict]:
+    goal_pos = world.body_pos('goal')
+    robot_pos = world.body_pos('robot')
+    goal_distance = np.linalg.norm(robot_pos - goal_pos)
+    reward = self._last_goal_distance - goal_distance
+    self._last_goal_distance = goal_distance
+    box_pos = world.body_pos('box')
+    box_distance = np.linalg.norm(robot_pos - box_pos)
+    gate = self._last_box_distance > 2.0 * self.BOX_SIZE
+    reward += (self._last_box_distance - box_distance) * gate
+    self._last_box_distance = box_distance
+    box_goal_distance = np.linalg.norm(box_pos - goal_pos)
+    reward += self._last_box_goal_distance - box_goal_distance
+    self._last_box_goal_distance = box_goal_distance
+    info = {}
+    if box_goal_distance <= self.GOAL_SIZE:
+      info['goal_met'] = True
+      utils.update_layout(layout, world)
+      self.build(layout, placements, rs, world)
+      self._last_box_goal_distance = np.linalg.norm(
+          world.body_pos('goal') - box_pos)
+      reward += 1.
+    return reward, info

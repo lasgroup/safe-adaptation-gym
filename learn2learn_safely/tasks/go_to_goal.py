@@ -1,4 +1,4 @@
-from typing import Mapping, Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 
@@ -15,7 +15,7 @@ class GoToGoal(Task):
   def __init__(self):
     self._last_goal_distance = None
 
-  def setup_placements(self) -> Mapping[str, tuple]:
+  def setup_placements(self) -> Dict[str, tuple]:
     return {'goal': (None, self.GOAL_KEEPOUT)}
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:

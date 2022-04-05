@@ -9,13 +9,13 @@ from learn2learn_safely.utils import ResamplingError
 from learn2learn_safely.world import World
 
 
-@pytest.fixture(params=[tasks.GoToGoal()])
+@pytest.fixture(params=[tasks.GoToGoal(), tasks.PushBox()])
 def good_world(request):
   world = World(np.random.RandomState(0), request.param, 'xmls/doggo.xml')
   return world
 
 
-@pytest.fixture(params=[tasks.GoToGoal()])
+@pytest.fixture(params=[tasks.GoToGoal(), tasks.PushBox()])
 def bad_world(request):
   config = {
       'hazards_size': 2.0,
@@ -62,5 +62,5 @@ def test_reset(good_world):
   mujoco_bridge.reset(good_world.sample_layout())
   plt.figure()
   plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
-  plt.pause(2.0)
+  plt.pause(4.0)
   assert True

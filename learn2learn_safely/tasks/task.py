@@ -1,5 +1,5 @@
 import abc
-from typing import Mapping, Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 
@@ -9,7 +9,7 @@ from learn2learn_safely.mujoco_bridge import MujocoBridge
 class Task(abc.ABC):
 
   @abc.abstractmethod
-  def setup_placements(self) -> Mapping[str, tuple]:
+  def setup_placements(self) -> Dict[str, tuple]:
     """
     Setups the task specific placements (e.g., goals or other obstacles).
     """

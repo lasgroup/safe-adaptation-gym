@@ -12,6 +12,7 @@ OBSTACLES = ['hazards', 'vases', 'gremlins', 'pillars']
 
 GROUP_OBSTACLES = 0
 GROUP_GOAL = 1
+GROUP_OBJECT = 2
 
 # Vases
 VASES_COLOR = np.array([0, 1, 1, 1])
