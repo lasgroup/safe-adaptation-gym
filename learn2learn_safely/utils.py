@@ -105,3 +105,12 @@ def convert_to_text(v: Union[int, float, str, np.ndarray]) -> str:
 def convert_from_text(txt: str) -> np.ndarray:
   """ Convert a string vector into a numpy array """
   return np.array(txt.split(), dtype=np.float32)
+
+
+def quat2mat(quat):
+  """ Convert Quaternion to a 3x3 Rotation Matrix using mujoco """
+  from dm_control import mujoco
+  q = np.array(quat, dtype='float64')
+  m = np.zeros(9, dtype='float64')
+  mujoco.mju_quat2Mat(m, q)
+  return m.reshape((3, 3))

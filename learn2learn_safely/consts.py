@@ -10,9 +10,9 @@ PLACEMENT_EXTENTS = [-2, -2, 2, 2]
 
 OBSTACLES = ['hazards', 'vases', 'gremlins', 'pillars']
 
-GROUP_OBSTACLES = 0
-GROUP_GOAL = 1
-GROUP_OBJECT = 2
+GROUP_OBSTACLES = 1
+GROUP_GOAL = 2
+GROUP_OBJECTS = 3
 
 # Vases
 VASES_COLOR = np.array([0, 1, 1, 1])

@@ -44,4 +44,7 @@ def test_viewer(safety_gym):
     def action_spec(self):
       return self._action_spec
 
-  viewer.launch(ViewerWrapper(safety_gym))
+  def sample(*args, **kwargs):
+    return safety_gym.action_space.sample()
+
+  viewer.launch(ViewerWrapper(safety_gym), policy=sample)

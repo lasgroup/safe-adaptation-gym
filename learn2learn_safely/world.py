@@ -33,7 +33,7 @@ class World:
   def __init__(self,
                rs: np.random.RandomState,
                task: Task,
-               robot_base: str,
+               robot: Robot,
                config=None):
     if config is None:
       config = {}
@@ -42,8 +42,7 @@ class World:
     self.config = SimpleNamespace(**tmp_config)
     self.task = task
     self.rs = rs
-    self.robot_base = robot_base
-    self.robot = Robot(self.robot_base)
+    self.robot = robot
     obstacle_sizes_scale = self.rs.standard_cauchy(len(
         c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
     self._obstacle_sizes = {
@@ -101,8 +100,6 @@ class World:
   def _build_world_config(self):
     """ Create a world_config from our own config """
     world_config = {
-        'robot_base':
-            self.robot_base,
         'robot_xy':
             self._layout['robot'],
         'robot_z_height':
@@ -207,14 +204,16 @@ class World:
       layout[name] = xy
     return layout
 
-  @property
-  def obstacles(self) -> List[np.ndarray]:
-    pass
-
-  @property
-  def goal(self) -> np.ndarray:
-    pass
-
-  @property
-  def object(self) -> np.ndarray:
-    pass
+  def body_positions(
+      self, mujoco_bridge: MujocoBridge
+  ) -> Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray]]:
+    obstacles, objects, goal = [], [], []
+    for name in self._layout.keys():
+      group = mujoco_bridge.geom_groups[name]
+      if group == c.GROUP_OBSTACLES:
+        obstacles.append(mujoco_bridge.body_pos(name))
+      elif group == c.GROUP_GOAL:
+        goal.append(mujoco_bridge.body_pos(name))
+      elif group == c.GROUP_OBJECTS:
+        objects.append(mujoco_bridge.body_pos(name))
+    return obstacles, objects, goal

@@ -34,7 +34,7 @@ class PushBox(GoToGoal):
         'pos': np.r_[layout['box'], self.BOX_SIZE],
         'quat': utils.rot2quat(utils.random_rot(rs)),
         'density': self.BOX_DENSITY,
-        'group': c.GROUP_OBJECT,
+        'group': c.GROUP_OBJECTS,
         'rgba': self.BOX_COLOR
     }
     dim = box['size'][0]

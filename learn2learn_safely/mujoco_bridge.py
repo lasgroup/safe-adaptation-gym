@@ -3,8 +3,6 @@ from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace
 
-from typing import Optional
-
 import numpy as np
 import xmltodict
 from dm_control import mujoco
@@ -35,7 +33,7 @@ class MujocoBridge:
     self._build()
 
   def get_sensor(self, name: str) -> np.ndarray:
-    return self.physics.named.sensordata[name].copy()
+    return self.physics.named.data.sensordata[name].copy()
 
   def _build(self):
     """ Build a world, including generating XML and moving objects """
@@ -262,4 +260,8 @@ class MujocoBridge:
 
   @property
   def actuator_ctrlrange(self):
-    return self.physics.model.actuator_ctrlrange
+    return self.physics.model.actuator_ctrlrange.copy()
+
+  @property
+  def geom_groups(self):
+    return self.physics.named.model.geom_group

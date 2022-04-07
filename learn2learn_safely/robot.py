@@ -9,8 +9,8 @@ class Robot:
   """ Simple utility class for getting mujoco-specific info about a robot """
 
   def __init__(self, path):
-    base_path = os.path.join(c.BASE_DIR, path)
-    self.sim = mujoco.Physics.from_xml_path(base_path)
+    self.base_path = os.path.join(c.BASE_DIR, path)
+    self.sim = mujoco.Physics.from_xml_path(self.base_path)
     self.sim.forward()
 
     # Needed to figure out z-height of free joint of offset body
