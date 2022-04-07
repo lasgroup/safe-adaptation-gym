@@ -6,16 +6,17 @@ import pytest
 from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.tasks import GoToGoal
 from learn2learn_safely.world import World
+from learn2learn_safely.robot import Robot
 
 
 @pytest.fixture
 def world():
-  _world = World(np.random.RandomState(0), GoToGoal(), 'xmls/doggo.xml')
+  _world = World(np.random.RandomState(0), GoToGoal(), Robot('xmls/doggo.xml'))
   return _world
 
 
 def test_manually(world):
-  mujoco_bridge = MujocoBridge(world.sample_layout())
+  mujoco_bridge = MujocoBridge('xmls/doggo.xml', world.sample_layout())
   duration = 7
   framerate = 60
   frames = []

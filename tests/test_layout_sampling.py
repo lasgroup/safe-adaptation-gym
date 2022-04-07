@@ -7,11 +7,13 @@ from learn2learn_safely import tasks
 from learn2learn_safely.mujoco_bridge import MujocoBridge
 from learn2learn_safely.utils import ResamplingError
 from learn2learn_safely.world import World
+from learn2learn_safely.robot import Robot
 
 
 @pytest.fixture(params=[tasks.GoToGoal(), tasks.PushBox()])
 def good_world(request):
-  world = World(np.random.RandomState(0), request.param, 'xmls/doggo.xml')
+  world = World(
+      np.random.RandomState(0), request.param, Robot('xmls/doggo.xml'))
   return world
 
 
@@ -24,7 +26,7 @@ def bad_world(request):
       'gremlins_size': 2.0
   }
   world = World(
-      np.random.RandomState(0), request.param, 'xmls/doggo.xml', config)
+      np.random.RandomState(0), request.param, Robot('xmls/doggo.xml'), config)
   return world
 
 
