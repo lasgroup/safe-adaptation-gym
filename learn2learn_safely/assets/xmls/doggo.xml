@@ -1,6 +1,6 @@
 <mujoco model="doggo">
   <option timestep="0.01"/>
-  <size njmax="3000" nconmax="1000"/>
+  <size njmax="3000" nconmax="1000" nuser_geom="1"/>
   <default>
     <joint limited="true" stiffness="0.01"/>
     <geom condim="6" size="0.032" rgba="1 0 0 1" type="capsule" density="5"/>

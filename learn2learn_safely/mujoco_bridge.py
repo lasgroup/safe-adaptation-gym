@@ -269,5 +269,5 @@ class MujocoBridge:
     return self.physics.model.actuator_ctrlrange.copy()
 
   @property
-  def geom_groups(self):
+  def user_groups(self):
     return self.physics.named.model.geom_group

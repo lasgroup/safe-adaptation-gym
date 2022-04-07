@@ -12,7 +12,7 @@ def object_attributes_to_xml(attributes_dict: dict) -> str:
   return """<body name="{name}" pos="{pos}" quat="{quat}">
                         <freejoint name="{name}"/>
                         <geom name="{name}" type="{type}" size="{size}" 
-                        density="{density}" rgba="{rgba}" group="{group}"/>
+                        density="{density}" rgba="{rgba}" user="{user}"/>
             </body>""".format(
       **{k: utils.convert_to_text(v) for k, v in attributes_dict.items()})
 
@@ -20,7 +20,7 @@ def object_attributes_to_xml(attributes_dict: dict) -> str:
 def geom_attributes_to_xml(attributes_dict: dict) -> str:
   return """<body name="{name}" pos="{pos}" quat="{quat}">
                     <geom name="{name}" type="{type}" size="{size}"
-                     rgba="{rgba}" group="{group}" contype="{contype}" 
+                     rgba="{rgba}" user="{user}" contype="{contype}" 
                      conaffinity="{conaffinity}"/>
             </body>""".format(
       **{k: utils.convert_to_text(v) for k, v in attributes_dict.items()})
@@ -31,7 +31,7 @@ def mocap_attributes_to_xml(attributes_dict: dict) -> str:
                       <geom name="{name}" type="{type}" size="{size}" 
                       rgba="{rgba}" pos="{pos}" quat="{quat}" 
                       contype="{contype}" conaffinity="{conaffinity}" 
-                      group="{group}"/>
+                      user="{user}"/>
             </body>""".format(
       **{k: utils.convert_to_text(v) for k, v in attributes_dict.items()})
 
@@ -48,7 +48,7 @@ def get_vase(name: str,
       'density': c.VASES_DENSITY,
       'pos': np.r_[xy, size - c.VASES_SINK],
       'quat': utils.rot2quat(rot),
-      'group': c.GROUP_OBSTACLES,
+      'user': [c.GROUP_OBSTACLES],
       'rgba': color
   }
   return [object_attributes_to_xml(vase_dict)], ''
@@ -67,7 +67,7 @@ def get_gremlin(
       'density': c.GREMLINS_DENSITY,
       'pos': np.r_[xy, size],
       'quat': utils.rot2quat(rot),
-      'group': c.GROUP_OBSTACLES,
+      'user': [c.GROUP_OBSTACLES],
       'rgba': color
   }
   gremlin_mocap_dict = deepcopy(gremlin_obj_dict)
@@ -101,7 +101,7 @@ def get_hazard(
       'type': 'cylinder',
       'contype': 0,
       'conaffinity': 0,
-      'group': c.GROUP_OBSTACLES,
+      'user': [c.GROUP_OBSTACLES],
       'rgba': color
   }
   return [geom_attributes_to_xml(hazard_dict)], ''
@@ -121,7 +121,7 @@ def get_pillar(
       'type': 'cylinder',
       'contype': 1,
       'conaffinity': 1,
-      'group': c.GROUP_OBSTACLES,
+      'user': [c.GROUP_OBSTACLES],
       'rgba': color
   }
   return [geom_attributes_to_xml(pillar_dict)], ''
@@ -142,7 +142,7 @@ def get_goal(
       'type': 'cylinder',
       'contype': 0,
       'conaffinity': 0,
-      'group': c.GROUP_GOAL,
+      'user': [c.GROUP_GOAL],
       'rgba': color
   }
   return [geom_attributes_to_xml(goal_dict)], ''

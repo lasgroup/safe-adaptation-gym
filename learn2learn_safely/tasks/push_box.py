@@ -21,9 +21,9 @@ class PushBox(GoToGoal):
     self._last_box_goal_distance = None
 
   def setup_placements(self) -> Dict[str, tuple]:
-    goal_placement = super(PushBox, self).setup_placements()
-    goal_placement.update({'box': (None, self.BOX_KEEPOUT)})
-    return goal_placement
+    placements = super(PushBox, self).setup_placements()
+    placements.update({'box': (None, self.BOX_KEEPOUT)})
+    return placements
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     goal_config = super(PushBox, self).build_world_config(layout, rs)
@@ -34,7 +34,7 @@ class PushBox(GoToGoal):
         'pos': np.r_[layout['box'], self.BOX_SIZE],
         'quat': utils.rot2quat(utils.random_rot(rs)),
         'density': self.BOX_DENSITY,
-        'group': c.GROUP_OBJECTS,
+        'user': [c.GROUP_OBJECTS],
         'rgba': self.BOX_COLOR
     }
     dim = box['size'][0]
@@ -49,19 +49,19 @@ class PushBox(GoToGoal):
                 <freejoint name="{name}"/>
                 <geom name="{name}" type="{type}" size="{size}"
                 density="{density}"
-                    rgba="{rgba}" group="{group}"/>
+                    rgba="{rgba}" user="{user}"/>
                 <geom name="col1" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
-                    rgba="{rgba}" group="{group}" pos="{x} {y} 0"/>
+                    rgba="{rgba}" pos="{x} {y} 0"/>
                 <geom name="col2" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
-                    rgba="{rgba}" group="{group}" pos="-{x} {y} 0"/>
+                    rgba="{rgba}" pos="-{x} {y} 0"/>
                 <geom name="col3" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
-                    rgba="{rgba}" group="{group}" pos="{x} -{y} 0"/>
+                    rgba="{rgba}" pos="{x} -{y} 0"/>
                 <geom name="col4" type="{type}" size="{width} {width}
                 {dim}" density="{density}"
-                    rgba="{rgba}" group="{group}" pos="-{x} -{y} 0"/>
+                    rgba="{rgba}" pos="-{x} -{y} 0"/>
             </body>
         """.format(**{k: utils.convert_to_text(v) for k, v in box.items()})
             ], '')

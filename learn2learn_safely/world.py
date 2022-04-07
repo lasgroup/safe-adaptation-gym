@@ -209,7 +209,7 @@ class World:
   ) -> Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray]]:
     obstacles, objects, goal = [], [], []
     for name in self._layout.keys():
-      group = mujoco_bridge.geom_groups[name]
+      group = mujoco_bridge.user_groups[name]
       if group == c.GROUP_OBSTACLES:
         obstacles.append(mujoco_bridge.body_pos(name))
       elif group == c.GROUP_GOAL:
