@@ -10,6 +10,7 @@ from learn2learn_safely.tasks.task import Task
 from learn2learn_safely.world import World
 from learn2learn_safely.robot import Robot
 import learn2learn_safely.utils as utils
+from learn2learn_safely.render import make_additional_render_objects
 
 
 # TODO (yarden): make sure that the environment is wrapped with a timelimit
@@ -22,12 +23,21 @@ class SafetyGym(gym.Env):
       'touch_ankle_1b', 'touch_ankle_2b', 'touch_ankle_3b', 'touch_ankle_4b'
   ]
 
-  def __init__(self, robot_base, rgb_observation=False, config=None):
+  def __init__(self,
+               robot_base,
+               rgb_observation=False,
+               config=None,
+               render_lidars_and_collision=False):
     self._world: Optional[World] = None
     self.base_config = config
     self._rgb_observation = rgb_observation
     self.robot = Robot(robot_base)
-    self.mujoco_bridge = MujocoBridge(robot_base)
+    self._render_lidars_and_collision = render_lidars_and_collision
+    visualization_objects = None
+    if render_lidars_and_collision:
+      visualization_objects = make_additional_render_objects(
+          self.NUM_LIDAR_BINS)
+    self.mujoco_bridge = MujocoBridge(self.robot, visualization_objects)
     self._seed = np.random.randint(2**32)
     self.rs = np.random.RandomState(self._seed)
     self._action_space = gym.spaces.Box(
@@ -84,7 +94,13 @@ class SafetyGym(gym.Env):
 
   def render(self, mode="human"):
     """ Renders the mujoco simulator """
-    pass
+    if mode == 'human':
+      robot_pos = self.mujoco_bridge.robot_pos()
+      robot_mat = self.mujoco_bridge.robot_mat()
+      obstacles, objects, goal = self._world.body_positions(self.mujoco_bridge)
+      obstacles_lidar = self._lidar(obstacles)
+      goal_lidar = self._lidar(goal)
+      objects_lidar = self._lidar(objects)
 
   def seed(self, seed=None):
     """ Set internal random state seeds """

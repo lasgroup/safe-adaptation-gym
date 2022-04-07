@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import xmltodict
-from dm_control import mujoco
+from dm_control import mujoco, mjcf
 
 import learn2learn_safely.consts as c
 import learn2learn_safely.utils as utils
@@ -14,22 +14,22 @@ import learn2learn_safely.utils as utils
 class MujocoBridge:
   DEFAULT = {
       'robot_xy': np.zeros(2),  # Robot XY location
-      'robot_z_height': 0.22,
       'robot_rot': 0,  # Robot rotation about Z axis
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
       'bodies': {},
       'robot_ctrl_range_scale': None
   }
 
-  def __init__(self, robot_base, config=None):
+  def __init__(self, robot, addition_render_objects_specs=None, config=None):
     """ config - JSON string or dict of configuration. """
     if config is None:
       config = {}
     self.config = deepcopy(self.DEFAULT)
     self.config.update(deepcopy(config))
     self.config = SimpleNamespace(**self.config)
-    self.robot_base = robot_base
+    self.robot = robot
     self.physics = None
+    self._addition_render_objects_specs = addition_render_objects_specs
     self._build()
 
   def get_sensor(self, name: str) -> np.ndarray:
@@ -38,9 +38,15 @@ class MujocoBridge:
   def _build(self):
     """ Build a world, including generating XML and moving objects """
     # Read in the base XML (contains robot, camera, floor, etc)
-    robot_base_path = os.path.join(c.BASE_DIR, self.robot_base)
+    robot_base_path = os.path.join(c.BASE_DIR, self.robot.base_path)
     with open(robot_base_path) as f:
       robot_base_xml = f.read()
+    if self._addition_render_objects_specs is not None:
+      arena_mjcf = mjcf.from_path(robot_base_path)
+      lidar_site = arena_mjcf.find('site', 'robot')
+      for creat_fn, specs in self._addition_render_objects_specs:
+        lidar_site.attach(creat_fn(**specs))
+      robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
 
     # Convenience accessor for xml dictionary
@@ -48,7 +54,7 @@ class MujocoBridge:
 
     # Move robot position to starting position
     worldbody['body']['@pos'] = utils.convert_to_text(
-        np.r_[self.config.robot_xy, self.config.robot_z_height])
+        np.r_[self.config.robot_xy, self.robot.z_height])
     worldbody['body']['@quat'] = utils.convert_to_text(
         utils.rot2quat(self.config.robot_rot))
 

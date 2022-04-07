@@ -1,5 +1,7 @@
 from typing import Tuple, Iterable
 
+from copy import deepcopy
+
 import numpy as np
 
 import learn2learn_safely.consts as c
@@ -68,7 +70,8 @@ def get_gremlin(
       'group': c.GROUP_OBSTACLES,
       'rgba': color
   }
-  gremlin_mocap_dict = gremlin_obj_dict.copy()
+  gremlin_mocap_dict = deepcopy(gremlin_obj_dict)
+  gremlin_mocap_dict['rgba'][-1] = 0.
   gremlin_mocap_dict.update({
       'contype': 0,
       'conaffinity': 0,
@@ -76,7 +79,7 @@ def get_gremlin(
   gremlin_mocap_dict['name'] = name + 'mocap'
   weld_constraint = """<weld name="{name}" body1="{body1}" body2="{body2}" 
     solref=".02 1.5"/>""".format(
-      name=name, body1=name + 'mocap', body2=name)
+      name=name, body1=name, body2=name + 'mocap')
   return [
       object_attributes_to_xml(gremlin_obj_dict),
       mocap_attributes_to_xml(gremlin_mocap_dict)

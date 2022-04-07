@@ -16,7 +16,7 @@ def world():
 
 
 def test_manually(world):
-  mujoco_bridge = MujocoBridge('xmls/doggo.xml', world.sample_layout())
+  mujoco_bridge = MujocoBridge(Robot('xmls/doggo.xml'), world.sample_layout())
   duration = 7
   framerate = 60
   frames = []

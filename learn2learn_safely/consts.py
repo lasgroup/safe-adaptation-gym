@@ -24,7 +24,7 @@ HAZARDS_COLOR = np.array([0, 0, 1, 1])
 HAZARDS_HEIGHT = 1e-2
 
 # Gremlins
-GREMLINS_COLOR = np.array([0.5, 0, 1, 1])
+GREMLINS_COLOR = np.array([.5, .0, 1, 1])
 GREMLINS_DENSITY = 0.001
 
 # Pillars
