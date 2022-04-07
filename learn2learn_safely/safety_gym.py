@@ -71,8 +71,12 @@ class SafetyGym(gym.Env):
         return self.observation, -10., True, {'cost': 0.}
     self.mujoco_bridge.physics.forward()
     reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
-    info = {'cost': self._world.compute_cost(self.mujoco_bridge)}
-    return self.observation, reward, terminal, info
+    cost = self._world.compute_cost(self.mujoco_bridge)
+    info = {'cost': cost}
+    observation = self.observation
+    if self._render_lidars_and_collision:
+      self._update_lidars_and_collision(observation, cost)
+    return observation, reward, terminal, info
 
   def reset(
       self,
@@ -95,12 +99,7 @@ class SafetyGym(gym.Env):
   def render(self, mode="human"):
     """ Renders the mujoco simulator """
     if mode == 'human':
-      robot_pos = self.mujoco_bridge.robot_pos()
-      robot_mat = self.mujoco_bridge.robot_mat()
-      obstacles, objects, goal = self._world.body_positions(self.mujoco_bridge)
-      obstacles_lidar = self._lidar(obstacles)
-      goal_lidar = self._lidar(goal)
-      objects_lidar = self._lidar(objects)
+      pass
 
   def seed(self, seed=None):
     """ Set internal random state seeds """
@@ -225,3 +224,24 @@ class SafetyGym(gym.Env):
       quat = self.mujoco_bridge.get_sensor(sensor)
       sensors.append(utils.quat2mat(quat))
     return sensors
+
+  def _update_lidars_and_collision(self, observations, cost):
+    obstacles_lidar, objects_lidar, goal_lidar = np.split(
+        observations[:self.NUM_LIDAR_BINS * 3], 3)
+
+    def update_lidar_alpha(name, lidar, color):
+      for i, value in enumerate(lidar):
+        alpha = min(1., value + .1)
+        self.mujoco_bridge.site_rgba['{}lidar/{}'.format(name,
+                                                         i)] = color * alpha
+
+    for i, (name, lidar) in enumerate(
+        zip(['obstacles', 'goal', 'objects'],
+            [obstacles_lidar, goal_lidar, objects_lidar])):
+      color = np.array([0., 0., 0., 1.])
+      color[i] = 1.
+      update_lidar_alpha(name, lidar, color)
+    if cost > 0.:
+      self.mujoco_bridge.site_rgba['collision/indicator'][-1] = 0.5
+    else:
+      self.mujoco_bridge.site_rgba['collision/indicator'][-1] = 0.

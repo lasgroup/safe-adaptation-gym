@@ -217,3 +217,4 @@ class World:
       elif group == c.GROUP_OBJECTS:
         objects.append(mujoco_bridge.body_pos(name))
     return obstacles, objects, goal
+

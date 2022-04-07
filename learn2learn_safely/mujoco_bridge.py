@@ -43,9 +43,9 @@ class MujocoBridge:
       robot_base_xml = f.read()
     if self._addition_render_objects_specs is not None:
       arena_mjcf = mjcf.from_path(robot_base_path)
-      lidar_site = arena_mjcf.find('site', 'robot')
+      robot_site = arena_mjcf.find('site', 'robot')
       for creat_fn, specs in self._addition_render_objects_specs:
-        lidar_site.attach(creat_fn(**specs))
+        robot_site.attach(creat_fn(**specs))
       robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
 
@@ -270,4 +270,9 @@ class MujocoBridge:
 
   @property
   def user_groups(self):
-    return self.physics.named.model.geom_group
+    return self.physics.named.model.geom_user
+
+  @property
+  def site_rgba(self):
+    return self.physics.named.model.site_rgba
+

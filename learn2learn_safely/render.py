@@ -6,14 +6,15 @@ LIDAR_SIZE = 0.025
 
 
 def lidar_ring(n_bins, color, prefix, offset):
-  model = mjcf.RootElement()
+  model = mjcf.RootElement(prefix + 'lidar')
   for i in range(n_bins):
-    theta = 2. * np.pi * i / n_bins
+    j = i + 0.5
+    theta = 2. * np.pi * j / n_bins
     rad = 0.15
     binpos = np.array([np.cos(theta) * rad, np.sin(theta) * rad, offset])
     model.worldbody.add(
         'site',
-        name='{}lidar{}'.format(prefix, i),
+        name='{}'.format(i),
         type='sphere',
         size=LIDAR_SIZE * np.ones(3),
         rgba=color,
@@ -22,13 +23,13 @@ def lidar_ring(n_bins, color, prefix, offset):
 
 
 def cost_sphere():
-  model = mjcf.RootElement()
+  model = mjcf.RootElement('collision')
   model.worldbody.add(
       'site',
-      name='costsphere',
+      name='indicator',
       type='sphere',
       size=0.25 * np.ones(3),
-      rgba=np.array([1., 0., 0., .5]))
+      rgba=np.array([1., 0., 0., 0.]))
   return model
 
 
@@ -36,8 +37,7 @@ def make_additional_render_objects(n_bins):
   render_specs = []
   offset = 0.5
   for i, name in enumerate(['obstacles', 'goal', 'objects']):
-    color = np.zeros(4)
-    color[-1] = .1
+    color = np.array([0., 0., 0., .1])
     color[i] = 1.
     render_specs.append(
         (lidar_ring,
