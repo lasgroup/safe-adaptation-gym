@@ -18,9 +18,9 @@ class PushRolyPoly(PushBox):
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     config = GoToGoal.build_world_config(self, layout, rs)
     model = mjcf.RootElement()
-    tippetop_root = model.worldbody.add('body', name='box')
-    tippetop_root.add('freejoint', name='box')
-    tippetop_root.add(
+    rolypoly = model.worldbody.add('body', name='box')
+    rolypoly.add('freejoint', name='box')
+    rolypoly.add(
         'geom',
         name='box',
         type='ellipsoid',
@@ -29,7 +29,7 @@ class PushRolyPoly(PushBox):
         rgba=convert_to_text(self.ROLY_POLY_COLOR),
         pos='0 0 0.22',
         user=[c.GROUP_OBJECTS])
-    tippetop_root.add(
+    rolypoly.add(
         'geom',
         name='box_base',
         type='sphere',
@@ -40,8 +40,9 @@ class PushRolyPoly(PushBox):
         friction='.7 .005 .005',
         solref='-100 -60',
         condim='6',
-        priority='1')
-    tippetop_root.add(
+        priority='1',
+        user=[c.GROUP_OBJECTS])
+    rolypoly.add(
         'geom',
         name='ballast',
         type='sphere',
@@ -51,6 +52,6 @@ class PushRolyPoly(PushBox):
         group='3',
         density='0.0008',
         pos='0 0 -0.05')
-    box_config = {'bodies': {'box': ([tippetop_root.to_xml_string()], '')}}
+    box_config = {'bodies': {'box': ([rolypoly.to_xml_string()], '')}}
     merge(config, box_config)
     return config
