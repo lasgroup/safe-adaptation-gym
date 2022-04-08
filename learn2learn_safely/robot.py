@@ -16,9 +16,9 @@ class Robot:
     # Needed to figure out z-height of free joint of offset body
     self.z_height = self.sim.named.data.xpos['robot'][2]
     # Get a list of geoms in the robot
-    self.geom_names = [
+    self.geom_names = set([
         n for n in self.sim.named.data.geom_xpos.axes.row.names if n != 'floor'
-    ]
+    ])
     # Needed to figure out the observation spaces
     self.nq = self.sim.model.nq
     self.nv = self.sim.model.nv

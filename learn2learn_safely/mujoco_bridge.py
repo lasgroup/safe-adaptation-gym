@@ -2,6 +2,7 @@ import os
 from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace
+from typing import Iterable
 
 import numpy as np
 import xmltodict
@@ -193,6 +194,22 @@ class MujocoBridge:
       self.physics.named.data.qpos['robot'] = to_qpos(
           robot_pos, utils.rot2quat(config['robot_rot']))
 
+  def touches_robot(self, group_geom_names: Iterable[str]) -> int:
+    """
+    Check if any of the geoms in group_geom_names is in contact with any of
+    the geom names attached to the robot. Returns the number of contacts with
+    the robot
+    """
+    part_of_robot = lambda name: name in self.robot.geom_names  # noqa
+    in_group = lambda name: any(
+        name.startswith(geom)  # noqa
+        for geom in group_geom_names)
+    count = 0
+    for geom1, geom2 in self.contacts:
+      count += int((part_of_robot(geom1) or part_of_robot(geom2)) and
+                   (in_group(geom1) or in_group(geom2)))
+    return count
+
   def robot_com(self) -> np.ndarray:
     """ Get the position of the robot center of mass in the simulator world
     reference frame """
@@ -276,3 +293,6 @@ class MujocoBridge:
   def site_rgba(self):
     return self.physics.named.model.site_rgba
 
+  @property
+  def geom_rgba(self):
+    return self.physics.named.model.geom_rgba

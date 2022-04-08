@@ -39,14 +39,14 @@ class GoToGoal(Task):
     if distance <= self.GOAL_SIZE:
       info['goal_met'] = True
       utils.update_layout(layout, mujoco_bridge)
-      self.build(layout, placements, rs, mujoco_bridge)
+      self.reset(layout, placements, rs, mujoco_bridge)
       reward += 1.
     return reward, False, info
 
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     pass
 
-  def build(self, layout: dict, placements: dict, rs: np.random.RandomState,
+  def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):
     goal_xy = self._resample_goal_position(layout, placements, rs)
     layout['goal'] = goal_xy

@@ -1,4 +1,5 @@
 from learn2learn_safely.tasks.go_to_goal import GoToGoal
 from learn2learn_safely.tasks.push_box import PushBox
+from learn2learn_safely.tasks.press_buttons import PressButtons
 
-__all__ = ['GoToGoal', 'PushBox']
+__all__ = ['GoToGoal', 'PushBox', 'PressButtons']

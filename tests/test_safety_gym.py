@@ -8,21 +8,16 @@ from learn2learn_safely import tasks
 from learn2learn_safely.safety_gym import SafetyGym
 
 
-@pytest.fixture(params=[tasks.GoToGoal(), tasks.PushBox()])
+@pytest.fixture(
+    params=[tasks.GoToGoal(),
+            tasks.PushBox(),
+            tasks.PressButtons()])
 def safety_gym(request):
   arena = TimeLimit(
       SafetyGym('xmls/doggo.xml', render_lidars_and_collision=True), 1000)
   arena.seed(2)
   arena.set_task(request.param)
   return arena
-
-
-def test_episode(safety_gym):
-  safety_gym.reset()
-  done = False
-  while not done:
-    *_, done, _ = safety_gym.step(safety_gym.action_space.sample())
-  assert True
 
 
 def test_viewer(safety_gym):
@@ -55,3 +50,11 @@ def test_viewer(safety_gym):
     return safety_gym.action_space.sample()
 
   viewer.launch(ViewerWrapper(safety_gym), sample)
+
+
+def test_episode(safety_gym):
+  safety_gym.reset()
+  done = False
+  while not done:
+    *_, done, _ = safety_gym.step(safety_gym.action_space.sample())
+  assert True

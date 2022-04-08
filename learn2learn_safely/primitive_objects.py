@@ -146,3 +146,24 @@ def get_goal(
       'rgba': color
   }
   return [geom_attributes_to_xml(goal_dict)], ''
+
+
+def get_button(
+    name: str,
+    size: float,
+    xy: np.ndarray,
+    rot: float,
+    color: np.ndarray = c.GOAL_COLOR * [1, 1, 1, 0.25]
+) -> Tuple[Iterable[str], str]:
+  button_dict = {
+      'name': name,
+      'size': np.ones(3) * size,
+      'pos': np.r_[xy, size],
+      'quat': utils.rot2quat(rot),
+      'type': 'sphere',
+      'contype': 1,
+      'conaffinity': 1,
+      'user': [c.GROUP_OBJECTS],
+      'rgba': color
+  }
+  return [geom_attributes_to_xml(button_dict)], ''

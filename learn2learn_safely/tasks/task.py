@@ -43,7 +43,7 @@ class Task(abc.ABC):
     """
 
   @abc.abstractmethod
-  def build(self, layout: dict, placements: dict, rs: np.random.RandomState,
+  def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):
     """
     Not sure about this yet. But should allow an interface to build to task

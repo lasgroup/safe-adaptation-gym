@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Iterable
 
 import numpy as np
 
@@ -71,7 +71,8 @@ def draw_placement(rs: np.random.RandomState, placements: Union[dict, None],
   return np.array([rs.uniform(xmin, xmax), rs.uniform(ymin, ymax)])
 
 
-# https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries/24088493#24088493
+# https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of
+# -dictionaries/24088493#24088493
 def merge(a, b, path=None):
   """ merges b into a """
   if path is None:
@@ -114,3 +115,4 @@ def quat2mat(quat):
   m = np.zeros(9, dtype='float64')
   mujoco.mju_quat2Mat(m, q)
   return m.reshape((3, 3))
+

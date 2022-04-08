@@ -90,13 +90,13 @@ class PushBox(GoToGoal):
     if box_goal_distance <= self.GOAL_SIZE:
       info['goal_met'] = True
       utils.update_layout(layout, mujoco_bridge)
-      self.build(layout, placements, rs, mujoco_bridge)
+      self.reset(layout, placements, rs, mujoco_bridge)
       reward += 1.
     return reward, False, info
 
-  def build(self, layout: dict, placements: dict, rs: np.random.RandomState,
+  def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):
-    super(PushBox, self).build(layout, placements, rs, mujoco_bridge)
+    super(PushBox, self).reset(layout, placements, rs, mujoco_bridge)
     self._last_box_goal_distance = np.linalg.norm(
         mujoco_bridge.body_pos('goal')[:2] - mujoco_bridge.body_pos('box')[:2])
     self._last_box_distance = np.linalg.norm(

@@ -10,6 +10,7 @@ PLACEMENT_EXTENTS = [-2, -2, 2, 2]
 
 OBSTACLES = ['hazards', 'vases', 'gremlins', 'pillars']
 
+GROUP_INACTIVE = 0
 GROUP_OBSTACLES = 1
 GROUP_GOAL = 2
 GROUP_OBJECTS = 3

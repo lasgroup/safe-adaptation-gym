@@ -138,17 +138,10 @@ class World:
 
   def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
     mujoco_bridge.physics.forward()  # Ensure positions and contacts are correct
-    cost = 0.
-    touches_robot = lambda name: name in self.robot.geom_names  # noqa
-    is_obstacle = lambda name: any(obstacle in name  # noqa
-                                   for obstacle in c.OBSTACLES)
-    for geom1, geom2 in mujoco_bridge.contacts:
-      if (touches_robot(geom1) or
-          touches_robot(geom2)) and (is_obstacle(geom1) or is_obstacle(geom2)):
-        cost += 1.
+    cost = float(mujoco_bridge.touches_robot(c.OBSTACLES))
     robot_pos = mujoco_bridge.robot_pos()[:2]
     for name in self._layout.keys():
-      if 'hazards' not in name:
+      if not name.startswith('hazards'):
         continue
       dist = np.linalg.norm(robot_pos - mujoco_bridge.body_pos(name)[:2])
       if dist <= self._obstacle_sizes['hazards']:
@@ -159,7 +152,7 @@ class World:
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     phase = float(mujoco_bridge.time)
     for name, _ in self._layout.items():
-      if 'gremlins' in name:
+      if name.startswith('gremlins'):
         target = np.array([np.sin(phase), np.cos(phase)
                           ]) * self.config.gremlins_travel
         pos = np.r_[target, [self.config.gremlins_size]]
@@ -169,7 +162,7 @@ class World:
   def reset(self, mujoco_bridge: MujocoBridge):
     """ Resets the task. Allows the concrete implementation to perform
     specialized reset """
-    self.task.build(self._layout, self._placements, self.rs, mujoco_bridge)
+    self.task.reset(self._layout, self._placements, self.rs, mujoco_bridge)
 
   def _generate_new_layout(self):
     """ Rejection sample a placement of objects to find a layout. """
@@ -217,4 +210,3 @@ class World:
       elif group == c.GROUP_OBJECTS:
         objects.append(mujoco_bridge.body_pos(name))
     return obstacles, objects, goal
-
