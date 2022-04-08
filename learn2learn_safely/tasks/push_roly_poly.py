@@ -9,10 +9,8 @@ import learn2learn_safely.consts as c
 class PushRolyPoly(PushBox):
   # For the interested: https://en.wikipedia.org/wiki/Roly-poly_toy and
   # https://he.wikipedia.org/wiki/%D7%A0%D7%97%D7%95%D7%9D_%D7%AA%D7%A7%D7%95%D7%9D
-  BOX_SIZE = 0.2
-  BOX_KEEPOUT = 0.2
-  BOX_COLOR = np.array([1, 1, 0, 0.25])
-  BOX_DENSITY = 0.001
+  SPHERE_SIZE = 0.17
+  ROLY_POLY_COLOR = np.array([1., 0.94, 0.68, 0.5])
 
   def __init__(self):
     super(PushBox, self).__init__()
@@ -22,24 +20,23 @@ class PushRolyPoly(PushBox):
     model = mjcf.RootElement()
     tippetop_root = model.worldbody.add('body', name='box')
     tippetop_root.add('freejoint', name='box')
-    color = np.array([1., 0.94, 0.68, 0.5])
     tippetop_root.add(
         'geom',
         name='box',
         type='ellipsoid',
-        size="0.1 0.1 0.15",
+        size='0.1 0.1 0.15',
         density='0.0001',
-        rgba=convert_to_text(color),
+        rgba=convert_to_text(self.ROLY_POLY_COLOR),
         pos='0 0 0.22',
         user=[c.GROUP_OBJECTS])
     tippetop_root.add(
         'geom',
         name='box_base',
         type='sphere',
-        size='0.17',
+        size=convert_to_text(self.SPHERE_SIZE),
         density='0.0001',
-        rgba=convert_to_text(color),
-        pos='0 0 0.17',
+        rgba=convert_to_text(self.ROLY_POLY_COLOR),
+        pos=convert_to_text(np.array([0, 0, self.SPHERE_SIZE])),
         friction='.7 .005 .005',
         solref='-100 -60',
         condim='6',
