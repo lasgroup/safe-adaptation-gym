@@ -5,16 +5,15 @@ from dm_env import specs, TimeStep, StepType
 from gym.wrappers import TimeLimit
 
 from learn2learn_safely import tasks
-from learn2learn_safely.safety_gym import SafetyGym
+from learn2learn_safely.safety_gym import SafeAdaptationGym
 
 
 @pytest.fixture(
-    params=[tasks.GoToGoal(),
-            tasks.PushBox(),
-            tasks.PressButtons()])
+    params=[
+            tasks.PushRodMass()])
 def safety_gym(request):
   arena = TimeLimit(
-      SafetyGym('xmls/doggo.xml', render_lidars_and_collision=True), 1000)
+      SafeAdaptationGym('xmls/doggo.xml', render_lidars_and_collision=True), 1000)
   arena.seed(2)
   arena.set_task(request.param)
   return arena
@@ -47,7 +46,7 @@ def test_viewer(safety_gym):
       return TimeStep(StepType.MID, reward, 1.0, obs)
 
   def sample(*args, **kwargs):
-    return safety_gym.action_space.sample()
+    return np.zeros_like(safety_gym.action_space.sample())
 
   viewer.launch(ViewerWrapper(safety_gym), sample)
 

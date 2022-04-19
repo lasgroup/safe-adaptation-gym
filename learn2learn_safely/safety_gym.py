@@ -14,7 +14,7 @@ from learn2learn_safely.render import make_additional_render_objects
 
 
 # TODO (yarden): make sure that the environment is wrapped with a timelimit
-class SafetyGym(gym.Env):
+class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
   LIDAR_MAX_DIST = 3.
   BASE_SENSORS = ['accelerometer', 'velocimeter', 'gyro', 'magnetometer']
