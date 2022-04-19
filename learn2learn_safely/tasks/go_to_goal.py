@@ -10,7 +10,7 @@ from learn2learn_safely.tasks.task import Task
 
 class GoToGoal(Task):
   GOAL_SIZE = 0.3
-  GOAL_KEEPOUT = 0.305
+  GOAL_KEEPOUT = 0.4
 
   def __init__(self):
     self._last_goal_distance = None
@@ -60,9 +60,13 @@ class GoToGoal(Task):
     layout.pop('goal')
     for _ in range(10000):
       goal_xy = utils.draw_placement(rs, None, self.GOAL_KEEPOUT)
+      valid_placement = True
       for other_name, other_xy in layout.items():
         other_keepout = placements[other_name][1]
-        dist = np.sqrt(np.sum(np.square(goal_xy - other_xy)))
-        if dist >= other_keepout + self.GOAL_KEEPOUT:
-          return goal_xy
+        dist = np.linalg.norm(goal_xy - other_xy)
+        if dist < other_keepout + self.GOAL_KEEPOUT:
+          valid_placement = False
+          break
+      if valid_placement:
+        return goal_xy
     raise utils.ResamplingError('Failed to generate goal')
