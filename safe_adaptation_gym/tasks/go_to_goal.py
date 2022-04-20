@@ -2,10 +2,10 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-import learn2learn_safely.primitive_objects as po
-import learn2learn_safely.utils as utils
-from learn2learn_safely.mujoco_bridge import MujocoBridge
-from learn2learn_safely.tasks.task import Task
+import safe_adaptation_gym.primitive_objects as po
+import safe_adaptation_gym.utils as utils
+from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym.tasks.task import Task
 
 
 class GoToGoal(Task):

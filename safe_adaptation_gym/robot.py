@@ -2,7 +2,7 @@ import os
 
 from dm_control import mujoco
 
-import learn2learn_safely.consts as c
+import safe_adaptation_gym.consts as c
 
 
 class Robot:

@@ -4,8 +4,8 @@ from dm_control import viewer
 from dm_env import specs, TimeStep, StepType
 from gym.wrappers import TimeLimit
 
-from learn2learn_safely import tasks
-from learn2learn_safely.safety_gym import SafeAdaptationGym
+from safe_adaptation_gym import tasks
+from safe_adaptation_gym.safety_gym import SafeAdaptationGym
 
 
 @pytest.fixture(

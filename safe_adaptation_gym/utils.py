@@ -2,7 +2,7 @@ from typing import Union, Iterable
 
 import numpy as np
 
-import learn2learn_safely.consts as c
+import safe_adaptation_gym.consts as c
 
 
 class ResamplingError(AssertionError):

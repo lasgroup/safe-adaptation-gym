@@ -4,8 +4,8 @@ from copy import deepcopy
 
 import numpy as np
 
-import learn2learn_safely.consts as c
-import learn2learn_safely.utils as utils
+import safe_adaptation_gym.consts as c
+import safe_adaptation_gym.utils as utils
 
 
 def object_attributes_to_xml(attributes_dict: dict) -> str:

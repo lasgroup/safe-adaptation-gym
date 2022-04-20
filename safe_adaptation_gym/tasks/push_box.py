@@ -2,10 +2,10 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-import learn2learn_safely.utils as utils
-from learn2learn_safely.mujoco_bridge import MujocoBridge
-from learn2learn_safely.tasks.go_to_goal import GoToGoal
-import learn2learn_safely.consts as c
+import safe_adaptation_gym.utils as utils
+from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym.tasks.go_to_goal import GoToGoal
+import safe_adaptation_gym.consts as c
 
 
 class PushBox(GoToGoal):

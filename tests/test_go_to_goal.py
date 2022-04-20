@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from learn2learn_safely.mujoco_bridge import MujocoBridge
-from learn2learn_safely.tasks import GoToGoal
-from learn2learn_safely.world import World
-from learn2learn_safely.robot import Robot
+from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym.tasks import GoToGoal
+from safe_adaptation_gym.world import World
+from safe_adaptation_gym.robot import Robot
 
 
 @pytest.fixture

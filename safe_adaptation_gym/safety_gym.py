@@ -5,12 +5,12 @@ import gym
 import numpy as np
 from gym.core import ActType, ObsType
 
-from learn2learn_safely.mujoco_bridge import MujocoBridge
-from learn2learn_safely.tasks.task import Task
-from learn2learn_safely.world import World
-from learn2learn_safely.robot import Robot
-import learn2learn_safely.utils as utils
-from learn2learn_safely.render import make_additional_render_objects
+from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym.tasks.task import Task
+from safe_adaptation_gym.world import World
+from safe_adaptation_gym.robot import Robot
+import safe_adaptation_gym.utils as utils
+from safe_adaptation_gym.render import make_additional_render_objects
 
 
 # TODO (yarden): make sure that the environment is wrapped with a timelimit

@@ -3,11 +3,11 @@ import pytest
 
 import matplotlib.pyplot as plt
 
-from learn2learn_safely import tasks
-from learn2learn_safely.mujoco_bridge import MujocoBridge
-from learn2learn_safely.utils import ResamplingError
-from learn2learn_safely.world import World
-from learn2learn_safely.robot import Robot
+from safe_adaptation_gym import tasks
+from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym.utils import ResamplingError
+from safe_adaptation_gym.world import World
+from safe_adaptation_gym.robot import Robot
 
 
 @pytest.fixture(params=[tasks.GoToGoal(), tasks.PushBox()])

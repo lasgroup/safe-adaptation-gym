@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from learn2learn_safely.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 
 
 class Task(abc.ABC):

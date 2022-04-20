@@ -3,16 +3,18 @@
 from setuptools import setup, find_packages
 
 required = [
-    'dm_control>=0.0.403778684', 'gym>=0.21.0', 'numpy>=1.22.1',
+    'dm_control>=0.0.403778684',
+    'gym>=0.21.0',
+    'numpy>=1.22.1',
     'xmltodict>=0.12.0'
 ]
 
 extras = {'dev': ['pytest>=4.4.0', 'Pillow', 'matplotlib']}
 
-package_data = {'learn2learn_safely': ['assets/*']}
+package_data = {'safe-adaptation-gym': ['assets/*']}
 
 setup(
-    name='learn2learn_safely',
+    name='safe_adaptation_gym',
     version='0.0.0',
     packages=find_packages(),
     include_package_data=True,

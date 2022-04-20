@@ -1,9 +1,9 @@
 import numpy as np
 from dm_control import mjcf
 
-from learn2learn_safely.tasks.push_box import PushBox, GoToGoal
-from learn2learn_safely.utils import merge, convert_to_text
-import learn2learn_safely.consts as c
+from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
+from safe_adaptation_gym.utils import merge, convert_to_text
+import safe_adaptation_gym.consts as c
 
 
 class PushRodMass(PushBox):

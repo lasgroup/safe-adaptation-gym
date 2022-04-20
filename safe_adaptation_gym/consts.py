@@ -2,9 +2,9 @@ import os
 
 import numpy as np
 
-import learn2learn_safely
+import safe_adaptation_gym
 
-BASE_DIR = os.path.join(os.path.dirname(learn2learn_safely.__file__), 'assets')
+BASE_DIR = os.path.join(os.path.dirname(safe_adaptation_gym.__file__), 'assets')
 
 PLACEMENT_EXTENTS = [-2, -2, 2, 2]
 

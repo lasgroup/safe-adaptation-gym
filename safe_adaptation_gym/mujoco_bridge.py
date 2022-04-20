@@ -8,8 +8,8 @@ import numpy as np
 import xmltodict
 from dm_control import mujoco, mjcf
 
-import learn2learn_safely.consts as c
-import learn2learn_safely.utils as utils
+import safe_adaptation_gym.consts as c
+import safe_adaptation_gym.utils as utils
 
 
 class MujocoBridge:
