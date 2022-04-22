@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import Iterator, Mapping, Optional, Type
+from typing import Iterator, Mapping, Optional, Type, Tuple
 
 import numpy as np
 
@@ -12,10 +12,11 @@ class TaskSampler:
   rs: np.random.RandomState
   tasks: Mapping[str, Type[Task]]
 
-  def sample(self) -> Optional[Task]:
+  def sample(self) -> Optional[Tuple[str, Task]]:
     if len(self.tasks) == 0:
       return None
-    return self.rs.choice(list(self.tasks.values()))()
+    task_name, task = self.rs.choice(list(self.tasks.items()))
+    return task_name, task()
 
 
 class OneRunTaskSampler(TaskSampler):
@@ -24,15 +25,15 @@ class OneRunTaskSampler(TaskSampler):
     super(OneRunTaskSampler, self).__init__(rs, tasks)
     self._n_samples = len(tasks)
 
-    def _sample() -> Iterator[Task]:
-      all_tasks = list(self.tasks.values())
+    def _sample() -> Iterator[Tuple[str, Task]]:
+      all_tasks = list(self.tasks.items())
       self.rs.shuffle(all_tasks)
-      for task in all_tasks:
-        yield task()
+      for task_name, task in all_tasks:
+        yield task_name, task()
 
     self._sample = _sample()
 
-  def sample(self) -> Optional[Task]:
+  def sample(self) -> Optional[Tuple[str, Task]]:
     try:
       return next(self._sample)
     except StopIteration:

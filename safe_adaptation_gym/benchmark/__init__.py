@@ -1,5 +1,6 @@
 import re
 import inspect
+from copy import deepcopy
 
 from typing import Iterator
 
@@ -7,7 +8,7 @@ import numpy as np
 
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
-from benchmark import samplers
+from safe_adaptation_gym.benchmark import samplers
 
 BENCHMARKS = {'no_adaptation'}
 ROBOTS = {'point', 'car', 'doggo'}
@@ -47,6 +48,7 @@ class Benchmark:
         rgb_observation=rgb_observation,
         render_lidars_and_collision=True)
     self._gym.seed(seed)
+    self._seed = seed
     self._train_tasks_sampler = train_sampler
     self._test_tasks_sampler = test_sampler
 
@@ -56,11 +58,13 @@ class Benchmark:
     the flexibility to) calling this function after enough episodes per task.
     """
     while True:
-      next_task = self._train_tasks_sampler.sample()
-      if next_task is None:
+      sample = self._train_tasks_sampler.sample()
+      if sample is None:
         return None
-      self._gym.set_task(next_task)
-      yield self._gym
+      self._seed += 1
+      self._gym.seed(self._seed)
+      self._gym.set_task(sample[1])
+      yield sample[0], deepcopy(self._gym)
 
   def test_tasks(self) -> Iterator[SafeAdaptationGym]:
     """
@@ -68,8 +72,8 @@ class Benchmark:
     the flexibility to) calling this function after enough episodes per task.
     """
     while True:
-      next_task = self._test_tasks_sampler.sample()
-      if next_task is None:
+      sample = self._test_tasks_sampler.sample()
+      if sample is None:
         return None
-      self._gym.set_task(next_task)
-      yield self._gym
+      self._gym.set_task(sample[1])
+      yield sample[0], deepcopy(self._gym)
