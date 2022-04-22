@@ -1,14 +1,13 @@
 import re
 import inspect
-from dataclasses import dataclass
 
-from typing import Iterator, Mapping, Optional, Type
+from typing import Iterator
 
 import numpy as np
 
 from safe_adaptation_gym import tasks
-from safe_adaptation_gym.tasks.task import Task
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
+from benchmark import samplers
 
 BENCHMARKS = {'no_adaptation'}
 ROBOTS = {'point', 'car', 'doggo'}
@@ -25,57 +24,24 @@ _ROBOTS_NAMES_TO_BASENAMES = {
     name: _BASE + name + '.xml' for name in ['point', 'car', 'doggo']
 }
 
-_BENCHMARKS = {'no_adaptation': (_TASKS, {})}
-
 
 def make(benchmark_name: str,
          robot_name: str,
          seed: int = 666,
          rgb_observation: bool = False):
+  rs = np.random.RandomState(seed)
   if benchmark_name == 'no_adaptation':
-    rs = np.random.RandomState(seed)
-    train_sampler = OneRunTaskSampler(rs, _TASKS)
-    test_sampler = TaskSampler(rs, {})
+    train_sampler = samplers.OneRunTaskSampler(rs, _TASKS)
+    test_sampler = samplers.TaskSampler(rs, {})
     return Benchmark(train_sampler, test_sampler, seed,
                      _ROBOTS_NAMES_TO_BASENAMES[robot_name], rgb_observation)
 
 
-@dataclass
-class TaskSampler:
-  rs: np.random.RandomState
-  tasks: Mapping[str, Type[Task]]
-
-  def sample(self) -> Optional[Task]:
-    if len(self.tasks) == 0:
-      return None
-    return self.rs.choice(list(self.tasks.values()))()
-
-
-class OneRunTaskSampler(TaskSampler):
-
-  def __init__(self, rs, tasks):
-    super(OneRunTaskSampler, self).__init__(rs, tasks)
-    self._n_samples = len(tasks)
-
-    def _sample():
-      all_tasks = list(self.tasks.values())
-      self.rs.shuffle(all_tasks)
-      for task in all_tasks:
-        yield task()
-
-    self._sample = _sample()
-
-  def sample(self) -> Optional[Task]:
-    try:
-      return next(self._sample)
-    except StopIteration:
-      return None
-
-
 class Benchmark:
 
-  def __init__(self, train_sampler: TaskSampler, test_sampler: TaskSampler,
-               seed: int, robot_base: str, rgb_observation: bool):
+  def __init__(self, train_sampler: samplers.TaskSampler,
+               test_sampler: samplers.TaskSampler, seed: int, robot_base: str,
+               rgb_observation: bool):
     self._gym = SafeAdaptationGym(
         robot_base,
         rgb_observation=rgb_observation,
