@@ -62,6 +62,7 @@ class SafeAdaptationGym(gym.Env):
     # Keeping magic 10 from Safety-Gym
     # https://github.com/openai/safety-gym/blob
     # /f31042f2f9ee61b9034dd6a416955972911544f5/safety_gym/envs/engine.py#L1253
+    # TODO (yarden): checking for a collision only after 10 steps is wrong!
     for _ in range(10):
       try:
         self._world.set_mocaps(self.mujoco_bridge)

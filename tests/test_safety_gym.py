@@ -5,15 +5,18 @@ from dm_env import specs, TimeStep, StepType
 from gym.wrappers import TimeLimit
 
 from safe_adaptation_gym import tasks
-from safe_adaptation_gym.safety_gym import SafeAdaptationGym
+from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
 
 @pytest.fixture(
-    params=[
-            tasks.PushRodMass()])
+    params=[tasks.PushRodMass(),
+            tasks.PushBox(),
+            tasks.PressButtons(),
+            tasks.GoToGoal()])
 def safety_gym(request):
   arena = TimeLimit(
-      SafeAdaptationGym('xmls/doggo.xml', render_lidars_and_collision=True), 1000)
+      SafeAdaptationGym('xmls/doggo.xml', render_lidars_and_collision=True),
+      1000)
   arena.seed(2)
   arena.set_task(request.param)
   return arena
