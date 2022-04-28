@@ -106,6 +106,8 @@ class SafeAdaptationGym(gym.Env):
     """ Set internal random state seeds """
     self._seed = np.random.randint(2**32) if seed is None else seed
     self.rs = np.random.RandomState(self._seed)
+    if self._world is not None:
+      self._world.rs = self.rs
 
   @property
   def observation(self) -> np.ndarray:

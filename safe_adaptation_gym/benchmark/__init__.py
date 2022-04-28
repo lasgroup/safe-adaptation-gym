@@ -29,7 +29,7 @@ _ROBOTS_NAMES_TO_BASENAMES = {
 def make(benchmark_name: str,
          robot_name: str,
          seed: int = 666,
-         rgb_observation: bool = False):
+         rgb_observation: bool = False) -> Benchmark:
   rs = np.random.RandomState(seed)
   if benchmark_name == 'no_adaptation':
     train_sampler = samplers.OneRunTaskSampler(rs, _TASKS)
