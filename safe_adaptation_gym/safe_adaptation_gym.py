@@ -195,7 +195,7 @@ class SafeAdaptationGym(gym.Env):
       pos = np.asarray(pos)
       if pos.shape == (3,):
         pos = pos[:2]  # Truncate Z coordinate
-      z = np.complex(*ego_xy(pos))  # X, Y as real, imaginary components
+      z = complex(*ego_xy(pos))  # X, Y as real, imaginary components
       dist = np.abs(z)
       angle = np.angle(z) % (np.pi * 2)
       bin_size = (np.pi * 2) / self.NUM_LIDAR_BINS
