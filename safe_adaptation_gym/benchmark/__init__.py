@@ -26,18 +26,6 @@ _ROBOTS_NAMES_TO_BASENAMES = {
 }
 
 
-def make(benchmark_name: str,
-         robot_name: str,
-         seed: int = 666,
-         rgb_observation: bool = False) -> Benchmark:
-  rs = np.random.RandomState(seed)
-  if benchmark_name == 'no_adaptation':
-    train_sampler = samplers.OneRunTaskSampler(rs, _TASKS)
-    test_sampler = samplers.TaskSampler(rs, {})
-    return Benchmark(train_sampler, test_sampler, seed,
-                     _ROBOTS_NAMES_TO_BASENAMES[robot_name], rgb_observation)
-
-
 class Benchmark:
 
   def __init__(self, train_sampler: samplers.TaskSampler,
@@ -77,3 +65,15 @@ class Benchmark:
         return None
       self._gym.set_task(sample[1])
       yield sample[0], deepcopy(self._gym)
+
+
+def make(benchmark_name: str,
+         robot_name: str,
+         seed: int = 666,
+         rgb_observation: bool = False) -> Benchmark:
+  rs = np.random.RandomState(seed)
+  if benchmark_name == 'no_adaptation':
+    train_sampler = samplers.OneRunTaskSampler(rs, _TASKS)
+    test_sampler = samplers.TaskSampler(rs, {})
+    return Benchmark(train_sampler, test_sampler, seed,
+                     _ROBOTS_NAMES_TO_BASENAMES[robot_name], rgb_observation)
