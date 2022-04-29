@@ -15,13 +15,13 @@ ROBOTS = {'point', 'car', 'doggo'}
 
 pattern = re.compile(r'(?<!^)(?=[A-Z])')
 
-_TASKS = {
+TASKS = {
     pattern.sub('_', name).lower(): task
     for name, task in inspect.getmembers(tasks, inspect.isclass)
 }
 
 _BASE = 'xmls/'
-_ROBOTS_NAMES_TO_BASENAMES = {
+ROBOTS_BASENAMES = {
     name: _BASE + name + '.xml' for name in ['point', 'car', 'doggo']
 }
 
@@ -73,7 +73,7 @@ def make(benchmark_name: str,
          rgb_observation: bool = False) -> Benchmark:
   rs = np.random.RandomState(seed)
   if benchmark_name == 'no_adaptation':
-    train_sampler = samplers.OneRunTaskSampler(rs, _TASKS)
+    train_sampler = samplers.OneRunTaskSampler(rs, TASKS)
     test_sampler = samplers.TaskSampler(rs, {})
     return Benchmark(train_sampler, test_sampler, seed,
-                     _ROBOTS_NAMES_TO_BASENAMES[robot_name], rgb_observation)
+                     ROBOTS_BASENAMES[robot_name], rgb_observation)
