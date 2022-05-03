@@ -9,11 +9,11 @@ from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
 
 @pytest.fixture(params=[
-    # tasks.PushBox(),
-    # tasks.PushRodMass(),
+    tasks.PushBox(),
+    tasks.PushRodMass(),
     tasks.BallToGoal(),
-    # tasks.PressButtons(),
-    # tasks.GoToGoal()
+    tasks.PressButtons(),
+    tasks.GoToGoal()
 ])
 def safety_gym(request):
   arena = TimeLimit(
