@@ -8,14 +8,16 @@ from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
 
-@pytest.fixture(
-    params=[tasks.PushRodMass(),
-            tasks.PushBox(),
-            tasks.PressButtons(),
-            tasks.GoToGoal()])
+@pytest.fixture(params=[
+    # tasks.PushBox(),
+    # tasks.PushRodMass(),
+    tasks.BallToGoal(),
+    # tasks.PressButtons(),
+    # tasks.GoToGoal()
+])
 def safety_gym(request):
   arena = TimeLimit(
-      SafeAdaptationGym('xmls/doggo.xml', render_lidars_and_collision=True),
+      SafeAdaptationGym('xmls/point.xml', render_lidars_and_collision=True),
       1000)
   arena.seed(2)
   arena.set_task(request.param)
@@ -23,6 +25,19 @@ def safety_gym(request):
 
 
 def test_viewer(safety_gym):
+
+  import glfw
+
+  def controller(*args, **kwargs):
+    action = np.zeros((2,))
+    if not glfw.joystick_present(glfw.JOYSTICK_1):
+      return action
+    cmd = glfw.get_joystick_axes(glfw.JOYSTICK_1)[0]
+    y = -cmd[1] if np.abs(cmd[1]) > 0.05 else 0.0
+    x = -cmd[0] if np.abs(cmd[0]) > 0.05 else 0.0
+    action[0] = np.clip(y, -0.03, 1.0)
+    action[1] = x
+    return action
 
   class ViewerWrapper:
 
@@ -48,10 +63,7 @@ def test_viewer(safety_gym):
       obs, reward, terminal, info = self.env.step(action)
       return TimeStep(StepType.MID, reward, 1.0, obs)
 
-  def sample(*args, **kwargs):
-    return np.zeros_like(safety_gym.action_space.sample())
-
-  viewer.launch(ViewerWrapper(safety_gym), sample)
+  viewer.launch(ViewerWrapper(safety_gym), controller)
 
 
 def test_episode(safety_gym):

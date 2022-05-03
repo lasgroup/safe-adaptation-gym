@@ -9,7 +9,7 @@ import safe_adaptation_gym.consts as c
 class PushRolyPoly(PushBox):
   # For the interested: https://en.wikipedia.org/wiki/Roly-poly_toy and
   # https://he.wikipedia.org/wiki/%D7%A0%D7%97%D7%95%D7%9D_%D7%AA%D7%A7%D7%95%D7%9D
-  SPHERE_SIZE = 0.17
+  SPHERE_SIZE = 0.2
   ROLY_POLY_COLOR = np.array([1., 0.94, 0.68, 0.5])
 
   def __init__(self):
@@ -24,7 +24,7 @@ class PushRolyPoly(PushBox):
         'geom',
         name='box',
         type='ellipsoid',
-        size='0.1 0.1 0.15',
+        size=convert_to_text(np.array([0.1, 0.1, self.SPHERE_SIZE])),
         density='0.0001',
         rgba=convert_to_text(self.ROLY_POLY_COLOR),
         pos='0 0 0.22',
@@ -37,7 +37,7 @@ class PushRolyPoly(PushBox):
         density='0.0001',
         rgba=convert_to_text(self.ROLY_POLY_COLOR),
         pos=convert_to_text(np.array([0, 0, self.SPHERE_SIZE])),
-        friction='.7 .005 .005',
+        friction='.7 .075 .075',
         solref='-100 -60',
         condim='6',
         priority='1',

@@ -91,11 +91,13 @@ class MujocoBridge:
                     <texture name="texplane" builtin="checker" height="100" 
                     width="100"
                         rgb1="0.7 0.7 0.7" rgb2="0.8 0.8 0.8" type="2d"/>
+                    <texture file="{}" name="ukraine"/>
                     <material name="MatPlane" reflectance="0.1" 
                     shininess="0.1" specular="0.1"
                         texrepeat="10 10" texture="texplane"/>
+                    <material name="ukraine" specular="0.4" texture="ukraine" />
                 </asset>
-                """)
+                """.format(c.BASE_DIR + '/textures/ukraine.png'))
       xml['mujoco']['asset'] = asset['asset']
 
     # Add light to the XML dictionary
