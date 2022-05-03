@@ -29,8 +29,8 @@ class BallToGoal(PushBox):
         pos=[0, 0, self.SPHERE_RADIUS],
         user=[c.GROUP_OBJECTS],
         solref=[0.02, 0.1],
-        rgba=[1, 1, 1, 1],
         condim=6,
+        rgba=[1., 1., 1., 1.],
         material='ukraine',
         priority=1)
     box_config = {'bodies': {'box': ([ball.to_xml_string()], '')}}

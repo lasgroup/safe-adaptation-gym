@@ -7,8 +7,8 @@ import safe_adaptation_gym.consts as c
 
 
 class PushRodMass(PushBox):
-  ROD_LENGTH = 0.5
-  ROD_RADIUS = 0.05
+  ROD_LENGTH = 0.35
+  ROD_RADIUS = 0.1
   BOX_KEEPOUT = 0.7
   ROD_COLOR = np.array([0., 0., 0.5, 0.5])
 
@@ -24,20 +24,15 @@ class PushRodMass(PushBox):
         'geom',
         name='box',
         type='cylinder',
-        size=convert_to_text(np.array([self.ROD_RADIUS, self.ROD_LENGTH])),
-        density='0.001',
-        rgba=convert_to_text(self.ROD_COLOR),
-        pos=convert_to_text(np.array([0.0, self.ROD_RADIUS, 0.0])),
-        user=[c.GROUP_OBJECTS])
-    rod_root.add(
-        'geom',
-        name='box_base',
-        type='sphere',
-        size='0.07',
-        density='0.0001',
-        rgba=convert_to_text(self.ROD_COLOR),
-        pos='0. 0.05 0.5',
-        user=[c.GROUP_OBJECTS])
+        size=[self.ROD_RADIUS, self.ROD_LENGTH],
+        density=0.025,
+        friction=[0.4, 0.9, 0.04],
+        rgba=[1, 1, 1, 1],
+        material='pine',
+        pos=[0.0, self.ROD_RADIUS, 0.0],
+        user=[c.GROUP_OBJECTS],
+        condim=6,
+        priority=1)
     box_config = {'bodies': {'box': ([rod_root.to_xml_string()], '')}}
     merge(config, box_config)
     return config

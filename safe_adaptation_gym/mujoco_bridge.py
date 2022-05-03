@@ -82,6 +82,7 @@ class MujocoBridge:
       # light purple: ".676 .547 .996"
       # med blue: "0.527 0.582 0.906"
       # indigo: "0.293 0 0.508"
+      # TODO (yarden): use dm_control mjcf for this stuff!
       asset = xmltodict.parse("""
                 <asset>
                     <texture type="skybox" builtin="gradient" rgb1="0.527 
@@ -92,12 +93,15 @@ class MujocoBridge:
                     width="100"
                         rgb1="0.7 0.7 0.7" rgb2="0.8 0.8 0.8" type="2d"/>
                     <texture file="{}" name="ukraine"/>
+                    <texture file="{}" name="pine"/>
                     <material name="MatPlane" reflectance="0.1" 
                     shininess="0.1" specular="0.1"
                         texrepeat="10 10" texture="texplane"/>
                     <material name="ukraine" specular="0.4" texture="ukraine" />
+                    <material name="pine" specular="0.1" texture="pine" />
                 </asset>
-                """.format(c.BASE_DIR + '/textures/ukraine.png'))
+                """.format(c.BASE_DIR + '/textures/ukraine.png',
+                           c.BASE_DIR + '/textures/pine.png'))
       xml['mujoco']['asset'] = asset['asset']
 
     # Add light to the XML dictionary
