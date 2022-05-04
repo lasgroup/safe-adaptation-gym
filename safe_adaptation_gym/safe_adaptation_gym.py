@@ -97,10 +97,9 @@ class SafeAdaptationGym(gym.Env):
     self._build_world()
     return self.observation
 
-  def render(self, mode="human"):
+  def render(self, *args, **kwargs):
     """ Renders the mujoco simulator """
-    if mode == 'human':
-      pass
+    return self.mujoco_bridge.physics.render(*args, **kwargs)
 
   def seed(self, seed=None):
     """ Set internal random state seeds """

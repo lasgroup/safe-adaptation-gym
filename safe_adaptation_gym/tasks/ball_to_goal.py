@@ -10,6 +10,8 @@ import safe_adaptation_gym.consts as c
 
 class BallToGoal(PushBox):
   SPHERE_RADIUS = 0.1
+  BOX_KEEPOUT = 0.15
+  BOX_SIZE = SPHERE_RADIUS
 
   def __init__(self):
     super(PushBox, self).__init__()
@@ -26,7 +28,7 @@ class BallToGoal(PushBox):
         size=convert_to_text(np.array([self.SPHERE_RADIUS])),
         density=0.125,
         friction=[0.6, 0.05, 0.04],
-        pos=[0, 0, self.SPHERE_RADIUS],
+        pos=list(layout['box']) + [self.SPHERE_RADIUS],
         user=[c.GROUP_OBJECTS],
         solref=[0.02, 0.1],
         condim=6,

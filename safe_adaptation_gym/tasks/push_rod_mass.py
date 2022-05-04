@@ -29,7 +29,7 @@ class PushRodMass(PushBox):
         friction=[0.4, 0.9, 0.04],
         rgba=[1, 1, 1, 1],
         material='pine',
-        pos=[0.0, self.ROD_RADIUS, 0.0],
+        pos=[layout['box'][0], self.ROD_RADIUS, layout['box'][1]],
         user=[c.GROUP_OBJECTS],
         condim=6,
         priority=1)

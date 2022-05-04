@@ -64,6 +64,9 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
+    # https://keisan.casio.com/exec/system/1180573169
+    self._robot_ctrl_range_scale = self.rs.standard_cauchy(
+        self.robot.nu) * 0.05 + 1.0
     self._layout = None
 
   def _setup_placements(self):
@@ -100,15 +103,11 @@ class World:
   def _build_world_config(self):
     """ Create a world_config from our own config """
     world_config = {
-        'robot_xy':
-            self._layout['robot'],
-        'robot_z_height':
-            self.robot.z_height,
+        'robot_xy': self._layout['robot'],
+        'robot_z_height': self.robot.z_height,
         # https://keisan.casio.com/exec/system/1180573169
-        'robot_ctrl_range_scale':
-            self.rs.standard_cauchy(self.robot.nu) * 0.05 + 1.0,
-        'robot_rot':
-            utils.random_rot(self.rs),
+        'robot_ctrl_range_scale': self._robot_ctrl_range_scale,
+        'robot_rot': utils.random_rot(self.rs),
         'bodies': {}
     }
     for name, xy in self._layout.items():
