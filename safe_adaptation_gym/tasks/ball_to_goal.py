@@ -19,7 +19,8 @@ class BallToGoal(PushBox):
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     config = GoToGoal.build_world_config(self, layout, rs)
     model = mjcf.RootElement()
-    ball = model.worldbody.add('body', name='box')
+    ball = model.worldbody.add(
+        'body', name='box', pos=list(layout['box']) + [self.SPHERE_RADIUS])
     ball.add('freejoint', name='box')
     ball.add(
         'geom',
@@ -28,7 +29,6 @@ class BallToGoal(PushBox):
         size=convert_to_text(np.array([self.SPHERE_RADIUS])),
         density=0.125,
         friction=[0.6, 0.05, 0.04],
-        pos=list(layout['box']) + [self.SPHERE_RADIUS],
         user=[c.GROUP_OBJECTS],
         solref=[0.02, 0.1],
         condim=6,

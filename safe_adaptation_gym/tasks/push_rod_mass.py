@@ -18,7 +18,11 @@ class PushRodMass(PushBox):
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     config = GoToGoal.build_world_config(self, layout, rs)
     model = mjcf.RootElement()
-    rod_root = model.worldbody.add('body', name='box', euler='88 0 0')
+    rod_root = model.worldbody.add(
+        'body',
+        name='box',
+        euler='88 0 0',
+        pos=[layout['box'][0], layout['box'][1], self.ROD_RADIUS])
     rod_root.add('freejoint', name='box')
     rod_root.add(
         'geom',
@@ -29,7 +33,6 @@ class PushRodMass(PushBox):
         friction=[0.4, 0.9, 0.04],
         rgba=[1, 1, 1, 1],
         material='pine',
-        pos=[layout['box'][0], self.ROD_RADIUS, layout['box'][1]],
         user=[c.GROUP_OBJECTS],
         condim=6,
         priority=1)
