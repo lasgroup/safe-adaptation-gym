@@ -75,13 +75,9 @@ class PushBox(GoToGoal):
                      mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
     goal_pos = mujoco_bridge.body_pos('goal')[:2]
     robot_pos = mujoco_bridge.body_pos('robot')[:2]
-    goal_distance = np.linalg.norm(robot_pos - goal_pos)
-    reward = self._last_goal_distance - goal_distance
-    self._last_goal_distance = goal_distance
     box_pos = mujoco_bridge.body_pos('box')[:2]
     box_distance = np.linalg.norm(robot_pos - box_pos)
-    gate = self._last_box_distance > 2.0 * self.BOX_SIZE
-    reward += (self._last_box_distance - box_distance) * gate
+    reward = self._last_box_distance - box_distance
     self._last_box_distance = box_distance
     box_goal_distance = np.linalg.norm(box_pos - goal_pos)
     reward += self._last_box_goal_distance - box_goal_distance
