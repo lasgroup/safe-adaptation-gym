@@ -15,7 +15,7 @@ setup(
     name='safe_adaptation_gym',
     version='0.0.0',
     packages=find_packages(),
-    python_requires='>3.7',
+    python_requires='>3.8',
     include_package_data=True,
     install_requires=required,
     extras_require=extras,
