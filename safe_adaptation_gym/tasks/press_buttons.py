@@ -49,7 +49,7 @@ class PressButtons(Task):
     reward = self._last_goal_distance - goal_distance
     self._last_goal_distance = goal_distance
     info = {}
-    if mujoco_bridge.touches_robot([self._goal_button]):
+    if mujoco_bridge.robot_contacts([self._goal_button]):
       reward += 1.
       info['goal_met'] = True
       self._sample_goal_button(rs, mujoco_bridge)
@@ -100,14 +100,14 @@ class PressButtons(Task):
         for i in range(self.NUM_BUTTONS)
         if 'bottons{}'.format(i) != self._goal_button
     ]
-    return mujoco_bridge.touches_robot(non_goal_buttons)
+    return mujoco_bridge.robot_contacts(non_goal_buttons)
 
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     pass
 
 
 class State(Enum):
-  """State of the Buttons class."""
+  """ State of the Buttons class. """
   BUTTON_CHANGE = 0
   NORMAL = 1
 

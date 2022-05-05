@@ -137,7 +137,7 @@ class World:
 
   def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
     mujoco_bridge.physics.forward()  # Ensure positions and contacts are correct
-    cost = float(mujoco_bridge.touches_robot(c.OBSTACLES))
+    cost = float(mujoco_bridge.robot_contacts(c.OBSTACLES))
     robot_pos = mujoco_bridge.robot_pos()[:2]
     for name in self._layout.keys():
       if not name.startswith('hazards'):

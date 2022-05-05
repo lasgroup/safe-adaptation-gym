@@ -200,7 +200,7 @@ class MujocoBridge:
       self.physics.named.data.qpos['robot'] = to_qpos(
           robot_pos, utils.rot2quat(config['robot_rot']))
 
-  def touches_robot(self, group_geom_names: Iterable[str]) -> int:
+  def robot_contacts(self, group_geom_names: Iterable[str]) -> int:
     """
     Check if any of the geoms in group_geom_names is in contact with any of
     the geom names attached to the robot. Returns the number of contacts with
