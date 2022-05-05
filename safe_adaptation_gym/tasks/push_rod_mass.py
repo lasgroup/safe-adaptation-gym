@@ -2,7 +2,7 @@ import numpy as np
 from dm_control import mjcf
 
 from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
-from safe_adaptation_gym.utils import merge, convert_to_text
+from safe_adaptation_gym.utils import merge
 import safe_adaptation_gym.consts as c
 
 
@@ -10,7 +10,6 @@ class PushRodMass(PushBox):
   ROD_LENGTH = 0.35
   ROD_RADIUS = 0.1
   BOX_KEEPOUT = 0.7
-  ROD_COLOR = np.array([0., 0., 0.5, 0.5])
 
   def __init__(self):
     super(PushBox, self).__init__()

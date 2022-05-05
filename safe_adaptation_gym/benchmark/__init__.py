@@ -57,7 +57,7 @@ class Benchmark:
     while True:
       sample = self._train_tasks_sampler.sample()
       if sample is None:
-        return None
+        return
       self._seed += 1
       self._gym.seed(self._seed)
       self._gym.unwrapped.set_task(sample[1])  # noqa
@@ -72,7 +72,7 @@ class Benchmark:
     while True:
       sample = self._test_tasks_sampler.sample()
       if sample is None:
-        return None
+        return
       self._gym.unwrapped.set_task(sample[1])  # noqa
       yield sample[0], deepcopy(self._gym)
 

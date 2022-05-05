@@ -14,7 +14,7 @@ class TaskSampler:
 
   def sample(self) -> Optional[Tuple[str, Task]]:
     if len(self.tasks) == 0:
-      return None
+      return
     task_name, task = self.rs.choice(list(self.tasks.items()))
     return task_name, task()
 
@@ -37,4 +37,4 @@ class OneRunTaskSampler(TaskSampler):
     try:
       return next(self._sample)
     except StopIteration:
-      return None
+      return
