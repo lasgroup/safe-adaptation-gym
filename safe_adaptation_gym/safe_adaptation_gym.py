@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Optional, List
+from typing import Tuple, Union, Optional, List, Dict
 
 import dm_control.rl.control
 import gym
@@ -27,12 +27,14 @@ class SafeAdaptationGym(gym.Env):
                robot_base,
                rgb_observation=False,
                config=None,
-               render_lidars_and_collision=False):
+               render_lidars_and_collision=False,
+               render_options: Optional[Dict] = None):
     self._world: Optional[World] = None
     self.base_config = config
     self._rgb_observation = rgb_observation
     self.robot = Robot(robot_base)
     self._render_lidars_and_collision = render_lidars_and_collision
+    self._render_options = render_options if render_options is not None else {}
     visualization_objects = None
     if render_lidars_and_collision:
       visualization_objects = make_additional_render_objects(
@@ -87,19 +89,25 @@ class SafeAdaptationGym(gym.Env):
       options: Optional[dict] = None,
   ) -> Union[ObsType, Tuple[ObsType, dict]]:
     """ Reset the physics simulation and return observation """
-    assert self._world is not None, 'A task should be first set before reset.'
+    assert self._world is not None or (options is not None and
+                                       'task' in options), ('A task should be '
+                                                            'first set before '
+                                                            'reset.')
     if seed:
       self._seed = seed
     else:
       self._seed += 1
     self.rs = np.random.RandomState(self._seed)
+    if options is not None and 'task' in options:
+      self.set_task(options['task'])
+      return self.observation
     self._world.rs = self.rs
     self._build_world()
     return self.observation
 
-  def render(self, *args, **kwargs):
+  def render(self, mode='human'):
     """ Renders the mujoco simulator """
-    return self.mujoco_bridge.physics.render(*args, **kwargs)
+    return self.mujoco_bridge.physics.render(**self._render_options)
 
   def seed(self, seed=None):
     """ Set internal random state seeds """

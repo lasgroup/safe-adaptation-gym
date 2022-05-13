@@ -1,12 +1,13 @@
 import re
 import inspect
-from copy import deepcopy
 
-from typing import Iterator, Callable, Optional
+from typing import Iterator, Callable, Optional, Tuple, Union, Dict
 
+import gym
 import numpy as np
 
 from gym import Env
+from gym.vector import AsyncVectorEnv
 
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
@@ -30,26 +31,13 @@ ROBOTS_BASENAMES = {
 
 class Benchmark:
 
-  def __init__(self,
-               train_sampler: samplers.TaskSampler,
-               test_sampler: samplers.TaskSampler,
-               seed: int,
-               robot_base: str,
-               rgb_observation: bool,
-               wrappers: Optional[Callable[[SafeAdaptationGym], Env]] = None):
-    self._gym = SafeAdaptationGym(
-        robot_base,
-        rgb_observation=rgb_observation,
-        render_lidars_and_collision=True)
-    if wrappers:
-      self._gym = wrappers(self._gym)
-    self._gym.seed(seed)
-    self._seed = seed
+  def __init__(self, train_sampler: samplers.TaskSampler,
+               test_sampler: samplers.TaskSampler, seed: int):
     self._train_tasks_sampler = train_sampler
     self._test_tasks_sampler = test_sampler
 
   @property
-  def train_tasks(self) -> Iterator[SafeAdaptationGym]:
+  def train_tasks(self) -> Iterator[Tuple[str, Union[Env, AsyncVectorEnv]]]:
     """
     Genereates the next task to train on. The user is in charge of (and has
     the flexibility to) calling this function after enough episodes per task.
@@ -58,13 +46,10 @@ class Benchmark:
       sample = self._train_tasks_sampler.sample()
       if sample is None:
         return
-      self._seed += 1
-      self._gym.seed(self._seed)
-      self._gym.unwrapped.set_task(sample[1])  # noqa
-      yield sample[0], deepcopy(self._gym)
+      yield sample
 
   @property
-  def test_tasks(self) -> Iterator[SafeAdaptationGym]:
+  def test_tasks(self) -> Iterator[Tuple[str, Union[Env, AsyncVectorEnv]]]:
     """
     Genereates the next task to test on. The user is in charge of (and has
     the flexibility to) calling this function after enough episodes per task.
@@ -73,16 +58,10 @@ class Benchmark:
       sample = self._test_tasks_sampler.sample()
       if sample is None:
         return
-      self._gym.unwrapped.set_task(sample[1])  # noqa
-      yield sample[0], deepcopy(self._gym)
+      yield sample
 
 
-def make(
-    benchmark_name: str,
-    robot_name: str,
-    seed: int = 666,
-    rgb_observation: bool = False,
-    wrappers: Optional[Callable[[SafeAdaptationGym], Env]] = None) -> Benchmark:
+def make(benchmark_name: str, seed: int = 666) -> Benchmark:
   """
   Creates a new benchmark based on name. Can wrap with gym.Wrappers via the
   wrappers function (which takes a SafeAdaptationGym instance and returns a
@@ -93,5 +72,4 @@ def make(
   if benchmark_name == 'no_adaptation':
     train_sampler = samplers.OneRunTaskSampler(rs, TASKS)
     test_sampler = samplers.TaskSampler(rs, {})
-    return Benchmark(train_sampler, test_sampler, seed,
-                     ROBOTS_BASENAMES[robot_name], rgb_observation, wrappers)
+    return Benchmark(train_sampler, test_sampler, seed)

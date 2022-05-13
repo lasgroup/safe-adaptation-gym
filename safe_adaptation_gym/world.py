@@ -96,7 +96,6 @@ class World:
     return placements_dict
 
   def sample_layout(self):
-    # TODO (yarden): might need to clear layout upon reset?
     self._layout = self._generate_new_layout()
     return self._build_world_config()
 
