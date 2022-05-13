@@ -41,7 +41,7 @@ class SafeAdaptationGym(gym.Env):
           self.NUM_LIDAR_BINS)
     self.mujoco_bridge = MujocoBridge(self.robot, visualization_objects)
     self._seed = np.random.randint(2**32)
-    self._rs = np.random.RandomState(self._seed)
+    self.rs = np.random.RandomState(self._seed)
     self._action_space = gym.spaces.Box(
         -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32)
     self._observation_space = None
@@ -58,7 +58,7 @@ class SafeAdaptationGym(gym.Env):
     # accomodate variability in the dynamics.
     action = (
         action * action_range[:, 1] + self._world.config.action_noise *
-        self._rs.normal(size=self.mujoco_bridge.nu))
+        self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
     # Keeping magic 10 from Safety-Gym
@@ -93,15 +93,15 @@ class SafeAdaptationGym(gym.Env):
                                        'task' in options), ('A task should be '
                                                             'first set before '
                                                             'reset.')
-    if seed:
+    if seed is not None:
       self._seed = seed
     else:
       self._seed += 1
-    self._rs = np.random.RandomState(self._seed)
+    self.rs = np.random.RandomState(self._seed)
     if options is not None and 'task' in options:
       self.set_task(options['task'])
       return self.observation
-    self._world.rs = self._rs
+    self._world.rs = self.rs
     self._build_world()
     return self.observation
 
@@ -112,9 +112,9 @@ class SafeAdaptationGym(gym.Env):
   def seed(self, seed=None):
     """ Set internal random state seeds """
     self._seed = np.random.randint(2**32) if seed is None else seed
-    self._rs = np.random.RandomState(self._seed)
+    self.rs = np.random.RandomState(self._seed)
     if self._world is not None:
-      self._world.rs = self._rs
+      self._world.rs = self.rs
 
   @property
   def observation(self) -> np.ndarray:
@@ -163,7 +163,7 @@ class SafeAdaptationGym(gym.Env):
 
   def set_task(self, task: Task):
     """ Sets a new task to be solved """
-    self._world = World(self._rs, task, self.robot, self.base_config)
+    self._world = World(self.rs, task, self.robot, self.base_config)
     self._build_world()
 
   def _build_world(self):
@@ -255,12 +255,3 @@ class SafeAdaptationGym(gym.Env):
       self.mujoco_bridge.site_rgba['collision/indicator'][-1] = 0.5
     else:
       self.mujoco_bridge.site_rgba['collision/indicator'][-1] = 0.
-
-  @property
-  def rs(self):
-    return self._rs
-
-  @rs.setter
-  def rs(self, new_rs: np.random.RandomState):
-    self._rs = new_rs
-    self._world.rs = new_rs
