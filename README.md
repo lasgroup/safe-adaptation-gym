@@ -92,6 +92,9 @@ Three thoughts:
 3. Can LAMBDA solve it? Probably not because posterior over is unimodal whereas there are multiple tasks?
 
 
+## TODO:
+Check a random policy to check that it's not too easy in terms of safety
+
 
 
 
