@@ -1,3 +1,4 @@
+from safe_adaptation_gym.tasks.task import Task
 from safe_adaptation_gym.tasks.go_to_goal import GoToGoal
 from safe_adaptation_gym.tasks.push_box import PushBox
 from safe_adaptation_gym.tasks.press_buttons import PressButtons

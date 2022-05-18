@@ -1,16 +1,11 @@
 import re
 import inspect
 
-from typing import Iterator, Callable, Optional, Tuple, Union, Dict
+from typing import Iterator, Tuple
 
-import gym
 import numpy as np
 
-from gym import Env
-from gym.vector import AsyncVectorEnv
-
 from safe_adaptation_gym import tasks
-from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 from safe_adaptation_gym.benchmark import samplers
 
 BENCHMARKS = {'no_adaptation'}
@@ -32,12 +27,12 @@ ROBOTS_BASENAMES = {
 class Benchmark:
 
   def __init__(self, train_sampler: samplers.TaskSampler,
-               test_sampler: samplers.TaskSampler, seed: int):
+               test_sampler: samplers.TaskSampler):
     self._train_tasks_sampler = train_sampler
     self._test_tasks_sampler = test_sampler
 
   @property
-  def train_tasks(self) -> Iterator[Tuple[str, Union[Env, AsyncVectorEnv]]]:
+  def train_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
     """
     Genereates the next task to train on. The user is in charge of (and has
     the flexibility to) calling this function after enough episodes per task.
@@ -49,7 +44,7 @@ class Benchmark:
       yield sample
 
   @property
-  def test_tasks(self) -> Iterator[Tuple[str, Union[Env, AsyncVectorEnv]]]:
+  def test_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
     """
     Genereates the next task to test on. The user is in charge of (and has
     the flexibility to) calling this function after enough episodes per task.
@@ -72,4 +67,4 @@ def make(benchmark_name: str, seed: int = 666) -> Benchmark:
   if benchmark_name == 'no_adaptation':
     train_sampler = samplers.OneRunTaskSampler(rs, TASKS)
     test_sampler = samplers.TaskSampler(rs, {})
-    return Benchmark(train_sampler, test_sampler, seed)
+    return Benchmark(train_sampler, test_sampler)

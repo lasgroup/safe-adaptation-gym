@@ -47,11 +47,11 @@ class ViewerWrapper:
 
 
 @pytest.fixture(params=[
-  # tasks.PushBox(),
+  tasks.PushBox(),
   tasks.PushRodMass(),
-  # tasks.BallToGoal(),
-  # tasks.PressButtons(),
-  # tasks.GoToGoal()
+  tasks.BallToGoal(),
+  tasks.PressButtons(),
+  tasks.GoToGoal()
 ])
 def safety_gym(request):
   arena = TimeLimit(

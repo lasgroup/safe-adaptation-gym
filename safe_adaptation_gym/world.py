@@ -45,6 +45,9 @@ class World:
     self.robot = robot
     obstacle_sizes_scale = self.rs.standard_cauchy(len(
         c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
+    # Make sure that there are no negative size scales (otherwise objects
+    # would have a negative size, causing mujoco not to compile)
+    obstacle_sizes_scale = np.clip(obstacle_sizes_scale, 0.)
     self._obstacle_sizes = {
         k: scale * value
         for k, scale, value in zip(c.OBSTACLES, obstacle_sizes_scale, [
