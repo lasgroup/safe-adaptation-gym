@@ -47,7 +47,7 @@ class World:
         c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
     # Make sure that there are no negative size scales (otherwise objects
     # would have a negative size, causing mujoco not to compile)
-    obstacle_sizes_scale = np.clip(obstacle_sizes_scale, 0., a_max=None)
+    obstacle_sizes_scale = np.clip(obstacle_sizes_scale, 0.5, a_max=1.25)
     self._obstacle_sizes = {
         k: scale * value
         for k, scale, value in zip(c.OBSTACLES, obstacle_sizes_scale, [
