@@ -7,10 +7,12 @@ from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 def make(robot_name: str,
          task_name: Optional[str] = None,
          seed: int = 666,
+         config: Optional[Dict] = None,
          rgb_observation: bool = False,
          render_options: Optional[Dict] = None) -> SafeAdaptationGym:
   env = SafeAdaptationGym(
       ROBOTS_BASENAMES[robot_name.lower()],
+      config=config,
       rgb_observation=rgb_observation,
       render_lidars_and_collision=True,
       render_options=render_options)

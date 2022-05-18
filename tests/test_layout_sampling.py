@@ -57,15 +57,3 @@ def test_layout_impossible(bad_world):
   except ResamplingError:
     ok = True
   assert ok
-
-
-def test_reset(good_world):
-  mujoco_bridge = MujocoBridge(
-      Robot('xmls/doggo.xml'), good_world.sample_layout())
-  plt.figure()
-  plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
-  mujoco_bridge.rebuild(good_world.sample_layout())
-  plt.figure()
-  plt.imshow(mujoco_bridge.physics.render(camera_id='fixedfar'))
-  plt.pause(4.0)
-  assert True
