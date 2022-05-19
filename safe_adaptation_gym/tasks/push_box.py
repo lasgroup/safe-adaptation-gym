@@ -10,7 +10,7 @@ import safe_adaptation_gym.consts as c
 
 class PushBox(GoToGoal):
   BOX_SIZE = 0.2
-  BOX_KEEPOUT = 0.2
+  BOX_KEEPOUT = 0.5
   BOX_COLOR = np.array([1, 1, 0, 0.25])
   BOX_DENSITY = 0.001
 
@@ -100,4 +100,4 @@ class PushBox(GoToGoal):
 
   @property
   def obstacles_num(self):
-    return [0.4, 0.3, 0.1, 0.2]
+    return [0.4, 0.4, 0.1, 0.1]

@@ -26,10 +26,10 @@ class ViewerWrapper:
   def __init__(self, env):
     self.env = env
     self._action_spec = specs.BoundedArray(
-      shape=env.action_space.shape,
-      dtype=np.float32,
-      minimum=env.action_space.low,
-      maximum=env.action_space.high)
+        shape=env.action_space.shape,
+        dtype=np.float32,
+        minimum=env.action_space.low,
+        maximum=env.action_space.high)
 
   @property
   def physics(self):
@@ -47,21 +47,22 @@ class ViewerWrapper:
 
 
 @pytest.fixture(params=[
-  tasks.PushBox(),
-  tasks.PushRodMass(),
-  tasks.BallToGoal(),
-  tasks.PressButtons(),
-  tasks.GoToGoal()
+    tasks.PushBox(),
+    tasks.PushRodMass(),
+    tasks.BallToGoal(),
+    tasks.PressButtons(),
+    tasks.GoToGoal()
 ])
 def safety_gym(request):
   arena = TimeLimit(
-    SafeAdaptationGym('xmls/point.xml', render_lidars_and_collision=True),
-    1000)
+      SafeAdaptationGym('xmls/point.xml', render_lidars_and_collision=True),
+      1000)
   arena.seed(666)
   arena.set_task(request.param)
   return arena
 
 
+@pytest.mark.interactive
 def test_viewer(safety_gym):
   viewer.launch(ViewerWrapper(safety_gym), controller)
 
