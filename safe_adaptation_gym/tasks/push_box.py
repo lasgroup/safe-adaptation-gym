@@ -46,24 +46,24 @@ class PushBox(GoToGoal):
         'bodies': {
             'box': ([
                 """<body name="{name}" pos="{pos}" quat="{quat}">
-                <freejoint name="{name}"/>
-                <geom name="{name}" type="{type}" size="{size}"
-                density="{density}"
-                    rgba="{rgba}" user="{user}"/>
-                <geom name="col1" type="{type}" size="{width} {width}
-                {dim}" density="{density}"
-                    rgba="{rgba}" pos="{x} {y} 0"/>
-                <geom name="col2" type="{type}" size="{width} {width}
-                {dim}" density="{density}"
-                    rgba="{rgba}" pos="-{x} {y} 0"/>
-                <geom name="col3" type="{type}" size="{width} {width}
-                {dim}" density="{density}"
-                    rgba="{rgba}" pos="{x} -{y} 0"/>
-                <geom name="col4" type="{type}" size="{width} {width}
-                {dim}" density="{density}"
-                    rgba="{rgba}" pos="-{x} -{y} 0"/>
-            </body>
-        """.format(**{k: utils.convert_to_text(v) for k, v in box.items()})
+                  <freejoint name="{name}"/>
+                  <geom name="{name}" type="{type}" size="{size}"
+                  density="{density}"
+                      rgba="{rgba}" user="{user}"/>
+                  <geom name="col1" type="{type}" size="{width} {width}
+                  {dim}" density="{density}"
+                      rgba="{rgba}" pos="{x} {y} 0"/>
+                  <geom name="col2" type="{type}" size="{width} {width}
+                  {dim}" density="{density}"
+                      rgba="{rgba}" pos="-{x} {y} 0"/>
+                  <geom name="col3" type="{type}" size="{width} {width}
+                  {dim}" density="{density}"
+                      rgba="{rgba}" pos="{x} -{y} 0"/>
+                  <geom name="col4" type="{type}" size="{width} {width}
+                  {dim}" density="{density}"
+                      rgba="{rgba}" pos="-{x} -{y} 0"/>
+              </body>
+          """.format(**{k: utils.convert_to_text(v) for k, v in box.items()})
             ], '')
         }
     }
@@ -97,3 +97,7 @@ class PushBox(GoToGoal):
         mujoco_bridge.body_pos('goal')[:2] - mujoco_bridge.body_pos('box')[:2])
     self._last_box_distance = np.linalg.norm(
         mujoco_bridge.body_pos('robot')[:2] - mujoco_bridge.body_pos('box')[:2])
+
+  @property
+  def obstacles_num(self):
+    return [0.4, 0.3, 0.1, 0.2]

@@ -105,6 +105,10 @@ class PressButtons(Task):
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     pass
 
+  @property
+  def obstacles_num(self):
+    return [0.3, 0.3, 0.3, 0.1]
+
 
 class State(Enum):
   """ State of the Buttons class. """

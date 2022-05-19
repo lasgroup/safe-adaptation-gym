@@ -16,7 +16,7 @@ class World:
   DEFAULT = {
       'placements_margin': 0.0,
       'robot_keepout': 0.4,
-      'num_obstacles': 10,
+      'num_obstacles': 15,
       'hazards_size': 0.2,
       'vases_size': 0.1,
       'pillars_size': 0.2,
@@ -74,10 +74,8 @@ class World:
 
   def _setup_placements(self):
     """ Build a dict of placements. """
-    # TODO (yarden): Should the probability of different obstacle types be
-    #  different?
-    obstacle_samples = self.rs.multinomial(
-        self.config.num_obstacles, [1 / len(c.OBSTACLES)] * len(c.OBSTACLES))
+    obstacle_samples = self.rs.multinomial(self.config.num_obstacles,
+                                           self.task.obstacles_num)
     placements = {
         **self._placement_dict_from_object('robot', 1),
     }

@@ -70,3 +70,7 @@ class GoToGoal(Task):
       if valid_placement:
         return goal_xy
     raise utils.ResamplingError('Failed to generate goal')
+
+  @property
+  def obstacles_num(self):
+    return [0.4, 0.4, 0.1, 0.1]

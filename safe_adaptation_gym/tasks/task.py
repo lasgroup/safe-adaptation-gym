@@ -4,6 +4,7 @@ from typing import Dict, Tuple
 import numpy as np
 
 from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+from safe_adaptation_gym import consts
 
 
 class Task(abc.ABC):
@@ -49,3 +50,12 @@ class Task(abc.ABC):
     Not sure about this yet. But should allow an interface to build to task
     specific stuff
     """
+
+  @property
+  def obstacles_num(self):
+    """
+    How many obstacle instances are sampled for each obstacle type.
+    Type order follows: 'hazards', 'vases', 'gremlins', 'pillars',
+    as in consts.OBSTACLES
+    """
+    return [1 / len(consts.OBSTACLES)] * len(consts.OBSTACLES)
