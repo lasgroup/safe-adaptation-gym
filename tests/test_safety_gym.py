@@ -58,8 +58,8 @@ def safety_gym(request):
   arena = TimeLimit(
       SafeAdaptationGym('xmls/point.xml', render_lidars_and_collision=True),
       1000)
-  arena.set_task(request.param)
   arena.seed(123)
+  arena.set_task(request.param)
   return arena
 
 

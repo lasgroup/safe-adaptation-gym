@@ -170,41 +170,6 @@ class MujocoBridge:
     self.config = SimpleNamespace(**self.config)
     self._build()
 
-  def reset(self, config: dict):
-    """ Sets the new positions of the resampled bodies. """
-    assert config['bodies'].keys() == self.config.bodies.keys(), (
-        'Some bodies were added or discarded')
-
-    def to_qpos(pos, quat):
-      return np.concatenate([pos, quat])
-
-    with self.physics.reset_context():
-      for _, (body_strings, _) in config['bodies'].items():
-        for xml_string in body_strings:
-          body_xml = xmltodict.parse(xml_string)['body']
-          name = body_xml['@name']
-          if body_xml.get('@mocap', False):
-            new_pos = utils.convert_from_text(body_xml['geom']['@pos'])
-            old_pos = self.physics.named.data.xpos[name.replace('mocap', 'obj')]
-            self.set_mocap_pos(name, new_pos - old_pos)
-            continue
-          pos = utils.convert_from_text(body_xml['@pos'])
-          quat = utils.convert_from_text(body_xml['@quat'])
-          if 'freejoint' in body_xml.keys():
-            self.physics.named.data.qpos[name] = to_qpos(pos, quat)
-          else:
-            self.physics.named.model.body_pos[name] = pos
-            self.physics.named.model.body_quat[name] = quat
-      robot_pos = self.robot_pos()
-      robot_pos[:2] = config['robot_xy']
-      if 'robot' in self.physics.named.data.qpos:
-        self.physics.named.data.qpos['robot'] = to_qpos(
-            robot_pos, utils.rot2quat(config['robot_rot']))
-      else:
-        self.physics.named.model.body_pos['robot'] = robot_pos
-        self.physics.named.model.body_quat['robot'] = utils.rot2quat(
-            config['robot_rot'])
-
   def robot_contacts(self, group_geom_names: Iterable[str]) -> int:
     """
     Check if any of the geoms in group_geom_names is in contact with any of

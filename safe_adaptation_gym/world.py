@@ -80,7 +80,8 @@ class World:
         **self._placement_dict_from_object('robot', 1),
     }
     for obstacle, num in zip(c.OBSTACLES, obstacle_samples):
-      placements.update(self._placement_dict_from_object(obstacle, num))
+      if num > 0:
+        placements.update(self._placement_dict_from_object(obstacle, num))
     utils.merge(placements, self.task.setup_placements())
     return placements
 

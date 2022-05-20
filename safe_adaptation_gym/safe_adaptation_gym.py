@@ -102,7 +102,7 @@ class SafeAdaptationGym(gym.Env):
       self.set_task(options['task'])
       return self.observation
     self._world.rs = self.rs
-    self._reset_world()
+    self._build_world()
     return self.observation
 
   def render(self, mode='human'):
@@ -169,9 +169,6 @@ class SafeAdaptationGym(gym.Env):
   def _build_world(self):
     self.mujoco_bridge.rebuild(self._world.sample_layout())
     self._world.reset(self.mujoco_bridge)
-
-  def _reset_world(self):
-    self.mujoco_bridge.reset(self._world.sample_layout())
 
   def _lidar(self, positions: List[np.ndarray]) -> np.ndarray:
     """
