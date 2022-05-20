@@ -197,8 +197,13 @@ class MujocoBridge:
             self.physics.named.model.body_quat[name] = quat
       robot_pos = self.robot_pos()
       robot_pos[:2] = config['robot_xy']
-      self.physics.named.data.qpos['robot'] = to_qpos(
-          robot_pos, utils.rot2quat(config['robot_rot']))
+      if 'robot' in self.physics.named.data.qpos:
+        self.physics.named.data.qpos['robot'] = to_qpos(
+            robot_pos, utils.rot2quat(config['robot_rot']))
+      else:
+        self.physics.named.model.body_pos['robot'] = robot_pos
+        self.physics.named.model.body_quat['robot'] = utils.rot2quat(
+            config['robot_rot'])
 
   def robot_contacts(self, group_geom_names: Iterable[str]) -> int:
     """
@@ -215,11 +220,6 @@ class MujocoBridge:
       count += int((part_of_robot(geom1) or part_of_robot(geom2)) and
                    (in_group(geom1) or in_group(geom2)))
     return count
-
-  def robot_com(self) -> np.ndarray:
-    """ Get the position of the robot center of mass in the simulator world
-    reference frame """
-    return self.body_com('robot')
 
   def robot_pos(self) -> np.ndarray:
     """ Get the position of the robot in the simulator world reference frame """

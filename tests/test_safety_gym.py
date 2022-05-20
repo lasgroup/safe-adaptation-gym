@@ -43,7 +43,8 @@ class ViewerWrapper:
 
   def step(self, action):
     obs, reward, terminal, info = self.env.step(action)
-    return TimeStep(StepType.MID, reward, 1.0, obs)
+    t = StepType.LAST if terminal else StepType.MID
+    return TimeStep(t, reward, 1.0, obs)
 
 
 @pytest.fixture(params=[

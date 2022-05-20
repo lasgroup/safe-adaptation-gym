@@ -1,4 +1,5 @@
 from typing import Tuple, Union, Optional, List, Dict
+from types import SimpleNamespace
 
 import dm_control.rl.control
 import gym
@@ -13,10 +14,9 @@ import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.render import make_additional_render_objects
 
 
-# TODO (yarden): make sure that the environment is wrapped with a timelimit
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
-  LIDAR_MAX_DIST = 3.
+  LIDAR_MAX_DIST = 4.
   BASE_SENSORS = ['accelerometer', 'velocimeter', 'gyro', 'magnetometer']
   DOGGO_EXTRA_SENSORS = [
       'touch_ankle_1a', 'touch_ankle_2a', 'touch_ankle_3a', 'touch_ankle_4a',
@@ -24,10 +24,10 @@ class SafeAdaptationGym(gym.Env):
   ]
 
   def __init__(self,
-               robot_base,
-               rgb_observation=False,
-               config=None,
-               render_lidars_and_collision=False,
+               robot_base: str,
+               rgb_observation: bool = False,
+               config: Optional[SimpleNamespace] = None,
+               render_lidars_and_collision: bool = False,
                render_options: Optional[Dict] = None):
     self._world: Optional[World] = None
     self.base_config = config
@@ -102,7 +102,7 @@ class SafeAdaptationGym(gym.Env):
       self.set_task(options['task'])
       return self.observation
     self._world.rs = self.rs
-    self._build_world()
+    self._reset_world()
     return self.observation
 
   def render(self, mode='human'):
@@ -169,6 +169,9 @@ class SafeAdaptationGym(gym.Env):
   def _build_world(self):
     self.mujoco_bridge.rebuild(self._world.sample_layout())
     self._world.reset(self.mujoco_bridge)
+
+  def _reset_world(self):
+    self.mujoco_bridge.reset(self._world.sample_layout())
 
   def _lidar(self, positions: List[np.ndarray]) -> np.ndarray:
     """
