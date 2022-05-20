@@ -27,9 +27,10 @@ ROBOTS_BASENAMES = {
 class Benchmark:
 
   def __init__(self, train_sampler: samplers.TaskSampler,
-               test_sampler: samplers.TaskSampler):
+               test_sampler: samplers.TaskSampler, batch_size: int):
     self._train_tasks_sampler = train_sampler
     self._test_tasks_sampler = test_sampler
+    self._batch_size = batch_size
 
   @property
   def train_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
@@ -37,7 +38,7 @@ class Benchmark:
     Genereates the next task to train on. The user is in charge of (and has
     the flexibility to) calling this function after enough episodes per task.
     """
-    while True:
+    for _ in range(self._batch_size):
       sample = self._train_tasks_sampler.sample()
       if sample is None:
         return
@@ -49,7 +50,7 @@ class Benchmark:
     Genereates the next task to test on. The user is in charge of (and has
     the flexibility to) calling this function after enough episodes per task.
     """
-    while True:
+    for _ in range(self._batch_size):
       sample = self._test_tasks_sampler.sample()
       if sample is None:
         return
@@ -67,4 +68,4 @@ def make(benchmark_name: str, seed: int = 666) -> Benchmark:
   if benchmark_name == 'no_adaptation':
     train_sampler = samplers.OneRunTaskSampler(rs, TASKS)
     test_sampler = samplers.TaskSampler(rs, {})
-    return Benchmark(train_sampler, test_sampler)
+    return Benchmark(train_sampler, test_sampler, len(TASKS))

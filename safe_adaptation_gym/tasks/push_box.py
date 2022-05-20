@@ -100,4 +100,4 @@ class PushBox(GoToGoal):
 
   @property
   def obstacles_num(self):
-    return [0.4, 0.4, 0.1, 0.1]
+    return [0.5, 0.45, 0.01, 0.04]
