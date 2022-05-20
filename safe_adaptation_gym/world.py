@@ -16,7 +16,7 @@ class World:
   DEFAULT = {
       'placements_margin': 0.0,
       'robot_keepout': 0.4,
-      'num_obstacles': 15,
+      'num_obstacles': 12,
       'hazards_size': 0.2,
       'vases_size': 0.1,
       'pillars_size': 0.2,
