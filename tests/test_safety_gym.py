@@ -16,7 +16,7 @@ def controller(*args, **kwargs):
   cmd = glfw.get_joystick_axes(glfw.JOYSTICK_1)[0]
   y = -cmd[1] if np.abs(cmd[1]) > 0.05 else 0.0
   x = -cmd[0] if np.abs(cmd[0]) > 0.05 else 0.0
-  action[0] = np.clip(y, -0.03, 1.0)
+  action[0] = np.clip(y, -1.0, 1.0)
   action[1] = x
   return action
 
@@ -58,8 +58,9 @@ def safety_gym(request):
   arena = TimeLimit(
       SafeAdaptationGym('xmls/point.xml', render_lidars_and_collision=True),
       1000)
-  arena.seed(123)
+  arena.seed(10)
   arena.set_task(request.param)
+  arena.seed(10)
   return arena
 
 

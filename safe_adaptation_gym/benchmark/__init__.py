@@ -8,7 +8,7 @@ import numpy as np
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.benchmark import samplers
 
-BENCHMARKS = {'no_adaptation'}
+BENCHMARKS = {'no_adaptation', 'domain_randomization'}
 ROBOTS = {'point', 'car', 'doggo'}
 
 pattern = re.compile(r'(?<!^)(?=[A-Z])')
@@ -57,7 +57,9 @@ class Benchmark:
       yield sample
 
 
-def make(benchmark_name: str, seed: int = 666) -> Benchmark:
+def make(benchmark_name: str,
+         batch_size: int = 16,
+         seed: int = 666) -> Benchmark:
   """
   Creates a new benchmark based on name. Can wrap with gym.Wrappers via the
   wrappers function (which takes a SafeAdaptationGym instance and returns a
@@ -69,3 +71,9 @@ def make(benchmark_name: str, seed: int = 666) -> Benchmark:
     train_sampler = samplers.OneRunTaskSampler(rs, TASKS)
     test_sampler = samplers.TaskSampler(rs, {})
     return Benchmark(train_sampler, test_sampler, len(TASKS))
+  if benchmark_name == 'domain_randomization':
+    # Observe all tasks, radomize the parameters of the MDP (action scale,
+    # size of obstacles, etc.).
+    train_sampler = samplers.TaskSampler(rs, TASKS)
+    test_sampler = samplers.TaskSampler(rs, TASKS)
+    return Benchmark(train_sampler, test_sampler, batch_size)

@@ -27,6 +27,7 @@ class World:
       'pillars_keepout': 0.3,
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
+      'robot_ctrl_range_scale': 0.05,
       'action_noise': 0.01
   }
 
@@ -69,7 +70,7 @@ class World:
     self._placements = self._setup_placements()
     # https://keisan.casio.com/exec/system/1180573169
     self._robot_ctrl_range_scale = self.rs.standard_cauchy(
-        self.robot.nu) * 0.05 + 1.0
+        self.robot.nu) * self.config.robot_ctrl_range_scale + 1.0
     self._layout = None
 
   def _setup_placements(self):
