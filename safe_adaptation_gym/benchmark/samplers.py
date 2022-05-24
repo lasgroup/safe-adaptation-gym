@@ -15,7 +15,7 @@ class TaskSampler:
   def sample(self) -> Optional[Tuple[str, Task]]:
     if len(self.tasks) == 0:
       return
-    task_name, task = self.rs.choice(list(self.tasks.items()))
+    task_name, task = self.rs.permutation(list(self.tasks.items()))[0]
     return task_name, task()
 
 
