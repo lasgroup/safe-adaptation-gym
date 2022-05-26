@@ -67,10 +67,6 @@ def make(benchmark_name: str,
   """
   assert benchmark_name in BENCHMARKS, 'Supplied a wrong benchmark name.'
   rs = np.random.RandomState(seed)
-  if benchmark_name == 'no_adaptation':
-    train_sampler = samplers.OneRunTaskSampler(rs, TASKS)
-    test_sampler = samplers.TaskSampler(rs, {})
-    return Benchmark(train_sampler, test_sampler, len(TASKS))
   if benchmark_name == 'domain_randomization':
     # Observe all tasks, radomize the parameters of the MDP (action scale,
     # size of obstacles, etc.).
