@@ -10,7 +10,7 @@ class PushRodMass(PushBox):
   ROD_LENGTH = 0.3
   ROD_RADIUS = 0.06
   BOX_KEEPOUT = 0.7
-  BOX_SIZE = 0.3
+  BOX_SIZE = 0.25
 
   def __init__(self):
     super(PushBox, self).__init__()
