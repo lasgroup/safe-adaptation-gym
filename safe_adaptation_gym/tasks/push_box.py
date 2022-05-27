@@ -89,7 +89,7 @@ class PushBox(GoToGoal):
         sigmoid='linear',
         margin=arena_radius,
         value_at_margin=0.)
-    reward = reach_reward * (0.5 + 0.5 * fetch_reward) * 1e-2
+    reward = reach_reward * (0.5 + 0.5 * fetch_reward) 
     info = {}
     if box_goal_distance <= self.GOAL_SIZE + self.BOX_SIZE:
       reward += 1.

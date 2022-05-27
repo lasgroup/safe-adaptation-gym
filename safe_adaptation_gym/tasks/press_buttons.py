@@ -51,7 +51,7 @@ class PressButtons(Task):
         bounds=(0., self.BUTTON_SIZE * 0.99),
         sigmoid='linear',
         margin=mujoco_bridge.arena_radius,
-        value_at_margin=0.) * 1e-2
+        value_at_margin=0.) 
     info = {}
     touch_button = 0.
     if mujoco_bridge.robot_contacts([self._goal_button]):
