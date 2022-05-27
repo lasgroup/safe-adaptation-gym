@@ -52,10 +52,14 @@ class Task(abc.ABC):
     """
 
   @property
-  def obstacles_num(self):
+  def obstacles_distribution(self) -> List[float]:
     """
     How many obstacle instances are sampled for each obstacle type.
     Type order follows: 'hazards', 'vases', 'gremlins', 'pillars',
     as in consts.OBSTACLES
     """
     return [1 / len(consts.OBSTACLES)] * len(consts.OBSTACLES)
+
+  @property
+  def num_obstacles(self) -> int:
+    return 20

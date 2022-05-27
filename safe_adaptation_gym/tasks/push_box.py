@@ -103,5 +103,9 @@ class PushBox(GoToGoal):
     super(PushBox, self).reset(layout, placements, rs, mujoco_bridge)
 
   @property
-  def obstacles_num(self):
+  def obstacles_distribution(self):
     return [0.5, 0.46, 0., 0.04]
+
+  @property
+  def num_obstacles(self) -> int:
+    return 10

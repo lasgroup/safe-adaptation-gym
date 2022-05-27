@@ -111,8 +111,12 @@ class PressButtons(Task):
     pass
 
   @property
-  def obstacles_num(self):
+  def obstacles_distribution(self):
     return [0.3, 0.3, 0.3, 0.1]
+
+  @property
+  def num_obstacles(self) -> int:
+    return 12
 
 
 class State(Enum):

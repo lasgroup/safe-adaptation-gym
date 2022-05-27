@@ -72,5 +72,5 @@ class GoToGoal(Task):
     raise utils.ResamplingError('Failed to generate goal')
 
   @property
-  def obstacles_num(self):
+  def obstacles_distribution(self):
     return [0.4, 0.4, 0.1, 0.1]
