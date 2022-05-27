@@ -6,14 +6,12 @@ import safe_adaptation_gym.primitive_objects as po
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 from safe_adaptation_gym.tasks.task import Task
+from safe_adaptation_gym import rewards
 
 
 class GoToGoal(Task):
   GOAL_SIZE = 0.3
   GOAL_KEEPOUT = 0.4
-
-  def __init__(self):
-    self._last_goal_distance = None
 
   def setup_placements(self) -> Dict[str, tuple]:
     return {'goal': (None, self.GOAL_KEEPOUT)}
@@ -33,14 +31,18 @@ class GoToGoal(Task):
     goal_pos = np.asarray(mujoco_bridge.body_pos('goal'))
     robot_pos = mujoco_bridge.body_pos('robot')
     distance = np.linalg.norm(robot_pos - goal_pos)
-    reward = self._last_goal_distance - distance
-    self._last_goal_distance = distance
+    reward = rewards.tolerance(
+        distance,
+        bounds=(0, self.GOAL_SIZE),
+        sigmoid='linear',
+        margin=mujoco_bridge.arena_radius,
+        value_at_margin=0.) * 1e-3
     info = {}
     if distance <= self.GOAL_SIZE:
+      reward += 1.
       info['goal_met'] = True
       utils.update_layout(layout, mujoco_bridge)
       self.reset(layout, placements, rs, mujoco_bridge)
-      reward += 1.
     return reward, False, info
 
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
@@ -50,8 +52,6 @@ class GoToGoal(Task):
             mujoco_bridge: MujocoBridge):
     goal_xy = self._resample_goal_position(layout, placements, rs)
     layout['goal'] = goal_xy
-    robot_pos = mujoco_bridge.body_pos('robot')[:2]
-    self._last_goal_distance = np.linalg.norm(robot_pos - goal_xy)
     mujoco_bridge.set_body_pos('goal', goal_xy)
     mujoco_bridge.physics.forward()
 

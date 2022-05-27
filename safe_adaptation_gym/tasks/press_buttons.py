@@ -3,6 +3,7 @@ from enum import Enum
 
 import numpy as np
 
+from safe_adaptation_gym import rewards
 import safe_adaptation_gym.consts as c
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.mujoco_bridge import MujocoBridge
@@ -15,11 +16,10 @@ class PressButtons(Task):
   BUTTONS_KEEPOUT = 0.2
   BUTTON_SIZE = 0.1
   BUTTON_COLOR = np.array([1, .5, 0, 1])
-  BUTTON_TICKING_DELAY = 3
+  BUTTON_TICKING_DELAY = 5
 
   def __init__(self):
     super(PressButtons, self).__init__()
-    self._last_goal_distance = None
     self._goal_button = None
     self._state = State.NORMAL
     self._goal_button_timer = Timer(self.BUTTON_TICKING_DELAY)
@@ -46,11 +46,16 @@ class PressButtons(Task):
     goal_pos = mujoco_bridge.body_pos(self._goal_button)[:2]
     robot_pos = mujoco_bridge.body_pos('robot')[:2]
     goal_distance = np.linalg.norm(robot_pos - goal_pos)
-    reward = self._last_goal_distance - goal_distance
-    self._last_goal_distance = goal_distance
+    near_button = rewards.tolerance(
+        goal_distance,
+        bounds=(0., self.BUTTON_SIZE * 0.99),
+        sigmoid='linear',
+        margin=mujoco_bridge.arena_radius,
+        value_at_margin=0.) * 1e-3
     info = {}
+    touch_button = 0.
     if mujoco_bridge.robot_contacts([self._goal_button]):
-      reward += 1.
+      touch_button = 1.
       info['goal_met'] = True
       self._sample_goal_button(rs, mujoco_bridge)
       self._state = State.BUTTON_CHANGE
@@ -61,7 +66,7 @@ class PressButtons(Task):
         self._state = State.NORMAL
         self._goal_button_timer.reset()
     self._update_goal_button(mujoco_bridge)
-    return reward, False, info
+    return near_button + touch_button, False, info
 
   def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):

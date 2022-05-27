@@ -30,13 +30,17 @@ class ViewerWrapper:
         dtype=np.float32,
         minimum=env.action_space.low,
         maximum=env.action_space.high)
+    self.sum_rewards = None
 
   @property
   def physics(self):
     return self.env.mujoco_bridge.physics
 
   def reset(self):
+    if self.sum_rewards is not None:
+      print('Sum rewards: {}'.format(self.sum_rewards))
     self.env.reset()
+    self.sum_rewards = 0.
 
   def action_spec(self):
     return self._action_spec
@@ -44,6 +48,7 @@ class ViewerWrapper:
   def step(self, action):
     obs, reward, terminal, info = self.env.step(action)
     t = StepType.LAST if terminal else StepType.MID
+    self.sum_rewards += reward
     return TimeStep(t, reward, 1.0, obs)
 
 

@@ -267,3 +267,7 @@ class MujocoBridge:
   @property
   def geom_rgba(self):
     return self.physics.named.model.geom_rgba
+
+  @property
+  def arena_radius(self):
+    return self.physics.named.model.geom_size['floor', 0] * np.sqrt(2.)

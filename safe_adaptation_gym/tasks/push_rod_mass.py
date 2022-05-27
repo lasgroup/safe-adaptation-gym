@@ -7,9 +7,10 @@ import safe_adaptation_gym.consts as c
 
 
 class PushRodMass(PushBox):
-  ROD_LENGTH = 0.30
+  ROD_LENGTH = 0.3
   ROD_RADIUS = 0.06
   BOX_KEEPOUT = 0.7
+  BOX_SIZE = 0.3
 
   def __init__(self):
     super(PushBox, self).__init__()
