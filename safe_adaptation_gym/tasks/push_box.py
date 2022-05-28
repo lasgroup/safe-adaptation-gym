@@ -110,3 +110,7 @@ class PushBox(GoToGoal):
   @property
   def num_obstacles(self) -> int:
     return 10
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return c.PLACEMENT_EXTENTS
