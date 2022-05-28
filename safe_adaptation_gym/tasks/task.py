@@ -70,5 +70,4 @@ class Task(abc.ABC):
 
   @property
   def arena_radius(self):
-    return (self.placement_extents[2] -
-            self.placement_extents[0]) * np.sqrt(2.) / 2.
+    return (self.placement_extents[2]) * np.sqrt(2.)

@@ -34,11 +34,12 @@ class GoToGoal(Task):
     reward = rewards.tolerance(
         distance,
         bounds=(0, self.GOAL_SIZE),
-        sigmoid='gaussian',
-        margin=self.GOAL_KEEPOUT,
-        value_at_margin=1e-3)
+        sigmoid='linear',
+        margin=self.arena_radius,
+        value_at_margin=0.) * 5e-3
     info = {}
     if distance <= self.GOAL_SIZE:
+      reward += 1.
       info['goal_met'] = True
       utils.update_layout(layout, mujoco_bridge)
       self.reset(layout, placements, rs, mujoco_bridge)

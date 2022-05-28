@@ -49,9 +49,9 @@ class PressButtons(Task):
     near_button = rewards.tolerance(
         goal_distance,
         bounds=(0., self.BUTTON_SIZE * 0.99),
-        sigmoid='gaussian',
-        margin=self.BUTTONS_KEEPOUT,
-        value_at_margin=1e-3)
+        sigmoid='linear',
+        margin=self.arena_radius,
+        value_at_margin=0.) * 5e-3
     info = {}
     touch_button = 0.
     if mujoco_bridge.robot_contacts([self._goal_button]):
@@ -66,7 +66,7 @@ class PressButtons(Task):
         self._state = State.NORMAL
         self._goal_button_timer.reset()
     self._update_goal_button(mujoco_bridge)
-    return near_button * (0.5 + 0.5 * touch_button), False, info
+    return near_button + touch_button, False, info
 
   def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):
