@@ -63,3 +63,11 @@ class Task(abc.ABC):
   @property
   def num_obstacles(self) -> int:
     return 20
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return consts.PLACEMENT_EXTENTS
+
+  @property
+  def arena_radius(self):
+    return self.placement_extents[0] * np.sqrt(2.)

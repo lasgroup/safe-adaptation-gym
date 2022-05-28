@@ -188,7 +188,8 @@ class World:
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
       for _ in range(100):
-        xy = utils.draw_placement(self.rs, placements, keepout)
+        xy = utils.draw_placement(self.rs, placements,
+                                  self.task.placement_extents, keepout)
         if placement_is_valid(xy):
           conflicted = False
           break
