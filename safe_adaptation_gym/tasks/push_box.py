@@ -81,16 +81,16 @@ class PushBox(GoToGoal):
     reach_reward = rewards.tolerance(
         box_distance,
         bounds=(0, self.BOX_SIZE + robot_workspace),
-        sigmoid='linear',
-        margin=arena_radius,
-        value_at_margin=0.)
+        sigmoid='gaussian',
+        margin=self.GOAL_KEEPOUT + robot_workspace,
+        value_at_margin=1e-3)
     box_goal_distance = np.linalg.norm(box_pos - goal_pos)
     fetch_reward = rewards.tolerance(
         box_goal_distance,
         bounds=(0, self.GOAL_SIZE),
-        sigmoid='linear',
-        margin=arena_radius,
-        value_at_margin=0.)
+        sigmoid='guassian',
+        margin=self.GOAL_KEEPOUT,
+        value_at_margin=1e-3)
     reward = reach_reward * (0.5 + 0.5 * fetch_reward)
     info = {}
     if box_goal_distance <= self.GOAL_SIZE + self.BOX_SIZE:

@@ -49,9 +49,9 @@ class PressButtons(Task):
     near_button = rewards.tolerance(
         goal_distance,
         bounds=(0., self.BUTTON_SIZE * 0.99),
-        sigmoid='linear',
-        margin=self.arena_radius,
-        value_at_margin=0.)
+        sigmoid='gaussian',
+        margin=self.BUTTONS_KEEPOUT,
+        value_at_margin=1e-3)
     info = {}
     touch_button = 0.
     if mujoco_bridge.robot_contacts([self._goal_button]):

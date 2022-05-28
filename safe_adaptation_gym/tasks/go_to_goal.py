@@ -34,9 +34,9 @@ class GoToGoal(Task):
     reward = rewards.tolerance(
         distance,
         bounds=(0, self.GOAL_SIZE),
-        sigmoid='linear',
-        margin=self.arena_radius,
-        value_at_margin=0.)
+        sigmoid='gaussian',
+        margin=self.GOAL_KEEPOUT,
+        value_at_margin=1e-3)
     info = {}
     if distance <= self.GOAL_SIZE:
       info['goal_met'] = True
