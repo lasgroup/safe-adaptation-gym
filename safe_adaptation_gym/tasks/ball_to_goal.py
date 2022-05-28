@@ -7,7 +7,7 @@ import safe_adaptation_gym.consts as c
 
 
 class BallToGoal(PushBox):
-  SPHERE_RADIUS = 0.125
+  SPHERE_RADIUS = 0.14
   BOX_KEEPOUT = 0.2
   BOX_SIZE = SPHERE_RADIUS
 

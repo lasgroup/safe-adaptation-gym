@@ -51,7 +51,7 @@ class PressButtons(Task):
         bounds=(0., self.BUTTON_SIZE * 0.99),
         sigmoid='linear',
         margin=mujoco_bridge.arena_radius,
-        value_at_margin=0.) * 1e-3
+        value_at_margin=0.)
     info = {}
     touch_button = 0.
     if mujoco_bridge.robot_contacts([self._goal_button]):
@@ -66,7 +66,7 @@ class PressButtons(Task):
         self._state = State.NORMAL
         self._goal_button_timer.reset()
     self._update_goal_button(mujoco_bridge)
-    return near_button + touch_button, False, info
+    return near_button * (0.5 + 0.5 * touch_button), False, info
 
   def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):
