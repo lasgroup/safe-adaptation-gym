@@ -71,6 +71,8 @@ class PushBox(GoToGoal):
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
                      mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
+    if not mujoco_bridge.robot_in_floor:
+      return 0., False, {}
     goal_pos = mujoco_bridge.body_pos('goal')[:2]
     robot_pos = mujoco_bridge.body_pos('robot')[:2]
     box_pos = mujoco_bridge.body_pos('box')[:2]

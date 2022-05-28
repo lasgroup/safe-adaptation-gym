@@ -28,6 +28,8 @@ class GoToGoal(Task):
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
                      mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
+    if not mujoco_bridge.robot_in_floor:
+      return 0., False, {}
     goal_pos = np.asarray(mujoco_bridge.body_pos('goal'))
     robot_pos = mujoco_bridge.body_pos('robot')
     distance = np.linalg.norm(robot_pos - goal_pos)

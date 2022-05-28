@@ -43,6 +43,8 @@ class PressButtons(Task):
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
                      mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
+    if not mujoco_bridge.robot_in_floor:
+      return 0., False, {}
     goal_pos = mujoco_bridge.body_pos(self._goal_button)[:2]
     robot_pos = mujoco_bridge.body_pos('robot')[:2]
     goal_distance = np.linalg.norm(robot_pos - goal_pos)

@@ -268,3 +268,9 @@ class MujocoBridge:
   def geom_rgba(self):
     return self.physics.named.model.geom_rgba
 
+  @property
+  def robot_in_floor(self) -> bool:
+    robot_x, robot_y = self.body_pos('robot')[:2]
+    # Assumes square floor.
+    floor_x, floor_y = self.physics.named.model.geom_size['floor', :2]
+    return abs(robot_x) < floor_x and abs(robot_y) < floor_y
