@@ -7,7 +7,7 @@ import safe_adaptation_gym.consts as c
 
 
 class PushRodMass(PushBox):
-  ROD_LENGTH = 0.3
+  ROD_LENGTH = 0.4
   ROD_RADIUS = 0.08
   BOX_KEEPOUT = 0.7
   BOX_SIZE = 0.25
@@ -29,7 +29,7 @@ class PushRodMass(PushBox):
         name='box',
         type='cylinder',
         size=[self.ROD_RADIUS, self.ROD_LENGTH],
-        density=0.017,
+        density=0.1,
         friction=[0.30, 0.001, 0.05],
         rgba=[1, 1, 1, 1],
         material='pine',
