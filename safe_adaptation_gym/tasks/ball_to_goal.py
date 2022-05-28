@@ -25,7 +25,7 @@ class BallToGoal(PushBox):
         name='box',
         type='sphere',
         size=convert_to_text(np.array([self.SPHERE_RADIUS])),
-        density=0.15,
+        density=0.06,
         friction=[0.8, 0.03, 0.03],
         user=[c.GROUP_OBJECTS],
         solref=[0.02, 0.1],
