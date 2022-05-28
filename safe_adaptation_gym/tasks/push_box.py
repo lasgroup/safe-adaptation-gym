@@ -76,7 +76,7 @@ class PushBox(GoToGoal):
     box_pos = mujoco_bridge.body_pos('box')[:2]
     box_distance = np.linalg.norm(robot_pos - box_pos)
     # https://github.com/deepmind/dm_control/blob/4e1a35595124742015ae0c7a829e099a5aa100f5/dm_control/suite/quadruped.py#L456
-    arena_radius = mujoco_bridge.arena_radius
+    arena_radius = self.arena_radius
     robot_workspace = 0.3
     reach_reward = rewards.tolerance(
         box_distance,

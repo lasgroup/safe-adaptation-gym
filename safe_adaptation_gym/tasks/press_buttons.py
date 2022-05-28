@@ -50,7 +50,7 @@ class PressButtons(Task):
         goal_distance,
         bounds=(0., self.BUTTON_SIZE * 0.99),
         sigmoid='linear',
-        margin=mujoco_bridge.arena_radius,
+        margin=self.arena_radius,
         value_at_margin=0.)
     info = {}
     touch_button = 0.

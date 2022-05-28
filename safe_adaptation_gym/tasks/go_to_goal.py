@@ -35,7 +35,7 @@ class GoToGoal(Task):
         distance,
         bounds=(0, self.GOAL_SIZE),
         sigmoid='linear',
-        margin=mujoco_bridge.arena_radius,
+        margin=self.arena_radius,
         value_at_margin=0.)
     info = {}
     if distance <= self.GOAL_SIZE:
