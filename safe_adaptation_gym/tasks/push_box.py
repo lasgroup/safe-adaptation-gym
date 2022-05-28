@@ -88,7 +88,7 @@ class PushBox(GoToGoal):
     fetch_reward = rewards.tolerance(
         box_goal_distance,
         bounds=(0, self.GOAL_SIZE),
-        sigmoid='guassian',
+        sigmoid='gaussian',
         margin=self.GOAL_KEEPOUT,
         value_at_margin=1e-3)
     reward = reach_reward * (0.5 + 0.5 * fetch_reward)
