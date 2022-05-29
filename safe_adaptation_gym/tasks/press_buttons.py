@@ -98,17 +98,6 @@ class PressButtons(Task):
           mujoco_bridge.geom_rgba[self._goal_button] = c.GOAL_COLOR
           mujoco_bridge.user_groups[self._goal_button] = [c.GROUP_GOAL]
 
-  def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
-    # Give the robot some grace time to step away from the old goal.
-    if self._state == State.BUTTON_CHANGE:
-      return 0.
-    non_goal_buttons = [
-        'buttons{}'.format(i)
-        for i in range(self.NUM_BUTTONS)
-        if 'bottons{}'.format(i) != self._goal_button
-    ]
-    return mujoco_bridge.robot_contacts(non_goal_buttons)
-
   def set_mocaps(self, mujoco_bridge: MujocoBridge):
     pass
 
