@@ -30,7 +30,7 @@ class PushRodMass(PushBox):
         type='cylinder',
         size=[self.ROD_RADIUS, self.ROD_LENGTH],
         density=0.017,
-        friction=[0.30, 0.001, 0.05],
+        friction=[0.6, 0.001, 0.05],
         rgba=[1, 1, 1, 1],
         material='pine',
         user=[c.GROUP_OBJECTS],
