@@ -43,6 +43,7 @@ class World:
     self.task = task
     self.rs = rs
     self.robot = robot
+    # TODO (yarden): obstacles sizes samples should be given from the task (otherwise this changes everytime we load a task, even if it was already used) to the world so this should be migrated to task constructor
     obstacle_sizes_scale = self.rs.standard_cauchy(len(
         c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
     # Make sure that there are no negative size scales (otherwise objects

@@ -8,8 +8,19 @@ from gym.wrappers import TimeLimit
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
+ROBOT = 'car'
 
-def controller(*args, **kwargs):
+
+def controller(action_space):
+  if ROBOT == 'car':
+    return car_controller
+  elif ROBOT == 'point':
+    return point_controller
+  else:
+    return lambda *_: action_space.sample()
+
+
+def point_controller(*args, **kwargs):
   action = np.zeros((2,))
   if not glfw.joystick_present(glfw.JOYSTICK_1):
     return action
@@ -18,6 +29,18 @@ def controller(*args, **kwargs):
   x = -cmd[0] if np.abs(cmd[0]) > 0.05 else 0.0
   action[0] = np.clip(y, -1.0, 1.0)
   action[1] = x
+  return action
+
+
+def car_controller(*args, **kwargs):
+  action = np.zeros((2,))
+  if not glfw.joystick_present(glfw.JOYSTICK_1):
+    return action
+  cmd = glfw.get_joystick_axes(glfw.JOYSTICK_1)[0]
+  x = -cmd[1] if np.abs(cmd[1]) > 0.05 else 0.0
+  y = -cmd[0] if np.abs(cmd[0]) > 0.05 else 0.0
+  action[0] = (x + y) / 2.
+  action[1] = (x - y) / 2.
   return action
 
 
@@ -61,7 +84,7 @@ class ViewerWrapper:
 ])
 def safety_gym(request):
   arena = TimeLimit(
-      SafeAdaptationGym('xmls/point.xml', render_lidars_and_collision=True),
+      SafeAdaptationGym(f'xmls/{ROBOT}.xml', render_lidars_and_collision=True),
       1000)
   arena.seed(10)
   arena.set_task(request.param)
@@ -71,7 +94,10 @@ def safety_gym(request):
 
 @pytest.mark.interactive
 def test_viewer(safety_gym):
-  viewer.launch(ViewerWrapper(safety_gym), controller)
+  policy = (lambda *_: safety_gym.action_space.sample()
+           ) if not glfw.joystick_present(glfw.JOYSTICK_1) else controller(
+               safety_gym.action_space)
+  viewer.launch(ViewerWrapper(safety_gym), policy)
 
 
 def test_episode(safety_gym):
