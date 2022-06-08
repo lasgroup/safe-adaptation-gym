@@ -13,7 +13,7 @@ class PushBox(GoToGoal):
   BOX_SIZE = 0.2
   BOX_KEEPOUT = 0.5
   BOX_COLOR = np.array([1, 1, 0, 0.25])
-  BOX_DENSITY = 0.001
+  BOX_DENSITY = 0.005
 
   def __init__(self):
     super(PushBox, self).__init__()
