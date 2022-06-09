@@ -59,7 +59,8 @@ class GoToGoal(Task):
                               rs: np.random.RandomState):
     layout.pop('goal')
     for _ in range(10000):
-      goal_xy = utils.draw_placement(rs, None, self.GOAL_KEEPOUT)
+      goal_xy = utils.draw_placement(rs, None, self.placement_extents,
+                                     self.GOAL_KEEPOUT)
       valid_placement = True
       for other_name, other_xy in layout.items():
         other_keepout = placements[other_name][1]
@@ -72,5 +73,9 @@ class GoToGoal(Task):
     raise utils.ResamplingError('Failed to generate goal')
 
   @property
-  def obstacles_num(self):
+  def obstacles_distribution(self):
     return [0.4, 0.4, 0.1, 0.1]
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return -2.25, -2.25, 2.25, 2.25

@@ -15,7 +15,7 @@ class PressButtons(Task):
   BUTTONS_KEEPOUT = 0.2
   BUTTON_SIZE = 0.1
   BUTTON_COLOR = np.array([1, .5, 0, 1])
-  BUTTON_TICKING_DELAY = 3
+  BUTTON_TICKING_DELAY = 5
 
   def __init__(self):
     super(PressButtons, self).__init__()
@@ -106,8 +106,12 @@ class PressButtons(Task):
     pass
 
   @property
-  def obstacles_num(self):
+  def obstacles_distribution(self):
     return [0.3, 0.3, 0.3, 0.1]
+
+  @property
+  def num_obstacles(self) -> int:
+    return 12
 
 
 class State(Enum):

@@ -16,7 +16,7 @@ from safe_adaptation_gym.render import make_additional_render_objects
 
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
-  LIDAR_MAX_DIST = 4.
+  LIDAR_MAX_DIST = 5.
   BASE_SENSORS = ['accelerometer', 'velocimeter', 'gyro', 'magnetometer']
   DOGGO_EXTRA_SENSORS = [
       'touch_ankle_1a', 'touch_ankle_2a', 'touch_ankle_3a', 'touch_ankle_4a',
@@ -61,17 +61,12 @@ class SafeAdaptationGym(gym.Env):
         self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
-    # Keeping magic 10 from Safety-Gym
-    # https://github.com/openai/safety-gym/blob
-    # /f31042f2f9ee61b9034dd6a416955972911544f5/safety_gym/envs/engine.py#L1253
-    # TODO (yarden): checking for a collision only after 10 steps is wrong!
-    for _ in range(10):
-      try:
-        self._world.set_mocaps(self.mujoco_bridge)
-        self.mujoco_bridge.physics.step()
-      except dm_control.rl.control.PhysicsError as er:
-        print('PhysicsError', er)
-        return self.observation, -10., True, {'cost': 0.}
+    try:
+      self._world.set_mocaps(self.mujoco_bridge)
+      self.mujoco_bridge.physics.step(nstep=2)
+    except dm_control.rl.control.PhysicsError as er:
+      print('PhysicsError', er)
+      return self.observation, -10., True, {'cost': 0.}
     self.mujoco_bridge.physics.forward()
     reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
     cost = self._world.compute_cost(self.mujoco_bridge)
@@ -128,12 +123,10 @@ class SafeAdaptationGym(gym.Env):
     goal_lidar = self._lidar(goal)
     objects_lidar = self._lidar(objects)
     sensors = self._sensors()
-    obs = np.zeros(self.observation_space.shape, self._observation_space.dtype)
-    offset = 0
-    for observation in [obstacles_lidar, objects_lidar, goal_lidar] + sensors:
-      size = np.prod(observation.shape)
-      obs[offset:offset + size] = observation.flat
-      offset += size
+    obs = np.concatenate([
+        obstacles_lidar, objects_lidar, goal_lidar,
+        np.asarray(sensors).ravel()
+    ])
     return obs
 
   @property
@@ -232,7 +225,7 @@ class SafeAdaptationGym(gym.Env):
       sensors.append(np.array([np.sin(theta), np.cos(theta)]))
     for sensor in self.robot.ballquat_names:
       quat = self.mujoco_bridge.get_sensor(sensor)
-      sensors.append(utils.quat2mat(quat))
+      sensors.append(utils.quat2mat(quat).ravel())
     return sensors
 
   def _update_lidars_and_collision(self, observations, cost):

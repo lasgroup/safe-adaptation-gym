@@ -6,7 +6,7 @@ import safe_adaptation_gym
 
 BASE_DIR = os.path.join(os.path.dirname(safe_adaptation_gym.__file__), 'assets')
 
-PLACEMENT_EXTENTS = [-2, -2, 2, 2]
+PLACEMENT_EXTENTS = (-2, -2, 2, 2)
 
 OBSTACLES = ['hazards', 'vases', 'gremlins', 'pillars']
 
@@ -18,7 +18,7 @@ GROUP_OBJECTS = 3
 # Vases
 VASES_COLOR = np.array([0, 1, 1, 1])
 VASES_SINK = 4e-5
-VASES_DENSITY = 0.001
+VASES_DENSITY = 0.005
 
 # Hazards
 HAZARDS_COLOR = np.array([0, 0, 1, 1])

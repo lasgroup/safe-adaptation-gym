@@ -99,5 +99,13 @@ class PushBox(GoToGoal):
         mujoco_bridge.body_pos('robot')[:2] - mujoco_bridge.body_pos('box')[:2])
 
   @property
-  def obstacles_num(self):
-    return [0.5, 0.45, 0.01, 0.04]
+  def obstacles_distribution(self):
+    return [0.5, 0.46, 0., 0.04]
+
+  @property
+  def num_obstacles(self) -> int:
+    return 10
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return c.PLACEMENT_EXTENTS
