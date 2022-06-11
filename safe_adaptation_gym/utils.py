@@ -1,4 +1,4 @@
-from typing import Union, Iterable
+from typing import Union, Tuple
 
 import numpy as np
 
@@ -28,6 +28,7 @@ def constrain_placement(placement: tuple, keepout: float) -> tuple:
 
 
 def draw_placement(rs: np.random.RandomState, placements: Union[dict, None],
+                   placement_extents: Tuple[float, float, float, float],
                    keepout: float) -> np.ndarray:
   """
   Sample an (x,y) location, based on potential placement areas.
@@ -50,7 +51,7 @@ def draw_placement(rs: np.random.RandomState, placements: Union[dict, None],
 
   """
   if placements is None:
-    choice = constrain_placement(c.PLACEMENT_EXTENTS, keepout)
+    choice = constrain_placement(placement_extents, keepout)
   else:
     # Draw from placements according to placeable area
     constrained = []
@@ -115,4 +116,3 @@ def quat2mat(quat):
   m = np.zeros(9, dtype='float64')
   mujoco.mju_quat2Mat(m, q)
   return m.reshape((3, 3))
-

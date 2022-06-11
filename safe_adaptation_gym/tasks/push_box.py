@@ -2,6 +2,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 
+from safe_adaptation_gym import rewards
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 from safe_adaptation_gym.tasks.go_to_goal import GoToGoal
@@ -16,9 +17,6 @@ class PushBox(GoToGoal):
 
   def __init__(self):
     super(PushBox, self).__init__()
-    self._last_goal_distance = None
-    self._last_box_distance = None
-    self._last_box_goal_distance = None
 
   def setup_placements(self) -> Dict[str, tuple]:
     placements = super(PushBox, self).setup_placements()
@@ -73,31 +71,47 @@ class PushBox(GoToGoal):
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
                      mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
+    if not mujoco_bridge.robot_in_floor:
+      return 0., False, {}
     goal_pos = mujoco_bridge.body_pos('goal')[:2]
     robot_pos = mujoco_bridge.body_pos('robot')[:2]
     box_pos = mujoco_bridge.body_pos('box')[:2]
     box_distance = np.linalg.norm(robot_pos - box_pos)
-    reward = self._last_box_distance - box_distance
-    self._last_box_distance = box_distance
+    arena_radius = self.arena_radius
+    reach_reward = rewards.tolerance(
+        box_distance,
+        bounds=(0, self.BOX_SIZE + 0.3),
+        sigmoid='linear',
+        margin=arena_radius,
+        value_at_margin=0.)
     box_goal_distance = np.linalg.norm(box_pos - goal_pos)
-    reward += self._last_box_goal_distance - box_goal_distance
-    self._last_box_goal_distance = box_goal_distance
+    fetch_reward = rewards.tolerance(
+        box_goal_distance,
+        bounds=(0, self.GOAL_SIZE),
+        sigmoid='linear',
+        margin=arena_radius,
+        value_at_margin=0.)
+    reward = reach_reward * (0.5 + 0.5 * fetch_reward) * 5e-3
     info = {}
-    if box_goal_distance <= self.GOAL_SIZE:
+    if box_goal_distance <= self.GOAL_SIZE + self.BOX_SIZE:
+      reward += 1.
       info['goal_met'] = True
       utils.update_layout(layout, mujoco_bridge)
       self.reset(layout, placements, rs, mujoco_bridge)
-      reward += 1.
     return reward, False, info
 
   def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: MujocoBridge):
     super(PushBox, self).reset(layout, placements, rs, mujoco_bridge)
-    self._last_box_goal_distance = np.linalg.norm(
-        mujoco_bridge.body_pos('goal')[:2] - mujoco_bridge.body_pos('box')[:2])
-    self._last_box_distance = np.linalg.norm(
-        mujoco_bridge.body_pos('robot')[:2] - mujoco_bridge.body_pos('box')[:2])
 
   @property
-  def obstacles_num(self):
-    return [0.5, 0.45, 0.01, 0.04]
+  def obstacles_distribution(self):
+    return [0.5, 0.46, 0., 0.04]
+
+  @property
+  def num_obstacles(self) -> int:
+    return 10
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return c.PLACEMENT_EXTENTS

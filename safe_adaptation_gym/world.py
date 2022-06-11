@@ -16,7 +16,6 @@ class World:
   DEFAULT = {
       'placements_margin': 0.0,
       'robot_keepout': 0.4,
-      'num_obstacles': 12,
       'hazards_size': 0.2,
       'vases_size': 0.1,
       'pillars_size': 0.2,
@@ -44,6 +43,7 @@ class World:
     self.task = task
     self.rs = rs
     self.robot = robot
+    # TODO (yarden): obstacles sizes samples should be given from the task (otherwise this changes everytime we load a task, even if it was already used) to the world so this should be migrated to task constructor
     obstacle_sizes_scale = self.rs.standard_cauchy(len(
         c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
     # Make sure that there are no negative size scales (otherwise objects
@@ -75,8 +75,8 @@ class World:
 
   def _setup_placements(self):
     """ Build a dict of placements. """
-    obstacle_samples = self.rs.multinomial(self.config.num_obstacles,
-                                           self.task.obstacles_num)
+    obstacle_samples = self.rs.multinomial(self.task.num_obstacles,
+                                           self.task.obstacles_distribution)
     placements = {
         **self._placement_dict_from_object('robot', 1),
     }
@@ -189,7 +189,8 @@ class World:
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
       for _ in range(100):
-        xy = utils.draw_placement(self.rs, placements, keepout)
+        xy = utils.draw_placement(self.rs, placements,
+                                  self.task.placement_extents, keepout)
         if placement_is_valid(xy):
           conflicted = False
           break

@@ -34,7 +34,7 @@ class MujocoBridge:
     self._build()
 
   def get_sensor(self, name: str) -> np.ndarray:
-    return self.physics.named.data.sensordata[name].copy()
+    return self.physics.named.data.sensordata[name]
 
   def _build(self):
     """ Build a world, including generating XML and moving objects """
@@ -202,22 +202,22 @@ class MujocoBridge:
   def body_com(self, name: str) -> np.ndarray:
     """ Get the center of mass of a named body in the simulator world
     reference frame """
-    return self.physics.named.subtree_com[name].copy()
+    return self.physics.named.subtree_com[name]
 
   def body_pos(self, name: str) -> np.ndarray:
     """ Get the position of a named body in the simulator world reference
     frame """
-    return self.physics.named.data.xpos[name].copy()
+    return self.physics.named.data.xpos[name]
 
   def body_mat(self, name: str) -> np.ndarray:
     """ Get the rotation matrix of a named body in the simulator world
     reference frame """
-    return self.physics.named.data.xmat[name].reshape([3, 3]).copy()
+    return self.physics.named.data.xmat[name].reshape([3, 3])
 
   def body_vel(self, name: str) -> np.ndarray:
     """ Get the velocity of a named body in the simulator world reference
     frame """
-    vel = self.physics.named.object_velocity(name, 'body').copy()
+    vel = self.physics.named.object_velocity(name, 'body')
     return vel[0]
 
   def set_body_pos(self, name: str, pos: np.ndarray):
@@ -254,7 +254,7 @@ class MujocoBridge:
 
   @property
   def actuator_ctrlrange(self):
-    return self.physics.model.actuator_ctrlrange.copy()
+    return self.physics.model.actuator_ctrlrange
 
   @property
   def user_groups(self):
@@ -267,3 +267,10 @@ class MujocoBridge:
   @property
   def geom_rgba(self):
     return self.physics.named.model.geom_rgba
+
+  @property
+  def robot_in_floor(self) -> bool:
+    robot_x, robot_y = self.body_pos('robot')[:2]
+    # Assumes square floor.
+    floor_x, floor_y = self.physics.named.model.geom_size['floor', :2]
+    return abs(robot_x) < floor_x and abs(robot_y) < floor_y
