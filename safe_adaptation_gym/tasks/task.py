@@ -9,6 +9,11 @@ from safe_adaptation_gym import consts
 
 class Task(abc.ABC):
 
+  def __init__(self):
+    self._obstacle_scales = None
+    self._ctrl_scale = None
+
+
   @abc.abstractmethod
   def setup_placements(self) -> Dict[str, tuple]:
     """
@@ -71,3 +76,15 @@ class Task(abc.ABC):
   @property
   def arena_radius(self):
     return (self.placement_extents[2]) * np.sqrt(2.)
+
+  def obstacle_scales(self, rs: np.random.RandomState):
+    if self._obstacle_scales is None:
+      self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
+    return self._obstacle_scales
+
+  def ctrl_scale(self, rs: np.random.RandomState, control_size: int):
+    if self._ctrl_scale is None:
+      # https://keisan.casio.com/exec/system/1180573169
+      self._ctrl_scale = rs.standard_cauchy(control_size)
+    return self._ctrl_scale
+
