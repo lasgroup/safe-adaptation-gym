@@ -13,7 +13,6 @@ class Task(abc.ABC):
     self._obstacle_scales = None
     self._ctrl_scale = None
 
-
   @abc.abstractmethod
   def setup_placements(self) -> Dict[str, tuple]:
     """
@@ -87,4 +86,3 @@ class Task(abc.ABC):
       # https://keisan.casio.com/exec/system/1180573169
       self._ctrl_scale = rs.standard_cauchy(control_size)
     return self._ctrl_scale
-
