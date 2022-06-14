@@ -78,9 +78,10 @@ class PushBox(GoToGoal):
     box_pos = mujoco_bridge.body_pos('box')[:2]
     box_distance = np.linalg.norm(robot_pos - box_pos)
     arena_radius = self.arena_radius
+    # TODO (yarden): should add some tolerance to box size?
     reach_reward = rewards.tolerance(
         box_distance,
-        bounds=(0, self.BOX_SIZE + 0.3),
+        bounds=(0, self.BOX_SIZE),
         sigmoid='linear',
         margin=arena_radius,
         value_at_margin=0.)
