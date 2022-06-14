@@ -13,6 +13,7 @@ class GoToGoal(Task):
   GOAL_KEEPOUT = 0.4
 
   def __init__(self):
+    super(GoToGoal, self).__init__()
     self._last_goal_distance = None
 
   def setup_placements(self) -> Dict[str, tuple]:
