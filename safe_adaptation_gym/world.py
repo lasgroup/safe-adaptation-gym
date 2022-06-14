@@ -43,12 +43,11 @@ class World:
     self.task = task
     self.rs = rs
     self.robot = robot
-    # TODO (yarden): obstacles sizes samples should be given from the task (otherwise this changes everytime we load a task, even if it was already used) to the world so this should be migrated to task constructor
-    obstacle_sizes_scale = self.rs.standard_cauchy(len(
-        c.OBSTACLES)) * self.config.obstacles_size_noise_scale + 1.0
+    obstacle_sizes_scale = self.task.obstacle_scales(
+        self.rs) * self.config.obstacles_size_noise_scale + 1.0
     # Make sure that there are no negative size scales (otherwise objects
     # would have a negative size, causing mujoco not to compile)
-    obstacle_sizes_scale = np.clip(obstacle_sizes_scale, 0.5, a_max=1.25)
+    obstacle_sizes_scale = np.clip(obstacle_sizes_scale, 0.5, 1.25)
     self._obstacle_sizes = {
         k: scale * value
         for k, scale, value in zip(c.OBSTACLES, obstacle_sizes_scale, [
@@ -68,9 +67,8 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    # https://keisan.casio.com/exec/system/1180573169
-    self._robot_ctrl_range_scale = self.rs.standard_cauchy(
-        self.robot.nu) * self.config.robot_ctrl_range_scale + 1.0
+    self._robot_ctrl_range_scale = self.task.ctrl_scale(
+        self.rs, self.robot.nu) * self.config.robot_ctrl_range_scale + 1.0
     self._layout = None
 
   def _setup_placements(self):
