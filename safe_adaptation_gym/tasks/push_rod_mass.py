@@ -7,7 +7,7 @@ import safe_adaptation_gym.consts as c
 
 
 class PushRodMass(PushBox):
-  ROD_LENGTH = 0.35
+  ROD_LENGTH = 0.3
   ROD_RADIUS = 0.08
   BOX_KEEPOUT = 0.7
   BOX_SIZE = 0.25
@@ -21,7 +21,7 @@ class PushRodMass(PushBox):
     rod_root = model.worldbody.add(
         'body',
         name='box',
-        euler='88 0 0',
+        euler='90 0 0',
         pos=[layout['box'][0], layout['box'][1], self.ROD_RADIUS])
     rod_root.add('freejoint', name='box')
     rod_root.add(
@@ -29,12 +29,11 @@ class PushRodMass(PushBox):
         name='box',
         type='cylinder',
         size=[self.ROD_RADIUS, self.ROD_LENGTH],
-        density=0.017,
-        friction=[0.6, 0.001, 0.05],
+        density=self.BOX_DENSITY / 2.,
+        friction=[1.2, 0.001, 0.05],
         rgba=[1, 1, 1, 1],
         material='pine',
         user=[c.GROUP_OBJECTS],
-        condim=6,
         priority=1)
     box_config = {'bodies': {'box': ([rod_root.to_xml_string()], '')}}
     merge(config, box_config)
