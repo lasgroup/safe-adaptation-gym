@@ -9,12 +9,13 @@ def make(robot_name: str,
          seed: int = 666,
          config: Optional[Dict] = None,
          rgb_observation: bool = False,
-         render_options: Optional[Dict] = None) -> SafeAdaptationGym:
+         render_options: Optional[Dict] = None,
+         render_lidar_and_collision=True) -> SafeAdaptationGym:
   env = SafeAdaptationGym(
       ROBOTS_BASENAMES[robot_name.lower()],
       config=config,
       rgb_observation=rgb_observation,
-      render_lidars_and_collision=True,
+      render_lidars_and_collision=render_lidar_and_collision,
       render_options=render_options)
   env.seed(seed)
   if task_name is not None:
