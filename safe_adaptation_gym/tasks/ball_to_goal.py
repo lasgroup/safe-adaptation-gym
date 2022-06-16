@@ -1,5 +1,4 @@
 import numpy as np
-from dm_control import mjcf
 
 from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
 from safe_adaptation_gym.utils import merge, convert_to_text
@@ -15,6 +14,8 @@ class BallToGoal(PushBox):
     super(PushBox, self).__init__()
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
+    # Import mjcf here so that rendering with multiple process works.
+    from dm_control import mjcf
     config = GoToGoal.build_world_config(self, layout, rs)
     model = mjcf.RootElement()
     ball = model.worldbody.add(

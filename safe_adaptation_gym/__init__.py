@@ -1,7 +1,6 @@
 from typing import Optional, Dict
 
 from safe_adaptation_gym.benchmark import TASKS, ROBOTS_BASENAMES
-from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
 
 def make(robot_name: str,
@@ -10,7 +9,8 @@ def make(robot_name: str,
          config: Optional[Dict] = None,
          rgb_observation: bool = False,
          render_options: Optional[Dict] = None,
-         render_lidar_and_collision=True) -> SafeAdaptationGym:
+         render_lidar_and_collision=True):
+  from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
   env = SafeAdaptationGym(
       ROBOTS_BASENAMES[robot_name.lower()],
       config=config,
