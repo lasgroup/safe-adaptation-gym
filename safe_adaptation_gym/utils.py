@@ -2,8 +2,6 @@ from typing import Union, Tuple
 
 import numpy as np
 
-import safe_adaptation_gym.consts as c
-
 
 class ResamplingError(AssertionError):
   """ Raised when we fail to sample a valid distribution of objects or goals """

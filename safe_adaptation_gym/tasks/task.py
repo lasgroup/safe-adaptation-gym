@@ -1,10 +1,13 @@
 import abc
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, TypeVar
 
 import numpy as np
 
-from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 from safe_adaptation_gym import consts
+
+# Define as generic type instead of import the actual mujoco_bridge as it
+# loads resources (e.g. GPU pointers) that should not exist on a parent process.
+MujocoBridge = TypeVar("MujocoBridge")
 
 
 class Task(abc.ABC):
@@ -12,7 +15,6 @@ class Task(abc.ABC):
   def __init__(self):
     self._obstacle_scales = None
     self._ctrl_scale = None
-
 
   @abc.abstractmethod
   def setup_placements(self) -> Dict[str, tuple]:
@@ -87,4 +89,3 @@ class Task(abc.ABC):
       # https://keisan.casio.com/exec/system/1180573169
       self._ctrl_scale = rs.standard_cauchy(control_size)
     return self._ctrl_scale
-
