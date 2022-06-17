@@ -5,7 +5,6 @@ import numpy as np
 import safe_adaptation_gym.primitive_objects as po
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.tasks.task import Task, MujocoBridge
-from safe_adaptation_gym import rewards
 
 
 class GoToGoal(Task):
