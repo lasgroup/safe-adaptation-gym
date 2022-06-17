@@ -12,6 +12,7 @@ class BallToGoal(PushBox):
 
   def __init__(self):
     super(PushBox, self).__init__()
+    self._gate_distance = 0.15
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     # Import mjcf here so that rendering with multiple process works.
@@ -26,10 +27,10 @@ class BallToGoal(PushBox):
         name='box',
         type='sphere',
         size=convert_to_text(np.array([self.SPHERE_RADIUS])),
-        density=0.15,
-        friction=[1.5, 0.01, 0.01],
+        density=self.BOX_DENSITY / 2.,
+        friction=[1.2, 0.003, 0.05],
         user=[c.GROUP_OBJECTS],
-        solref=[0.02, 0.5],
+        solref=[0.018, 0.2],
         condim=6,
         rgba=[1., 1., 1., 1.],
         material='ukraine',
