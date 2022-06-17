@@ -12,6 +12,7 @@ class BallToGoal(PushBox):
 
   def __init__(self):
     super(PushBox, self).__init__()
+    self._gate_distance = 0.15
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     # Import mjcf here so that rendering with multiple process works.

@@ -19,6 +19,7 @@ class PushBox(GoToGoal):
     self._last_goal_distance = None
     self._last_box_distance = None
     self._last_box_goal_distance = None
+    self._gate_distance = 0.
 
   def setup_placements(self) -> Dict[str, tuple]:
     placements = super(PushBox, self).setup_placements()
@@ -77,7 +78,8 @@ class PushBox(GoToGoal):
     robot_pos = mujoco_bridge.body_pos('robot')[:2]
     box_pos = mujoco_bridge.body_pos('box')[:2]
     box_distance = np.linalg.norm(robot_pos - box_pos)
-    reward = self._last_box_distance - box_distance
+    gate = box_distance > self._last_box_goal_distance
+    reward = (self._last_box_distance - box_distance) * gate
     self._last_box_distance = box_distance
     box_goal_distance = np.linalg.norm(box_pos - goal_pos)
     reward += self._last_box_goal_distance - box_goal_distance
