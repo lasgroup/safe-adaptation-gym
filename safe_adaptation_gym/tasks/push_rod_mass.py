@@ -12,7 +12,7 @@ class PushRodMass(PushBox):
   BOX_SIZE = 0.25
 
   def __init__(self):
-    super(PushBox, self).__init__()
+    super(PushRodMass, self).__init__()
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     # Import mjcf here so that rendering with multiple process works.
