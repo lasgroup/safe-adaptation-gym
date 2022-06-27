@@ -15,6 +15,7 @@ class Task(abc.ABC):
   def __init__(self):
     self._obstacle_scales = None
     self._ctrl_scale = None
+    self._bound = None
 
   @abc.abstractmethod
   def setup_placements(self) -> Dict[str, tuple]:
@@ -89,3 +90,8 @@ class Task(abc.ABC):
       # https://keisan.casio.com/exec/system/1180573169
       self._ctrl_scale = rs.standard_cauchy(control_size)
     return self._ctrl_scale
+
+  def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
+    if self._bound is None:
+      self._bound = rs.uniform(0., max_bound)
+    return self._bound

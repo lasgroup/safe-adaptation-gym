@@ -27,7 +27,8 @@ class World:
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
       'robot_ctrl_range_scale': 0.05,
-      'action_noise': 0.01
+      'action_noise': 0.01,
+      'max_bound': 25
   }
 
   def __init__(self,
@@ -70,6 +71,7 @@ class World:
     self._robot_ctrl_range_scale = self.task.ctrl_scale(
         self.rs, self.robot.nu) * self.config.robot_ctrl_range_scale + 1.0
     self._layout = None
+    self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
 
   def _setup_placements(self):
     """ Build a dict of placements. """

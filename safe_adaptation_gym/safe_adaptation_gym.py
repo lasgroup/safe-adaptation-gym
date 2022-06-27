@@ -70,7 +70,7 @@ class SafeAdaptationGym(gym.Env):
     self.mujoco_bridge.physics.forward()
     reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
     cost = self._world.compute_cost(self.mujoco_bridge)
-    info = {'cost': cost}
+    info = {'cost': cost, 'bound': self._world.bound}
     observation = self.observation
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(observation, cost)
