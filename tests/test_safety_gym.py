@@ -76,6 +76,8 @@ class ViewerWrapper:
 
 
 @pytest.fixture(params=[
+    tasks.HaulBox(),
+    tasks.Collect(),
     tasks.PushBox(),
     tasks.PushRodMass(),
     tasks.BallToGoal(),

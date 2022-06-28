@@ -46,6 +46,7 @@ class PushBox(GoToGoal):
         'bodies': {
             'box': ([
                 """<body name="{name}" pos="{pos}" quat="{quat}">
+                  <site name="box_site"/>
                   <freejoint name="{name}"/>
                   <geom name="{name}" type="{type}" size="{size}"
                   density="{density}"

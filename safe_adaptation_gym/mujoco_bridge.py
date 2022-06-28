@@ -18,6 +18,7 @@ class MujocoBridge:
       'robot_rot': 0,  # Robot rotation about Z axis
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
       'bodies': {},
+      'others': {},
       'robot_ctrl_range_scale': None
   }
 
@@ -146,12 +147,13 @@ class MujocoBridge:
     worldbody['body'][0]['camera'] = [
         worldbody['body'][0]['camera'], track_camera['b']['camera']
     ]
-
     for name, (body_strings, weld_str) in self.config.bodies.items():
       for body_str in body_strings:
         worldbody['body'].append(xmltodict.parse(body_str)['body'])
       if weld_str:
         equality['weld'].append(xmltodict.parse(weld_str)['weld'])
+    for name, xml_str in self.config.others.items():
+      xml['mujoco'][name] = xmltodict.parse(xml_str)
     # Instantiate simulator
     xml_string = xmltodict.unparse(xml)
     self.physics = mujoco.Physics.from_xml_string(xml_string)

@@ -6,15 +6,9 @@ Separate into three categories: MDP variations due to reward and CMDP variations
 # Ideas
 1. Generalize across different dynamics
 2. Generalize across different tasks (but same robot.)
-3. ~~Generalize across different cost values. (to make some agents more safe than others.)~~
 4. Action noise scale is resampled (different scale for each dimension of actions).
 5. Action scale is resampled (different scale for each dimension of actions).
 6. ~~Take one of doggo legs off.~~ (Look for 4. and 5.)
-7. ~~Goal attributes (size + color) can change between goal resampling.~~
-8. ~~Extreme transfer (for example, button -> goal)~~
-9. ~~How to compose different variablities?~~
-10. ~~Radius of gremlins travel.~~
-11. ~~Use meta world and add objects that should not be touched.~~ 
 12. Mix the obstacles types but keep the task.
 13. Mix tasks keep the types.
 14. How parametric and non-parametric transfer can be tested together in a more intelligent way than metaworlds.
@@ -22,13 +16,28 @@ Separate into three categories: MDP variations due to reward and CMDP variations
 
 # Possible tasks
 
+offsamples = 0 (to speed rendering?)
+
+Disturbance (e.g. wind)
+
+Package drop collection.
+
+Wall in between?
+
+Sample constraint bounds.
+
+Coverage problems.
+
+Box with hole. Balls falling from the air, collect as many balls as possible.
+
+Press a button that removes half of the obstacles.
+
 ## Transfer (change objects and rewards, keep dynamics)
-1. Push box to location
-2. Press buttons
-3. Go to goal
-4. ~~Billiard (hit a ball -> make it hit another specific ball, impose costs on the number of hits?)~~
-5. Soccer.
-6. Change sizes of goals/box/buttons
+1. Push box to location.
+2. Pull instead of push.
+3. Press buttons
+4. Go to goal
+7. Change sizes of goals/box/buttons
 
 ## All tasks
 1. Push box to location (box, goal locations)
@@ -50,7 +59,7 @@ Make sure that (e.g.) PPO can solve each task independantly -- this would be the
 Afterwards, make sure that the baseline algos from Ray et al. 2019 fail on the Meta-RL case.
 
 ## Meta-RL algos
-1. Use a lagrangian based approach for the constrained optimization (perhaps even copy paste from safe-agents)
+1. Use a lagrangian based approach for the constrained optimization (perhaps even copy and paste from safe-agents)
 2. Implement PEARL as a method for task inference.
 3. Implement the model-based MAML CEM-MPC algorithm
 4. Migrate LAMBDA.
