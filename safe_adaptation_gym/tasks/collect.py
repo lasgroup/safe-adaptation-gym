@@ -3,8 +3,8 @@ from typing import Tuple
 import numpy as np
 
 import safe_adaptation_gym.consts as c
+from safe_adaptation_gym.tasks.press_buttons import PressButtons
 from safe_adaptation_gym.tasks.task import MujocoBridge
-from safe_adaptation_gym.tasks.press_buttons import PressButtons, State
 
 
 class Collect(PressButtons):

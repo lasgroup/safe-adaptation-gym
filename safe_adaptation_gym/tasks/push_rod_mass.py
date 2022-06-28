@@ -1,8 +1,8 @@
 import numpy as np
 
+import safe_adaptation_gym.consts as c
 from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
 from safe_adaptation_gym.utils import merge
-import safe_adaptation_gym.consts as c
 
 
 class PushRodMass(PushBox):

@@ -2,9 +2,9 @@ from typing import Tuple
 
 import numpy as np
 
-from safe_adaptation_gym.tasks import task
-from safe_adaptation_gym.tasks import push_box
 from safe_adaptation_gym import utils
+from safe_adaptation_gym.tasks import push_box
+from safe_adaptation_gym.tasks import task
 
 
 class HaulBox(push_box.PushBox):
@@ -13,14 +13,17 @@ class HaulBox(push_box.PushBox):
     super(HaulBox, self).__init__()
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
-    # Import mjcf here so that rendering with multiple process works.
     from dm_control import mjcf
     layout['box'] = layout['robot'].copy()
     layout['box'][0] += self.BOX_SIZE * 3.
     config = super(HaulBox, self).build_world_config(layout, rs)
     model = mjcf.RootElement()
     string = model.tendon.add(
-        'spatial', name='string', limited=True, range='0 0.75', width=0.002)
+        'spatial',
+        name='string',
+        limited=True,
+        range=[0, self.BOX_SIZE * 3.75],
+        width=0.002)
     string.add('site', site='robot')
     string.add('site', site='box_site')
     box_config = {'others': {'tendon': string.to_xml_string()}}
