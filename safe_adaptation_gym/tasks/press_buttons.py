@@ -112,14 +112,14 @@ class Timer:
 
   def __init__(self, count):
     self._count = count
-    self._time = 0
+    self.time = 0
 
   def tick(self):
-    self._time = max(0, self._time - 1)
+    self.time = max(0, self.time - 1)
 
   def reset(self):
-    self._time = self._count
+    self.time = self._count
 
   @property
   def done(self):
-    return self._time == 0
+    return self.time == 0

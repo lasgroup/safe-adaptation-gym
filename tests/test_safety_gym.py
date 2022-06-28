@@ -8,7 +8,7 @@ from gym.wrappers import TimeLimit
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
-ROBOT = 'point'
+ROBOT = 'doggo'
 
 
 def controller(action_space):
@@ -76,6 +76,7 @@ class ViewerWrapper:
 
 
 @pytest.fixture(params=[
+    tasks.FollowTheLeader(),
     tasks.HaulBox(),
     tasks.Collect(),
     tasks.PushBox(),

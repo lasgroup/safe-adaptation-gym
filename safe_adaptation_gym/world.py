@@ -154,8 +154,8 @@ class World:
     phase = float(mujoco_bridge.time)
     for name, _ in self._layout.items():
       if name.startswith('gremlins'):
-        target = np.array([np.sin(phase), np.cos(phase)
-                          ]) * self.config.gremlins_travel
+        target = np.array([np.sin(phase), np.cos(phase)])
+        target *= self.config.gremlins_travel
         pos = np.r_[target, [0.]]
         mujoco_bridge.set_mocap_pos(name + 'mocap', pos)
     self.task.set_mocaps(mujoco_bridge)

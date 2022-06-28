@@ -18,13 +18,9 @@ Separate into three categories: MDP variations due to reward and CMDP variations
 
 offsamples = 0 (to speed rendering?)
 
-Disturbance (e.g. wind)
-
 Package drop collection.
 
 Wall in between?
-
-Sample constraint bounds.
 
 Coverage problems.
 
@@ -40,17 +36,7 @@ Press a button that removes half of the obstacles.
 7. Change sizes of goals/box/buttons
 
 ## All tasks
-1. Push box to location (box, goal locations)
-2. Press buttons (needed button, other buttons)
-3. Go to goal (static goal location)
-4. ~~Billiard (hit/roll a ball -> make it hit another specific ball, impose costs on the number of hits? If touched ball on prev state but this state not give more reward? Better use gating as in original safety gym. Better not give reward if both robot and second ball are inside goal area. Or reward given the distance of the second ball traveled) (ball to hit, ball that the white ball should hit)~~
-5. ~~Follow a circle trajectory (-)~~
-6. ~~Follow a square trajectory (-)~~
-7. ~~Follow a triangle trajectory (-)~~
-8. ~~Drive box to a platform. (direction to the slope and then change to center.)~~
-9. Hit/roll a ball to a goal. (same ball as billiard?, but just go to goal area)
-10. Collect apples, avoid bad objects (as in CPO paper)
-11. ~~Follow the leader but don't hit it (Generate random circular splines: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html, https://stackoverflow.com/questions/64796809/how-to-avoid-spline-overlap-with-random-blobby-circle)/Catch a moving goal (instead of follow the leader?)~~
+11. Follow the leader but don't hit it (Generate random circular splines: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html, https://stackoverflow.com/questions/64796809/how-to-avoid-spline-overlap-with-random-blobby-circle)/Catch a moving goal (instead of follow the leader?)
 12. Go to moving goal.
 
 # Benchmark

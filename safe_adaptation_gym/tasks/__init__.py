@@ -5,7 +5,10 @@ from safe_adaptation_gym.tasks.haul_box import HaulBox
 from safe_adaptation_gym.tasks.press_buttons import PressButtons
 from safe_adaptation_gym.tasks.push_box import PushBox
 from safe_adaptation_gym.tasks.push_rod_mass import PushRodMass
+from safe_adaptation_gym.tasks.follow_the_leader import FollowTheLeader
 from safe_adaptation_gym.tasks.task import Task
 
-__all__ = ['GoToGoal', 'PushBox', 'PressButtons', 'PushRodMass', 'BallToGoal',
-           'Collect', 'HaulBox']
+__all__ = [
+    'GoToGoal', 'PushBox', 'PressButtons', 'PushRodMass', 'BallToGoal',
+    'Collect', 'HaulBox', 'FollowTheLeader'
+]
