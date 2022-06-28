@@ -2,12 +2,12 @@ from typing import Tuple
 
 import numpy as np
 
-from safe_adaptation_gym.tasks.task import MujocoBridge
-from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
-from safe_adaptation_gym.utils import merge
+from safe_adaptation_gym.tasks import task
+from safe_adaptation_gym.tasks import push_box
+from safe_adaptation_gym import utils
 
 
-class HaulBox(PushBox):
+class HaulBox(push_box.PushBox):
 
   def __init__(self):
     super(HaulBox, self).__init__()
@@ -24,12 +24,21 @@ class HaulBox(PushBox):
     string.add('site', site='robot')
     string.add('site', site='box_site')
     box_config = {'others': {'tendon': string.to_xml_string()}}
-    merge(config, box_config)
+    utils.merge(config, box_config)
     return config
 
-  def compute_reward(self, layout: dict, placements: dict,
-                     rs: np.random.RandomState,
-                     mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
-    # No need to reward the agent for getting close to the box as the robot
-    # and box are tied.
-    return GoToGoal.compute_reward(self, layout, placements, rs, mujoco_bridge)
+  def compute_reward(
+      self, layout: dict, placements: dict, rs: np.random.RandomState,
+      mujoco_bridge: task.MujocoBridge) -> Tuple[float, bool, dict]:
+    goal_pos = mujoco_bridge.body_pos('goal')[:2]
+    box_pos = mujoco_bridge.body_pos('box')[:2]
+    box_goal_distance = np.linalg.norm(box_pos - goal_pos)
+    reward = self._last_box_goal_distance - box_goal_distance
+    self._last_box_goal_distance = box_goal_distance
+    info = {}
+    if box_goal_distance <= self.GOAL_SIZE:
+      info['goal_met'] = True
+      utils.update_layout(layout, mujoco_bridge)
+      self.reset(layout, placements, rs, mujoco_bridge)
+      reward += 1.
+    return reward, False, info
