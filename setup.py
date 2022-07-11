@@ -12,7 +12,7 @@ extras = {'dev': ['pytest>=4.4.0', 'Pillow', 'matplotlib']}
 package_data = {'safe-adaptation-gym': ['assets/*']}
 
 setup(
-    name='safe_adaptation_gym',
+    name='safe-adaptation-gym',
     version='0.0.0',
     packages=find_packages(),
     python_requires='>3.8',

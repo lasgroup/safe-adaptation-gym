@@ -39,7 +39,6 @@ class FollowTheLeader(tasks.GoToGoal):
       self._current_radius = self._next_radius
       self._next_radius = self._random_radius(self.rs)
       self._timer.reset()
-      print('done')
     phase = float(mujoco_bridge.time)
     progress = (self.SAMPLE_POINTS - self._timer.time) / self.SAMPLE_POINTS
     radius = progress * (self._next_radius -

@@ -73,7 +73,7 @@ class SafeAdaptationGym(gym.Env):
     info = {'cost': cost, 'bound': self._world.bound}
     observation = self.observation
     if self._render_lidars_and_collision:
-      self._update_lidars_and_collision(observation, cost)
+      self._update_lidars_and_collision(self.lidar_observations, cost)
     return observation, reward, terminal, info
 
   def reset(
@@ -118,16 +118,18 @@ class SafeAdaptationGym(gym.Env):
           height=64, width=64, camera_id='vision')
       image = np.clip(image, 0, 255).astype(np.float32)
       return image / 255.0
+    sensors = self._sensors()
+    lidars = self.lidar_observations
+    obs = np.concatenate([lidars, np.asarray(sensors).ravel()])
+    return obs
+
+  @property
+  def lidar_observations(self) -> np.ndarray:
     obstacles, objects, goal = self._world.body_positions(self.mujoco_bridge)
     obstacles_lidar = self._lidar(obstacles)
     goal_lidar = self._lidar(goal)
     objects_lidar = self._lidar(objects)
-    sensors = self._sensors()
-    obs = np.concatenate([
-        obstacles_lidar, objects_lidar, goal_lidar,
-        np.asarray(sensors).ravel()
-    ])
-    return obs
+    return np.concatenate([obstacles_lidar, objects_lidar, goal_lidar])
 
   @property
   def action_space(self) -> gym.spaces.Box:
@@ -229,8 +231,7 @@ class SafeAdaptationGym(gym.Env):
     return sensors
 
   def _update_lidars_and_collision(self, observations, cost):
-    obstacles_lidar, objects_lidar, goal_lidar = np.split(
-        observations[:self.NUM_LIDAR_BINS * 3], 3)
+    obstacles_lidar, objects_lidar, goal_lidar = np.split(observations, 3)
 
     def update_lidar_alpha(name, lidar, color):
       for i, value in enumerate(lidar):
