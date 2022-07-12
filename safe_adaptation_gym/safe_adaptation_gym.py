@@ -116,8 +116,8 @@ class SafeAdaptationGym(gym.Env):
     if self._rgb_observation:
       image = self.mujoco_bridge.physics.render(
           height=64, width=64, camera_id='vision')
-      image = np.clip(image, 0, 255).astype(np.float32)
-      return image / 255.0
+      image = np.clip(image, 0, 255).astype(np.uint8)
+      return image
     sensors = self._sensors()
     lidars = self.lidar_observations
     obs = np.concatenate([lidars, np.asarray(sensors).ravel()])
@@ -139,8 +139,7 @@ class SafeAdaptationGym(gym.Env):
   def observation_space(self) -> gym.spaces.Box:
     if self._observation_space is None:
       if self._rgb_observation:
-        self._observation_space = gym.spaces.Box(0., 1., (64, 64, 3),
-                                                 np.float32)
+        self._observation_space = gym.spaces.Box(0, 255, (64, 64, 3), np.uint8)
       else:
         sensors = self._sensors()
         # Lidar for (1) obstacles, (2) objects and (3) goal.
