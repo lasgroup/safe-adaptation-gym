@@ -12,9 +12,8 @@ class Collect(PressButtons):
 
   def __init__(self):
     super(PressButtons, self).__init__()
-    self._active_buttons = [
-        'buttons{}'.format(i) for i in range(self.NUM_BUTTONS)
-    ]
+    self._active_buttons = set(
+        'buttons{}'.format(i) for i in range(self.NUM_BUTTONS))
 
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
@@ -39,7 +38,7 @@ class Collect(PressButtons):
       name = 'buttons{}'.format(i)
       mujoco_bridge.geom_rgba[name] = c.GOAL_COLOR
       mujoco_bridge.user_groups[name] = [c.GROUP_GOAL]
-      self._active_buttons.append(name)
+      self._active_buttons.add(name)
 
   @property
   def obstacles_distribution(self):
