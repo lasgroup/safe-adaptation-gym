@@ -39,6 +39,7 @@ class Collect(PressButtons):
       name = 'buttons{}'.format(i)
       mujoco_bridge.geom_rgba[name] = c.GOAL_COLOR
       mujoco_bridge.user_groups[name] = [c.GROUP_GOAL]
+      self._active_buttons.append(name)
 
   @property
   def obstacles_distribution(self):
