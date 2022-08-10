@@ -119,8 +119,9 @@ class SafeAdaptationGym(gym.Env):
       image = np.clip(image, 0, 255).astype(np.uint8)
       return image
     sensors = self._sensors()
+    sensors = np.concatenate([s[:, None] for s in sensors]).squeeze()
     lidars = self.lidar_observations
-    obs = np.concatenate([lidars, np.asarray(sensors).ravel()])
+    obs = np.concatenate([lidars, sensors])
     return obs
 
   @property

@@ -8,7 +8,7 @@ from gym.wrappers import TimeLimit
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
-ROBOT = 'doggo'
+ROBOT = 'point'
 
 
 def controller(action_space):

@@ -4,6 +4,7 @@ import safe_adaptation_gym.primitive_objects as po
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym import utils
 from safe_adaptation_gym import consts as c
+from safe_adaptation_gym.tasks.task import MujocoBridge
 
 
 class FollowTheLeader(tasks.GoToGoal):
@@ -18,20 +19,7 @@ class FollowTheLeader(tasks.GoToGoal):
     self._current_radius = self.MAX_RADIUS
     self._next_radius = self.MIN_RADIUS
     self._timer = tasks.press_buttons.Timer(self.SAMPLE_POINTS)
-
-  def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
-    goal_dict = {
-        'name': 'goal',
-        'size': [self.GOAL_SIZE, self.GOAL_SIZE / 2.],
-        'pos': np.r_[layout['goal'], self.GOAL_SIZE / 2. + 1e-2],
-        'quat': utils.rot2quat(utils.random_rot(rs)),
-        'type': 'cylinder',
-        'contype': 0,
-        'conaffinity': 0,
-        'user': [c.GROUP_GOAL],
-        'rgba': c.GOAL_COLOR * [1, 1, 1, 0.25]
-    }
-    return {'bodies': {'goal': ([po.mocap_attributes_to_xml(goal_dict)], '')}}
+    self._origin = None
 
   def set_mocaps(self, mujoco_bridge: tasks.task.MujocoBridge):
     self._timer.tick()
@@ -44,8 +32,7 @@ class FollowTheLeader(tasks.GoToGoal):
     radius = progress * (self._next_radius -
                          self._current_radius) + self._current_radius
     target = np.array([np.sin(phase), np.cos(phase)]) * radius
-    pos = np.r_[target, [0.]]
-    mujoco_bridge.set_mocap_pos('goal', pos)
+    mujoco_bridge.set_body_pos('goal', self._origin + target)
 
   def _random_radius(self, rs: np.random.RandomState):
     return rs.uniform(self.MIN_RADIUS, self.MAX_RADIUS)
@@ -54,3 +41,4 @@ class FollowTheLeader(tasks.GoToGoal):
             mujoco_bridge: tasks.task.MujocoBridge):
     self.rs = rs
     super(FollowTheLeader, self).reset(layout, placements, rs, mujoco_bridge)
+    self._origin = mujoco_bridge.body_pos('goal')[:2].copy()
