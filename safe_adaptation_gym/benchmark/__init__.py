@@ -6,9 +6,9 @@ from typing import Iterator, Tuple
 import numpy as np
 
 from safe_adaptation_gym import tasks
-from safe_adaptation_gym.benchmark import samplers
+from safe_adaptation_gym.benchmark import task_sampler as sampler
 
-BENCHMARKS = {'no_adaptation', 'domain_randomization'}
+BENCHMARKS = {'multitask', 'task_adaptation'}
 ROBOTS = {'point', 'car', 'doggo'}
 
 pattern = re.compile(r'(?<!^)(?=[A-Z])')
@@ -27,8 +27,8 @@ ROBOTS_BASENAMES = {
 
 class Benchmark:
 
-  def __init__(self, train_sampler: samplers.TaskSampler,
-               test_sampler: samplers.TaskSampler, batch_size: int):
+  def __init__(self, train_sampler: sampler.TaskSampler,
+               test_sampler: sampler.TaskSampler, batch_size: int):
     self._train_tasks_sampler = train_sampler
     self._test_tasks_sampler = test_sampler
     self._batch_size = batch_size
@@ -68,9 +68,16 @@ def make(benchmark_name: str,
   """
   assert benchmark_name in BENCHMARKS, 'Supplied a wrong benchmark name.'
   rs = np.random.RandomState(seed)
-  if benchmark_name == 'domain_randomization':
+  if benchmark_name == 'multitask':
     # Observe all tasks, radomize the parameters of the MDP (action scale,
     # size of obstacles, etc.).
-    train_sampler = samplers.TaskSampler(rs, TASKS)
-    test_sampler = samplers.TaskSampler(rs, TASKS)
+    train_sampler = sampler.TaskSampler(rs, TASKS)
+    test_sampler = sampler.TaskSampler(rs, TASKS)
+    return Benchmark(train_sampler, test_sampler, batch_size)
+  if benchmark_name == 'task_adaptation':
+    # Observe all tasks, radomize the parameters of the MDP (action scale,
+    # size of obstacles, etc.).
+    ids = rs.choice(len(TASKS), replace=False)
+    train_sampler = sampler.TaskSampler(rs, TASKS[ids[:5]])
+    test_sampler = sampler.TaskSampler(rs, TASKS[ids[5:]])
     return Benchmark(train_sampler, test_sampler, batch_size)

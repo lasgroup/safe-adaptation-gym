@@ -1,5 +1,4 @@
 from typing import Tuple, Union, Optional, List, Dict
-from types import SimpleNamespace
 
 import dm_control.rl.control
 import gym
@@ -26,7 +25,7 @@ class SafeAdaptationGym(gym.Env):
   def __init__(self,
                robot_base: str,
                rgb_observation: bool = False,
-               config: Optional[SimpleNamespace] = None,
+               config: Optional[Dict] = None,
                render_lidars_and_collision: bool = False,
                render_options: Optional[Dict] = None):
     self._world: Optional[World] = None

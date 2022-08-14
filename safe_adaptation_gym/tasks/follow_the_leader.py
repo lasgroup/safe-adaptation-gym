@@ -1,10 +1,6 @@
 import numpy as np
 
-import safe_adaptation_gym.primitive_objects as po
 from safe_adaptation_gym import tasks
-from safe_adaptation_gym import utils
-from safe_adaptation_gym import consts as c
-from safe_adaptation_gym.tasks.task import MujocoBridge
 
 
 class FollowTheLeader(tasks.GoToGoal):
