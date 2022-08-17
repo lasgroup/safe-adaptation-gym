@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 import safe_adaptation_gym.consts as c
@@ -31,9 +33,13 @@ class BallToGoal(PushBox):
         user=[c.GROUP_OBJECTS],
         solref=[0.018, 0.2],
         condim=6,
-        rgba=[1., 1., 1., 1.],
-        material='ukraine',
+        rgba=np.ones((4,)),
+        material='interactobj',
         priority=1)
     box_config = {'bodies': {'box': ([ball.to_xml_string()], '')}}
     merge(config, box_config)
     return config
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return -1.75, -1.75, 1.75, 1.75

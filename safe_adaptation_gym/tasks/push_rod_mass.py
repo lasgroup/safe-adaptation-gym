@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 import safe_adaptation_gym.consts as c
@@ -33,9 +35,13 @@ class PushRodMass(PushBox):
         density=self.BOX_DENSITY / 2.,
         friction=[1.2, 0.001, 0.05],
         rgba=[1, 1, 1, 1],
-        material='pine',
+        material='interactobj',
         user=[c.GROUP_OBJECTS],
         priority=1)
     box_config = {'bodies': {'box': ([rod_root.to_xml_string()], '')}}
     merge(config, box_config)
     return config
+
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return -1.75, -1.75, 1.75, 1.75

@@ -88,19 +88,19 @@ class MujocoBridge:
                     0.582 0.906" rgb2="0.1 0.1 0.35"
                         width="800" height="800" markrgb="1 1 1" 
                         mark="random" random="0.001"/>
+                        <texture name="interactobj" builtin="checker" width="150" height="150"
+             rgb1="0.87 0.87 0" rgb2="1 1 0" markrgb="0.7 0.7 0"/>
                     <texture name="texplane" builtin="checker" height="100" 
                     width="100"
                         rgb1="0.7 0.7 0.7" rgb2="0.8 0.8 0.8" type="2d"/>
-                    <texture file="{}" name="ukraine"/>
-                    <texture file="{}" name="pine"/>
                     <material name="MatPlane" reflectance="0.1" 
                     shininess="0.1" specular="0.1"
                         texrepeat="10 10" texture="texplane"/>
-                    <material name="ukraine" specular="0.4" texture="ukraine" />
-                    <material name="pine" specular="0.1" texture="pine" />
+                    <material name="interactobj" reflectance="0.1" 
+                    shininess="0.1" specular="0.1"
+                        texrepeat="10 10" texture="interactobj"/>
                 </asset>
-                """.format(c.BASE_DIR + '/textures/ukraine.png',
-                           c.BASE_DIR + '/textures/pine.png'))
+                """)
       xml['mujoco']['asset'] = asset['asset']
 
     # Add light to the XML dictionary
