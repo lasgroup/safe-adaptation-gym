@@ -7,6 +7,7 @@ from gym.wrappers import TimeLimit
 
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
+from safe_adaptation_gym import consts
 
 ROBOT = 'point'
 
@@ -61,7 +62,7 @@ class ViewerWrapper:
 
   def reset(self):
     if self.sum_rewards is not None:
-      print('Sum rewards: {}'.format(self.sum_rewards))
+      print('Episode Return: {}'.format(self.sum_rewards))
     self.env.reset()
     self.sum_rewards = 0.
 
@@ -87,11 +88,25 @@ class ViewerWrapper:
 ])
 def safety_gym(request):
   arena = TimeLimit(
-      SafeAdaptationGym(f'xmls/{ROBOT}.xml', render_lidars_and_collision=True),
-      1000)
-  arena.seed(10)
+      SafeAdaptationGym(
+          f'xmls/{ROBOT}.xml',
+          render_lidars_and_collision=True,
+          render_options={
+              'camera_id': 'fixedfar',
+              'height': 320,
+              'width': 320
+          },
+          config={'obstacles_size_noise_scale': 1.}), 1000)
+  seeds = {
+      'Collect', 'GoToGoal', 'HaulBox', 'PushBox', 'BallToGoal', 'PressButtons',
+      'FollowTheLeader', 'PushRodMass'
+  }
+  seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
+  name = type(request.param).__name__
+  arena.seed(seeds[name])
+  # request.param._obstacle_scales = np.asarray([0.25] * len(consts.OBSTACLES))
   arena.set_task(request.param)
-  arena.seed(10)
+  arena.seed(seeds[name])
   return arena
 
 
@@ -103,9 +118,25 @@ def test_viewer(safety_gym):
   viewer.launch(ViewerWrapper(safety_gym), policy)
 
 
+def test_print(safety_gym):
+  import matplotlib.pyplot as plt
+  import re
+  safety_gym.reset()
+  name = type(safety_gym.unwrapped._world.task).__name__
+  name = re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
+  plt.imsave(name + '.png', safety_gym.render())
+  assert True
+
+
 def test_episode(safety_gym):
+  import matplotlib.pyplot as plt
+  policy = (lambda *_: safety_gym.action_space.sample()
+           ) if not glfw.joystick_present(glfw.JOYSTICK_1) else controller(
+               safety_gym.action_space)
   safety_gym.reset()
   done = False
   while not done:
-    *_, done, _ = safety_gym.step(safety_gym.action_space.sample())
+    *_, done, _ = safety_gym.step(policy())
+    plt.imshow(safety_gym.render())
+    plt.pause(0.00001)
   assert True

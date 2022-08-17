@@ -23,7 +23,8 @@ class HaulBox(push_box.PushBox):
         name='string',
         limited=True,
         range=[0, self.BOX_SIZE * 3.75],
-        width=0.002)
+        width=0.01,
+        rgba=[0.5, 0.0, 0.5, 1.0])
     string.add('site', site='robot')
     string.add('site', site='box_site')
     box_config = {'others': {'tendon': string.to_xml_string()}}
