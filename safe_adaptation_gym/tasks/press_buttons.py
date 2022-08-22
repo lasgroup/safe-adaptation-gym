@@ -13,7 +13,7 @@ class PressButtons(Task):
   NUM_BUTTONS = 4
   BUTTONS_KEEPOUT = 0.2
   BUTTON_SIZE = 0.1
-  BUTTON_COLOR = np.array([1, .5, 0, 1])
+  BUTTON_COLOR = np.array([1, 105 / 255, 180 / 255, 1])
   BUTTON_TICKING_DELAY = 5
 
   def __init__(self):
