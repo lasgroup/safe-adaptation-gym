@@ -12,7 +12,6 @@ To find more details about evaluation metrics and formulation, please see our re
 ```python
 import safe-adaptation-gym
 from safe_adaptation_gym import tasks
-
 robot = 'point'
 seed = 666
 task_name = 'go_to_goal'
