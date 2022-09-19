@@ -12,6 +12,7 @@ To find more details about evaluation metrics and formulation, please see our re
 ```python
 import safe-adaptation-gym
 from safe_adaptation_gym import tasks
+# Define important parameters.
 robot = 'point'
 seed = 666
 task_name = 'go_to_goal'
@@ -19,7 +20,7 @@ config = {'obstacles_size_noise_scale': 1.})
 rgb_observation = False  # use first-person-view observations, or only pseudo-lidar
 render_options = {'camera_id': 'fixedfar', 'height': 320, 'width': 320}
 render_lidar_and_collision = True  # render human-supportive visualization (slight computation slowdown)
-
+# Make a new simulation environment.
 env = safe_adaptation_gym.make(robot,
   task,
   seed,
@@ -29,14 +30,14 @@ env = safe_adaptation_gym.make(robot,
   render_lidar_and_collision
   )
 policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
-
+# One RL interaction.
 observation = env.reset()
 action = policy(observation)
 next_observation, reward, done, info  = env.step(action)
 cost = info.get('cost', 0.)
-
+# Set a new task.
 env.set_task(tasks.HaulBox())
-
+# One RL interaction.
 observation = env.reset()
 action = policy(observation)
 next_observation, reward, done, info = env.step(action)
@@ -47,12 +48,11 @@ In order to reproduce our results, define a task sampler:
 ```python
 import safety_gym
 from safe_adaptation_gym import benchmark
-
+# Define important parameters.
 robot = 'doggo'
 seed = 666
 env = safe_adaptation_gym.make(robot, seed)
 policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
-
 benchmark_name = 'multitask'  # can also be 'task_adaptation', in which case, some tasks prototypes are held out.
 batch_size = 30
 task_sampler = benchmark.make(benchmark_name, batch_size, seed)
@@ -63,7 +63,6 @@ for task_name, task in task_sampler.train_tasks:
   action = policy(observation)
   next_observation, reward, done, info  = env.step(action)
   cost = info.get('cost', 0.)
-  
 # Iterate over held-out task prototypes
 for task_name, task in task_sampler.test_tasks:
   env.reset(options={'task': task})
