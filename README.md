@@ -8,7 +8,7 @@ To find more details about evaluation metrics and formulation, please see our re
 1. Open a new terminal and `git clone` the repo.
 2. Create a new environment with your favorite environment manager (venv, conda). Make sure to have it set up with `python >= 3.8.13`.
 3. Install dependencies with `cd safe-adaptation-gym && pip install .`
-4. The following snippet demostrates how to use the `safe-adapatation-gym` no a specific task:
+4. The following snippet demostrates how to use the `safe-adapatation-gym` on a specific task:
 ```python
 import safe-adaptation-gym
 from safe_adaptation_gym import tasks
@@ -29,14 +29,48 @@ env = safe_adaptation_gym.make(robot,
   render_options,
   render_lidar_and_collision
   )
+ policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
 
-o = env.reset()
-*_ = env.step(env.action_space.sample()
+observation = env.reset()
+action = policy(observation)
+next_observation, reward, done, info  = env.step(action)
+cost = info.get('cost', 0.)
 
 env.set_task(tasks.HaulBox())
 
-o = env.reset()
-*_ = env.step(env.action_space.sample()
+observation = env.reset()
+action = policy(observation)
+next_observation, reward, done, info = env.step(action)
 ```
 
 ## Benchmark
+In order to reproduce our results, define a task sampler:
+```python
+import safety_gym
+from safe_adaptation_gym import benchmark
+
+robot = 'doggo'
+seed = 666
+env = safe_adaptation_gym.make(robot, seed)
+policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
+
+benchmark_name = 'multitask'  # can also be 'task_adaptation', in which case, some tasks prototypes are held out.
+batch_size = 30
+task_sampler = benchmark.make(benchmark_name, batch_size, seed)
+# Iterate over training task prototypes
+for task_name, task in task_sampler.train_tasks:
+  env.reset(options={'task': task})
+  observation = env.reset()
+  action = policy(observation)
+  next_observation, reward, done, info  = env.step(action)
+  cost = info.get('cost', 0.)
+  
+# Iterate over held-out task prototypes
+for task_name, task in task_sampler.test_tasks:
+  env.reset(options={'task': task})
+  observation = env.reset()
+  action = policy(observation)
+  next_observation, reward, done, info  = env.step(action)
+  cost = info.get('cost', 0.)
+```
+
