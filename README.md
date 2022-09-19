@@ -29,7 +29,7 @@ env = safe_adaptation_gym.make(robot,
   render_options,
   render_lidar_and_collision
   )
- policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
+policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
 
 observation = env.reset()
 action = policy(observation)
