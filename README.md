@@ -58,15 +58,13 @@ batch_size = 30
 task_sampler = benchmark.make(benchmark_name, batch_size, seed)
 # Iterate over training task prototypes
 for task_name, task in task_sampler.train_tasks:
-  env.reset(options={'task': task})
-  observation = env.reset()
+  observation = env.reset(options={'task': task})  # We can also set new tasks as we reset to a new episode
   action = policy(observation)
   next_observation, reward, done, info  = env.step(action)
   cost = info.get('cost', 0.)
 # Iterate over held-out task prototypes
 for task_name, task in task_sampler.test_tasks:
   env.reset(options={'task': task})
-  observation = env.reset()
   action = policy(observation)
   next_observation, reward, done, info  = env.step(action)
   cost = info.get('cost', 0.)
