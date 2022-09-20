@@ -4,6 +4,8 @@ It is based on [Safety Gym](https://github.com/openai/safety-gym) and extends it
 
 To find more details about evaluation metrics and formulation, please see our research paper.
 
+<img width="100%" src="https://imgur.com/7ak6HO2.gif">
+
 ## Install & Run
 1. Open a new terminal and `git clone` the repo.
 2. Create a new environment with your favorite environment manager (venv, conda). Make sure to have it set up with `python >= 3.8.13`.
