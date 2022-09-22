@@ -75,8 +75,7 @@ def make(benchmark_name: str,
     test_sampler = sampler.TaskSampler(rs, TASKS)
     return Benchmark(train_sampler, test_sampler, batch_size)
   if benchmark_name == 'task_adaptation':
-    # Observe all tasks, radomize the parameters of the MDP (action scale,
-    # size of obstacles, etc.).
+    # Keep 3 tasks held-out.
     ids = rs.choice(len(TASKS), replace=False)
     train_sampler = sampler.TaskSampler(rs, TASKS[ids[:5]])
     test_sampler = sampler.TaskSampler(rs, TASKS[ids[5:]])
