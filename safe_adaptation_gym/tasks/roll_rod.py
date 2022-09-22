@@ -7,14 +7,14 @@ from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
 from safe_adaptation_gym.utils import merge
 
 
-class PushRodMass(PushBox):
+class RollRod(PushBox):
   ROD_LENGTH = 0.3
   ROD_RADIUS = 0.08
   BOX_KEEPOUT = 0.7
   BOX_SIZE = 0.25
 
   def __init__(self):
-    super(PushRodMass, self).__init__()
+    super(RollRod, self).__init__()
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     # Import mjcf here so that rendering with multiple process works.

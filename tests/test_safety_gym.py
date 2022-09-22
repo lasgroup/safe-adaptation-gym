@@ -77,12 +77,12 @@ class ViewerWrapper:
 
 
 @pytest.fixture(params=[
-    tasks.FollowTheLeader(),
+    tasks.CatchGoal(),
     tasks.HaulBox(),
     tasks.Collect(),
     tasks.PushBox(),
-    tasks.PushRodMass(),
-    tasks.BallToGoal(),
+    tasks.RollRod(),
+    tasks.DribbleBall(),
     tasks.PressButtons(),
     tasks.GoToGoal()
 ])
@@ -98,8 +98,8 @@ def safety_gym(request):
           },
           config={'obstacles_size_noise_scale': 1.}), 1000)
   seeds = {
-      'Collect', 'GoToGoal', 'HaulBox', 'PushBox', 'BallToGoal', 'PressButtons',
-      'FollowTheLeader', 'PushRodMass'
+      'Collect', 'GoToGoal', 'HaulBox', 'PushBox', 'DribbleBall', 'PressButtons',
+      'CatchGoal', 'RollRod'
   }
   seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
   name = type(request.param).__name__

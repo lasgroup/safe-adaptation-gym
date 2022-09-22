@@ -7,13 +7,13 @@ from safe_adaptation_gym.tasks.push_box import PushBox, GoToGoal
 from safe_adaptation_gym.utils import merge, convert_to_text
 
 
-class BallToGoal(PushBox):
+class DribbleBall(PushBox):
   SPHERE_RADIUS = 0.14
   BOX_KEEPOUT = 0.2
   BOX_SIZE = SPHERE_RADIUS
 
   def __init__(self):
-    super(BallToGoal, self).__init__()
+    super(DribbleBall, self).__init__()
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     # Import mjcf here so that rendering with multiple process works.
