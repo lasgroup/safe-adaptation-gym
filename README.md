@@ -1,58 +1,74 @@
-# learn2learn-safely
-A Safety-Gym based benchmark suite for safe meta reinforcement learning
+# Safe Adaptation Gym
+The `safe-adaptation-gym` is a benchmark suite for testing how agents perform in a multitask and adaptation settings where safety is crucial.
+It is based on [Safety Gym](https://github.com/openai/safety-gym) and extends its 3 tasks to 8 different task prototypes.
 
-Separate into three categories: MDP variations due to reward and CMDP variations due to costs, MDP variations on the actions (e.g., disable doggo's leg)
+To find more details about evaluation metrics and formulation, please see our research paper.
 
-# Ideas
-1. Generalize across different dynamics
-2. Generalize across different tasks (but same robot.)
-4. Action noise scale is resampled (different scale for each dimension of actions).
-5. Action scale is resampled (different scale for each dimension of actions).
-6. ~~Take one of doggo legs off.~~ (Look for 4. and 5.)
-12. Mix the obstacles types but keep the task.
-13. Mix tasks keep the types.
-14. How parametric and non-parametric transfer can be tested together in a more intelligent way than metaworlds.
-15. Cross validate tasks: in each experiment make a different mixture of training, testing splits.
+<img width="100%" src="https://imgur.com/7ak6HO2.gif">
 
-# Possible tasks
+## Install & Run
+1. Open a new terminal and `git clone` the repo.
+2. Create a new environment with your favorite environment manager (venv, conda). Make sure to have it set up with `python >= 3.8.13`.
+3. Install dependencies with `cd safe-adaptation-gym && pip install .`.
+4. The following snippet demostrates how to use the `safe-adapatation-gym` on a specific task:
+```python
+import safe-adaptation-gym
+from safe_adaptation_gym import tasks
+# Define important parameters.
+robot = 'point'
+seed = 666
+task_name = 'go_to_goal'
+config = {'obstacles_size_noise_scale': 1.})
+rgb_observation = False  # use first-person-view observations, or only pseudo-lidar
+render_options = {'camera_id': 'fixedfar', 'height': 320, 'width': 320}
+render_lidar_and_collision = True  # render human-supportive visualization (slight computation slowdown)
+# Make a new simulation environment.
+env = safe_adaptation_gym.make(robot,
+  task,
+  seed,
+  config,
+  rbg_observation,
+  render_options,
+  render_lidar_and_collision
+  )
+policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
+# One RL interaction.
+observation = env.reset()
+action = policy(observation)
+next_observation, reward, done, info  = env.step(action)
+cost = info.get('cost', 0.)
+# Set a new task.
+env.set_task(tasks.HaulBox())
+# One RL interaction.
+observation = env.reset()
+action = policy(observation)
+next_observation, reward, done, info = env.step(action)
+```
 
-offsamples = 0 (to speed rendering?)
+## Benchmark
+In order to reproduce our results, define a task sampler:
+```python
+import safety_gym
+from safe_adaptation_gym import benchmark
+# Define important parameters.
+robot = 'doggo'
+seed = 666
+env = safe_adaptation_gym.make(robot, seed)
+policy = lambda obs: env.action_space.sample()  # define a uniformly random policy
+benchmark_name = 'multitask'  # can also be 'task_adaptation', in which case, some tasks prototypes are held out.
+batch_size = 30
+task_sampler = benchmark.make(benchmark_name, batch_size, seed)
+# Iterate over training task prototypes
+for task_name, task in task_sampler.train_tasks:
+  observation = env.reset(options={'task': task})  # We can also set new tasks as we reset to a new episode
+  action = policy(observation)
+  next_observation, reward, done, info  = env.step(action)
+  cost = info.get('cost', 0.)
+# Iterate over held-out task prototypes
+for task_name, task in task_sampler.test_tasks:
+  env.reset(options={'task': task})
+  action = policy(observation)
+  next_observation, reward, done, info  = env.step(action)
+  cost = info.get('cost', 0.)
+```
 
-Package drop collection.
-
-Wall in between?
-
-Coverage problems.
-
-Box with hole. Balls falling from the air, collect as many balls as possible.
-
-Press a button that removes half of the obstacles.
-
-## Transfer (change objects and rewards, keep dynamics)
-1. Push box to location.
-2. Pull instead of push.
-3. Press buttons
-4. Go to goal
-7. Change sizes of goals/box/buttons
-
-## All tasks
-11. Follow the leader but don't hit it (Generate random circular splines: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html, https://stackoverflow.com/questions/64796809/how-to-avoid-spline-overlap-with-random-blobby-circle)/Catch a moving goal (instead of follow the leader?)
-12. Go to moving goal.
-
-# Benchmark
-## Non Meta-RL algos
-Make sure that (e.g.) PPO can solve each task independantly -- this would be the normalization factor as in Ray et al. 2019
-Afterwards, make sure that the baseline algos from Ray et al. 2019 fail on the Meta-RL case.
-
-## Meta-RL algos
-1. Use a lagrangian based approach for the constrained optimization (perhaps even copy and paste from safe-agents)
-2. Implement PEARL as a method for task inference.
-3. Implement the model-based MAML CEM-MPC algorithm
-4. Migrate LAMBDA.
-
-
-
-
-
-
-PILLARS, GREMLINS, HAZARDS, VASES
