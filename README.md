@@ -9,7 +9,7 @@ To find more details about evaluation metrics and formulation, please see our re
 ## Install & Run
 1. Open a new terminal and `git clone` the repo.
 2. Create a new environment with your favorite environment manager (venv, conda). Make sure to have it set up with `python >= 3.8.13`.
-3. Install dependencies with `cd safe-adaptation-gym && pip install .`
+3. Install dependencies with `cd safe-adaptation-gym && pip install .`.
 4. The following snippet demostrates how to use the `safe-adapatation-gym` on a specific task:
 ```python
 import safe-adaptation-gym
