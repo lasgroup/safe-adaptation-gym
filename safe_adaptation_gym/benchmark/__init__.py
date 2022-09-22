@@ -76,7 +76,7 @@ def make(benchmark_name: str,
     return Benchmark(train_sampler, test_sampler, batch_size)
   if benchmark_name == 'task_adaptation':
     # Keep 3 tasks held-out.
-    ids = rs.permutation(TASKS.keys())
+    ids = rs.permutation(list(TASKS.keys()))
     train_tasks = {task_name: TASKS[task_name] for task_name in ids[:5]}
     heldout_tasks = {task_name: TASKS[task_name] for task_name in ids[5:]}
     train_sampler = sampler.TaskSampler(rs, train_tasks)
