@@ -16,7 +16,7 @@ pattern = re.compile(r'(?<!^)(?=[A-Z])')
 TASKS = {
     pattern.sub('_', name).lower(): task
     for name, task in inspect.getmembers(tasks, inspect.isclass)
-    if name != 'Task'
+    if name not in ['Task', 'DribbleBall', 'RollRod']
 }
 
 _BASE = 'xmls/'
@@ -77,8 +77,8 @@ def make(benchmark_name: str,
   if benchmark_name == 'task_adaptation':
     # Keep 3 tasks held-out.
     ids = rs.permutation(list(TASKS.keys()))
-    train_tasks = {task_name: TASKS[task_name] for task_name in ids[:5]}
-    heldout_tasks = {task_name: TASKS[task_name] for task_name in ids[5:]}
+    train_tasks = {task_name: TASKS[task_name] for task_name in ids[:4]}
+    heldout_tasks = {task_name: TASKS[task_name] for task_name in ids[4:]}
     train_sampler = sampler.TaskSampler(rs, train_tasks)
     test_sampler = sampler.TaskSampler(rs, heldout_tasks)
     return Benchmark(train_sampler, test_sampler, batch_size)
