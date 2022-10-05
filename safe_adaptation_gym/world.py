@@ -11,6 +11,12 @@ from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 from safe_adaptation_gym.robot import Robot
 from safe_adaptation_gym.tasks.task import Task
 
+FORCE_LIMITS = {
+    'point': np.array((5.5, 5.)),
+    'car': np.array((5., 5.)),
+    'doggo': np.ones((12,)) * 0.5
+}
+
 
 class World:
   DEFAULT = {
@@ -69,8 +75,12 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    self._robot_ctrl_range_scale = self.task.ctrl_scale(
-        self.rs, self.robot.nu) * self.config.robot_ctrl_range_scale + 1.0
+    ctrl_scale = np.abs(self.task.ctrl_scale(self.rs, self.robot.nu))
+    robot_name = self.robot.base_path.split('.xml')[0].split('/')[-1]
+    ctrl_scale = np.clip(ctrl_scale, None, FORCE_LIMITS[robot_name])
+    print(ctrl_scale)
+    self._robot_ctrl_range_scale = (
+        ctrl_scale * self.config.robot_ctrl_range_scale + 1.0)
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
