@@ -75,10 +75,9 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    ctrl_scale = np.abs(self.task.ctrl_scale(self.rs, self.robot.nu))
+    ctrl_scale = self.task.ctrl_scale(self.rs, self.robot.nu)
     robot_name = self.robot.base_path.split('.xml')[0].split('/')[-1]
-    ctrl_scale = np.clip(ctrl_scale, None, FORCE_LIMITS[robot_name])
-    print(ctrl_scale)
+    ctrl_scale *= FORCE_LIMITS[robot_name]
     self._robot_ctrl_range_scale = (
         ctrl_scale * self.config.robot_ctrl_range_scale + 1.0)
     self._layout = None

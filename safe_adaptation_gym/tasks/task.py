@@ -82,13 +82,13 @@ class Task(abc.ABC):
 
   def obstacle_scales(self, rs: np.random.RandomState):
     if self._obstacle_scales is None:
+      # https://keisan.casio.com/exec/system/1180573169
       self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
     return self._obstacle_scales
 
   def ctrl_scale(self, rs: np.random.RandomState, control_size: int):
     if self._ctrl_scale is None:
-      # https://keisan.casio.com/exec/system/1180573169
-      self._ctrl_scale = rs.standard_cauchy(control_size)
+      self._ctrl_scale = rs.uniform(size=control_size)
     return self._ctrl_scale
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
