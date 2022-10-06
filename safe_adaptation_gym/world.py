@@ -72,7 +72,8 @@ class World:
     gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
     assert 0. <= self.config.robot_ctrl_range_scale < 1., (
         'Control scale should be within [0, 1)')
-    alpha = self.config.robot_ctrl_range_scale
+    # alpha = self.config.robot_ctrl_range_scale
+    alpha = 1.
     self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
                         alpha * gain_matrix)
     self._layout = None
