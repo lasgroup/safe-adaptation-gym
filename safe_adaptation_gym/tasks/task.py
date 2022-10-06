@@ -88,7 +88,7 @@ class Task(abc.ABC):
 
   def ctrl_scale(self, rs: np.random.RandomState, control_size: int):
     if self._ctrl_scale is None:
-      self._ctrl_scale = rs.uniform(size=control_size)
+      self._ctrl_scale = rs.uniform(size=(control_size, control_size))
     return self._ctrl_scale
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):

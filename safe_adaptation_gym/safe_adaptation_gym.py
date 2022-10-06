@@ -52,11 +52,13 @@ class SafeAdaptationGym(gym.Env):
     """ Take a step and return observation, reward, done, and info """
     action = np.array(action, copy=False)
     action_range = self.mujoco_bridge.actuator_ctrlrange
+    action_transform = self._world.gain_matrix
+    action = action_transform.dot(action)
     # Action space is in [-1, 1] by definition. Each time we sample a new
     # world (a.k.a. CMDP), we sample a new scale (see _build_world_config) to
     # accomodate variability in the dynamics.
-    action = (
-        action * action_range[:, 1] + self._world.config.action_noise *
+    action += (
+        self._world.config.action_noise *
         self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))

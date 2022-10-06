@@ -75,11 +75,15 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    ctrl_scale = self.task.ctrl_scale(self.rs, self.robot.nu)
+    gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
+    rank = np.linalg.matrix_rank(gain_matrix)
+    while rank < self.robot.nu:
+      gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
+      rank = np.linalg.matrix_rank(gain_matrix)
     robot_name = self.robot.base_path.split('.xml')[0].split('/')[-1]
-    ctrl_scale *= FORCE_LIMITS[robot_name]
     self._robot_ctrl_range_scale = (
-        ctrl_scale * self.config.robot_ctrl_range_scale + 1.0)
+        FORCE_LIMITS[robot_name] * self.config.robot_ctrl_range_scale + 1.0)
+    self.gain_matrix = self._robot_ctrl_range_scale * gain_matrix
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
