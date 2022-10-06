@@ -81,9 +81,12 @@ class World:
       gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
       rank = np.linalg.matrix_rank(gain_matrix)
     robot_name = self.robot.base_path.split('.xml')[0].split('/')[-1]
-    self._robot_ctrl_range_scale = (
-        FORCE_LIMITS[robot_name] * self.config.robot_ctrl_range_scale + 1.0)
-    self.gain_matrix = self._robot_ctrl_range_scale * gain_matrix
+    assert 0. <= self.config.robot_ctrl_range_scale < 1., (
+        'Control scale should be within [0, 1)')
+    self._robot_ctrl_range = FORCE_LIMITS[robot_name]
+    alpha = self.config.robot_ctrl_range_scale
+    self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
+                        alpha * self._robot_ctrl_range * gain_matrix)
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
@@ -125,7 +128,7 @@ class World:
         'robot_xy': self._layout['robot'],
         'robot_z_height': self.robot.z_height,
         # https://keisan.casio.com/exec/system/1180573169
-        'robot_ctrl_range_scale': self._robot_ctrl_range_scale,
+        'robot_ctrl_range_scale': self._robot_ctrl_range,
         'robot_rot': utils.random_rot(self.rs),
         'bodies': {}
     }
