@@ -89,12 +89,7 @@ class Task(abc.ABC):
   def ctrl_scale(self, rs: np.random.RandomState, control_size: int):
     if self._ctrl_scale is None:
       gain_matrix = rs.uniform(size=(control_size, control_size))
-      signs = np.where(rs.binomial(1, 0.5, control_size), 1., -1.)
-      gain_matrix *= signs
-      rank = np.linalg.matrix_rank(gain_matrix)
-      while rank < control_size:
-        gain_matrix = rs.uniform(size=(control_size, control_size)) * signs
-        rank = np.linalg.matrix_rank(gain_matrix)
+      gain_matrix, *_ = np.linalg.qr(gain_matrix)
       self._ctrl_scale = gain_matrix
     return self._ctrl_scale
 
