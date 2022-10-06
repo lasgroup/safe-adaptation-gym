@@ -76,10 +76,6 @@ class World:
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
     gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
-    rank = np.linalg.matrix_rank(gain_matrix)
-    while rank < self.robot.nu:
-      gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
-      rank = np.linalg.matrix_rank(gain_matrix)
     robot_name = self.robot.base_path.split('.xml')[0].split('/')[-1]
     assert 0. <= self.config.robot_ctrl_range_scale < 1., (
         'Control scale should be within [0, 1)')
