@@ -157,9 +157,6 @@ class MujocoBridge:
     # Instantiate simulator
     xml_string = xmltodict.unparse(xml)
     self.physics = mujoco.Physics.from_xml_string(xml_string)
-    if self.config.robot_ctrl_range_scale is not None:
-      self.physics.model.actuator_ctrlrange[:] *= (
-          self.config.robot_ctrl_range_scale)
     # Recompute simulation intrinsics from new position
     self.physics.forward()
 
