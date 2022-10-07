@@ -90,7 +90,8 @@ class Task(abc.ABC):
     if self._ctrl_scale is None:
       # gain_matrix = rs.uniform(size=(control_size, control_size))
       # gain_matrix, *_ = np.linalg.qr(gain_matrix)
-      scale = -1. if rs.binomial(1, 0.5) else 1.
+      scale = rs.binomial(1, 0.5, size=control_size)
+      print('scale', scale)
       gain_matrix = scale * np.eye(control_size)
       self._ctrl_scale = gain_matrix
     return self._ctrl_scale
