@@ -88,11 +88,15 @@ class Task(abc.ABC):
 
   def ctrl_scale(self, rs: np.random.RandomState, control_size: int):
     if self._ctrl_scale is None:
-      # gain_matrix = rs.uniform(size=(control_size, control_size))
-      # gain_matrix, *_ = np.linalg.qr(gain_matrix)
-      scale = np.where(rs.binomial(1, 0.5, size=control_size), -1., 1.)
-      print('scale', scale)
-      gain_matrix = scale * np.eye(control_size)
+      dir1 = rs.randn(2)
+      dir1 /= np.linalg.norm(dir1)
+      # Find another actuation direction that is not 'too parallel' to dir1.
+      parallel = True
+      while parallel:
+        dir2 = rs.randn(2)
+        dir2 /= np.linalg.norm(dir2)
+        parallel = abs(np.dot(dir1, dir2)) > 0.9
+      gain_matrix = np.stack([dir1, dir2])
       self._ctrl_scale = gain_matrix
     return self._ctrl_scale
 
