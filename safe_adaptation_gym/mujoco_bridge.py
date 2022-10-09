@@ -17,6 +17,7 @@ class MujocoBridge:
       'robot_xy': np.zeros(2),  # Robot XY location
       'robot_rot': 0,  # Robot rotation about Z axis
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
+      'damping': [],
       'bodies': {},
       'others': {},
       'robot_ctrl_range_scale': None
@@ -42,6 +43,12 @@ class MujocoBridge:
     # Read in the base XML (contains robot, camera, floor, etc)
     robot_base_path = os.path.join(c.BASE_DIR, self.robot.base_path)
     arena_mjcf = mjcf.from_path(robot_base_path)
+    for i, joint in enumerate(arena_mjcf.worldbody.find_all('joint')):
+      if i < len(self.config.damping):
+        damping = self.config.damping[i]
+      else:
+        damping = 0.
+      joint.damping += damping
     if self._addition_render_objects_specs is not None:
       robot_site = arena_mjcf.find('site', 'robot')
       for creat_fn, specs in self._addition_render_objects_specs:
