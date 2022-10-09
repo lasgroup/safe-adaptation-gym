@@ -69,13 +69,13 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
-    assert 0. <= self.config.robot_ctrl_range_scale < 1., (
-        'Control scale should be within [0, 1)')
-    # alpha = self.config.robot_ctrl_range_scale
-    alpha = 1.
-    self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
-                        alpha * gain_matrix)
+    # gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
+    # assert 0. <= self.config.robot_ctrl_range_scale < 1., (
+    #     'Control scale should be within [0, 1)')
+    # # alpha = self.config.robot_ctrl_range_scale
+    # alpha = 1.
+    # self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
+    #                     alpha * gain_matrix)
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
@@ -171,6 +171,7 @@ class World:
     """ Resets the task. Allows the concrete implementation to perform
     specialized reset """
     self.task.reset(self._layout, self._placements, self.rs, mujoco_bridge)
+    dynamics = self.task.maybe_reset_mdp(mujoco_bridge, self.rs)
 
   def _generate_new_layout(self):
     """ Rejection sample a placement of objects to find a layout. """

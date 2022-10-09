@@ -14,7 +14,7 @@ class Task(abc.ABC):
 
   def __init__(self):
     self._obstacle_scales = None
-    self._ctrl_scale = None
+    self._mdp_params = None
     self._bound = None
 
   @abc.abstractmethod
@@ -79,6 +79,12 @@ class Task(abc.ABC):
   @property
   def arena_radius(self):
     return (self.placement_extents[2]) * np.sqrt(2.)
+
+  def maybe_reset_mdp(self, mujoco_bridge: MujocoBridge, rs: np.random.RandomState):
+    if self._mdp_params is None:
+      for item in ['body_mass', 'dof_damping', 'body_inertia', 'geom_friction']:
+        print('dd')
+      self._mdp_params = []
 
   def obstacle_scales(self, rs: np.random.RandomState):
     if self._obstacle_scales is None:
