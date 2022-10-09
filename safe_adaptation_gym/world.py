@@ -69,7 +69,9 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    self.damping = self.task.sample_mdp_params(self.rs, 3)
+    damping = self.task.sample_mdp_params(self.rs, 3)
+    damping *= self.config.robot_ctrl_range_scale
+    self.damping = damping
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)

@@ -88,7 +88,7 @@ class Task(abc.ABC):
 
   def sample_mdp_params(self, rs: np.random.RandomState, control_size: int):
     if self._mdp_params is None:
-      self._mdp_params = rs.normal(scale=5e-2, size=control_size)
+      self._mdp_params = rs.normal(size=control_size)
     return self._mdp_params
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
