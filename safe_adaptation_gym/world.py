@@ -69,11 +69,12 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    additive = self.task.ctrl_scale(self.rs, self.robot.nu)
+    gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
     assert 0. <= self.config.robot_ctrl_range_scale < 1., (
         'Control scale should be within [0, 1)')
     alpha = self.config.robot_ctrl_range_scale
-    self.additive = ((1. - alpha) * np.zeros(self.robot.nu) + alpha * additive)
+    self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
+                        alpha * gain_matrix)
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
