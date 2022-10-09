@@ -70,7 +70,7 @@ class World:
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
     gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
-    assert 0. <= self.config.robot_ctrl_range_scale < 1., (
+    assert 0. <= self.config.robot_ctrl_range_scale <= 1., (
         'Control scale should be within [0, 1)')
     alpha = self.config.robot_ctrl_range_scale
     self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
