@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import Iterator, Mapping, Optional, Type, Tuple
+from typing import Mapping, Optional, Type, Tuple
 
 import numpy as np
 
@@ -16,4 +16,6 @@ class TaskSampler:
     if len(self.tasks) == 0:
       return
     task_name, task = self.rs.permutation(list(self.tasks.items()))[0]
-    return task_name, task()
+    task = task()
+    task_name = str(task.ctrl_scale(self.rs, 2)[0, 0])
+    return task_name, task
