@@ -16,10 +16,11 @@ from safe_adaptation_gym.render import make_additional_render_objects
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
   LIDAR_MAX_DIST = 5.
-  BASE_SENSORS = ['gyro', 'magnetometer']
+  BASE_SENSORS = ['velocimeter', 'gyro', 'magnetometer']
   DOGGO_EXTRA_SENSORS = [
-      'touch_ankle_1a', 'touch_ankle_2a', 'touch_ankle_3a', 'touch_ankle_4a',
-      'touch_ankle_1b', 'touch_ankle_2b', 'touch_ankle_3b', 'touch_ankle_4b'
+      'accelerometer', 'touch_ankle_1a', 'touch_ankle_2a', 'touch_ankle_3a',
+      'touch_ankle_4a', 'touch_ankle_1b', 'touch_ankle_2b', 'touch_ankle_3b',
+      'touch_ankle_4b'
   ]
 
   def __init__(self,
