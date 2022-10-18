@@ -4,6 +4,7 @@ from typing import Dict, Tuple, List, TypeVar
 import numpy as np
 
 from safe_adaptation_gym import consts
+from safe_adaptation_gym.tasks import doggo_joints_sampler
 
 # Define as generic type instead of import the actual mujoco_bridge as it
 # loads resources (e.g. GPU pointers) that should not exist on a parent process.
@@ -14,7 +15,7 @@ class Task(abc.ABC):
 
   def __init__(self):
     self._obstacle_scales = None
-    self._ctrl_scale = None
+    self._joints = None
     self._bound = None
 
   @abc.abstractmethod
@@ -86,19 +87,12 @@ class Task(abc.ABC):
       self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
     return self._obstacle_scales
 
-  def ctrl_scale(self, rs: np.random.RandomState, control_size: int):
-    if self._ctrl_scale is None:
-      dir1 = rs.randn(2)
-      dir1 /= np.linalg.norm(dir1)
-      # Find another actuation direction that is not 'too parallel' to dir1.
-      parallel = True
-      while parallel:
-        dir2 = rs.randn(2)
-        dir2 /= np.linalg.norm(dir2)
-        parallel = abs(np.dot(dir1, dir2)) > 0.9
-      gain_matrix = np.stack([dir1, dir2])
-      self._ctrl_scale = gain_matrix
-    return self._ctrl_scale
+  def joints(self, rs: np.random.RandomState, max_joints_to_disable: int):
+    if self._joints is None:
+      num_joints_to_disable = rs.randint(max_joints_to_disable)
+      self._joints = doggo_joints_sampler.disable_joints(
+          rs, num_joints_to_disable)
+    return self._joints
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
     if self._bound is None:

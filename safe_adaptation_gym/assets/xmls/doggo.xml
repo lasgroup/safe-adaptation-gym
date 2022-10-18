@@ -135,10 +135,10 @@
     <motor name="hip_2_z" joint="hip_2_z"/>
     <motor name="hip_3_z" joint="hip_3_z"/>
     <motor name="hip_4_z" joint="hip_4_z"/>
-    <motor name="hip_1_y" joint="hip_1_y"/> <!--  gear=".05"/> -->
-    <motor name="hip_2_y" joint="hip_2_y"/> <!-- gear=".05"/> -->
-    <motor name="hip_3_y" joint="hip_3_y"/> <!-- gear=".05"/> -->
-    <motor name="hip_4_y" joint="hip_4_y"/> <!-- gear=".05"/> -->
+    <motor name="hip_1_y" joint="hip_1_y"/>
+    <motor name="hip_2_y" joint="hip_2_y"/>
+    <motor name="hip_3_y" joint="hip_3_y"/>
+    <motor name="hip_4_y" joint="hip_4_y"/>
     <motor name="ankle_1" joint="ankle_1"/>
     <motor name="ankle_2" joint="ankle_2"/>
     <motor name="ankle_3" joint="ankle_3"/>

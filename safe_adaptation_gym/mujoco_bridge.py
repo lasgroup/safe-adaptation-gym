@@ -19,7 +19,8 @@ class MujocoBridge:
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
       'bodies': {},
       'others': {},
-      'robot_ctrl_range_scale': None
+      'robot_ctrl_range_scale': None,
+      'modify_tree': []
   }
 
   def __init__(self, robot, addition_render_objects_specs=None, config=None):
@@ -46,6 +47,8 @@ class MujocoBridge:
       robot_site = arena_mjcf.find('site', 'robot')
       for creat_fn, specs in self._addition_render_objects_specs:
         robot_site.attach(creat_fn(**specs))
+    for (namespace, id_), (attribute, value) in self.config.modify_tree:
+      setattr(arena_mjcf.find(namespace, id_), attribute, value)
     robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
     # Convenience accessor for xml dictionary

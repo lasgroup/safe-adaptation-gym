@@ -26,7 +26,7 @@ class World:
       'pillars_keepout': 0.3,
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
-      'robot_ctrl_range_scale': 0.05,
+      'max_joints_to_disable': 3,
       'action_noise': 0.01,
       'max_bound': 25,
       'random_bound': False
@@ -69,12 +69,6 @@ class World:
     }
     self._obstacle_keepouts['robot'] = self.config.robot_keepout
     self._placements = self._setup_placements()
-    gain_matrix = self.task.ctrl_scale(self.rs, self.robot.nu)
-    assert 0. <= self.config.robot_ctrl_range_scale <= 1., (
-        'Control scale should be within [0, 1)')
-    alpha = self.config.robot_ctrl_range_scale
-    self.gain_matrix = ((1. - alpha) * np.eye(self.robot.nu) +
-                        alpha * gain_matrix)
     self._layout = None
     if self.config.random_bound:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
@@ -113,10 +107,15 @@ class World:
   def _build_world_config(self):
     """ Create a world_config from our own config """
     world_config = {
-        'robot_xy': self._layout['robot'],
-        'robot_z_height': self.robot.z_height,
-        'robot_rot': utils.random_rot(self.rs),
-        'bodies': {}
+        'robot_xy':
+            self._layout['robot'],
+        'robot_z_height':
+            self.robot.z_height,
+        'robot_rot':
+            utils.random_rot(self.rs),
+        'bodies': {},
+        'modify_tree':
+            self.task.joints(self.rs, self.config.max_joints_to_disable)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:
