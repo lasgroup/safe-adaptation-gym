@@ -48,30 +48,25 @@ class MujocoBridge:
         robot_site.attach(creat_fn(**specs))
     robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
-
     # Convenience accessor for xml dictionary
     worldbody = xml['mujoco']['worldbody']
-
     # Move robot position to starting position
     worldbody['body']['@pos'] = utils.convert_to_text(
         np.r_[self.config.robot_xy, self.robot.z_height])
     worldbody['body']['@quat'] = utils.convert_to_text(
         utils.rot2quat(self.config.robot_rot))
-
     # We need this because xmltodict skips over single-item lists in the tree
     worldbody['body'] = [worldbody['body']]
     if 'geom' in worldbody:
       worldbody['geom'] = [worldbody['geom']]
     else:
       worldbody['geom'] = []
-
     # Add equality section if missing
     if 'equality' not in xml['mujoco']:
       xml['mujoco']['equality'] = OrderedDict()
     equality = xml['mujoco']['equality']
     if 'weld' not in equality:
       equality['weld'] = []
-
     # Add asset section if missing
     if 'asset' not in xml['mujoco']:
       # old default rgb1: ".4 .5 .6"
@@ -102,30 +97,27 @@ class MujocoBridge:
                 </asset>
                 """)
       xml['mujoco']['asset'] = asset['asset']
-
     # Add light to the XML dictionary
     light = xmltodict.parse("""<b>
             <light cutoff="100" diffuse="1 1 1" dir="0 0 -1" directional="true"
                 exponent="1" pos="0 0 0.5" specular="0 0 0" castshadow="false"/>
             </b>""")
     worldbody['light'] = light['b']['light']
-
     # Make sure floor renders the same for every world
     for g in worldbody['geom']:
       if g['@name'] == 'floor':
         g.update({
             '@size': utils.convert_to_text(self.config.floor_size),
             '@rgba': '1 1 1 1',
-            '@material': 'MatPlane'
+            '@material': 'MatPlane',
+            '@zaxis': utils.convert_to_text(np.asarray((0.0, 0., 1.)))
         })
-
     # Add cameras to the XML dictionary
     cameras = xmltodict.parse("""<b>
             <camera name="fixednear" pos="0 -2 2" zaxis="0 -1 1"/>
             <camera name="fixedfar" pos="0 -5 5" zaxis="0 -1 1"/>
             </b>""")
     worldbody['camera'] = cameras['b']['camera']
-
     # Build and add a tracking camera (logic needed to ensure orientation
     # correct)
     theta = self.config.robot_rot
@@ -264,10 +256,3 @@ class MujocoBridge:
   @property
   def geom_rgba(self):
     return self.physics.named.model.geom_rgba
-
-  @property
-  def robot_in_floor(self) -> bool:
-    robot_x, robot_y = self.body_pos('robot')[:2]
-    # Assumes square floor.
-    floor_x, floor_y = self.physics.named.model.geom_size['floor', :2]
-    return abs(robot_x) < floor_x and abs(robot_y) < floor_y
