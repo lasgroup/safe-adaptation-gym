@@ -19,7 +19,6 @@ class MujocoBridge:
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
       'bodies': {},
       'others': {},
-      'robot_ctrl_range_scale': None,
       'modify_tree': []
   }
 

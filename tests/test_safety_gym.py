@@ -7,9 +7,8 @@ from gym.wrappers import TimeLimit
 
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
-from safe_adaptation_gym import consts
 
-ROBOT = 'point'
+ROBOT = 'doggo'
 
 
 def controller(action_space):
@@ -96,10 +95,13 @@ def safety_gym(request):
               'height': 320,
               'width': 320
           },
-          config={'obstacles_size_noise_scale': 1.}), 1000)
+          config={
+              'obstacles_size_noise_scale': 1.,
+              'max_joints_to_disable': 0
+          }), 1000)
   seeds = {
-      'Collect', 'GoToGoal', 'HaulBox', 'PushBox', 'DribbleBall', 'PressButtons',
-      'CatchGoal', 'RollRod'
+      'Collect', 'GoToGoal', 'HaulBox', 'PushBox', 'DribbleBall',
+      'PressButtons', 'CatchGoal', 'RollRod'
   }
   seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
   name = type(request.param).__name__

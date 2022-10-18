@@ -1,5 +1,5 @@
 <mujoco model="doggo">
-  <option timestep="0.015"/>
+  <option timestep="0.01"/>
   <size njmax="3000" nconmax="1000" nuser_geom="1"/>
   <default>
     <joint limited="true" stiffness="0.01"/>
@@ -21,7 +21,7 @@
           <joint axis="0 0 1" name="hip_1_z" pos="0.0 0.0 0.0" range="-10 30" type="hinge" springref="0"/>
           <joint axis="0 1 0" name="hip_1_y" pos="0.0 0.0 0.0" range="-75 15" type="hinge" springref="-10"/>
           <geom fromto="0.0 0.0 0.0 0.098 0.0566 -.05" name="hip_1"/>
-          <body pos="0.098 0.0566 -.05">
+          <body pos="0.098 0.0566 -.05" name="hip_1">
             <joint axis="-.5 .866 0" name="ankle_1" pos="0.0 0.0 0.0" range="-75 0" type="hinge" springref="-20"/>
             <geom fromto="0.0 0.0 0.0 -0.1176 -0.0679 -.1" name="ankle_1" rgba="0 0 1 1"/>
             <site name="ankle_1a" pos="0 0 0"/>
@@ -35,7 +35,7 @@
           <joint axis="0 0 -1" name="hip_4_z" pos="0.0 0.0 0.0" range="-10 30" type="hinge" springref="0"/>
           <joint axis="0 1 0" name="hip_4_y" pos="0.0 0.0 0.0" range="-75 15" type="hinge" springref="-10"/>
           <geom fromto="0.0 0.0 0.0 0.098 -0.0566 -.05" name="hip_4"/>
-          <body pos="0.098 -0.0566 -.05">
+          <body pos="0.098 -0.0566 -.05" name="hip_4">
             <joint axis=".5 .866 0" name="ankle_4" pos="0.0 0.0 0.0" range="-75 0" type="hinge" springref="-20"/>
             <geom fromto="0.0 0.0 0.0 -0.1176 0.0679 -.1" name="ankle_4" rgba="0 0 1 1"/>
             <site name="ankle_4a" pos="0 0 0"/>
@@ -53,7 +53,7 @@
             <joint axis="0 0 1" name="hip_2_z" pos="0.0 0.0 0.0" range="-10 30" type="hinge" springref="0"/>
             <joint axis="0 1 0" name="hip_2_y" pos="0.0 0.0 0.0" range="0 135" type="hinge" springref="0"/>
             <geom fromto="0.0 0.0 0.0 0.098 0.0566 -.05" name="hip_2"/>
-            <body pos="0.098 0.0566 -.05">
+            <body pos="0.098 0.0566 -.05" name="hip_2">
               <joint axis="-.5 .866 0" name="ankle_2" pos="0.0 0.0 0.0" range="-75 0" type="hinge" springref="-20"/>
               <geom fromto="0.0 0.0 0.0 -0.1176 -0.0679 -.1" name="ankle_2" rgba="0 1 0 1"/>
               <site name="ankle_2a" pos="0 0 0"/>
@@ -67,7 +67,7 @@
             <joint axis="0 0 -1" name="hip_3_z" pos="0.0 0.0 0.0" range="-10 30" type="hinge" springref="0"/>
             <joint axis="0 1 0" name="hip_3_y" pos="0.0 0.0 0.0" range="0 135" type="hinge" springref="0"/>
             <geom fromto="0.0 0.0 0.0 0.098 -0.0566 -.05" name="hip_3"/>
-            <body pos="0.098 -0.0566 -.05">
+            <body pos="0.098 -0.0566 -.05" name="hip_3">
               <joint axis=".5 .866 0" name="ankle_3" pos="0.0 0.0 0.0" range="-75 0" type="hinge" springref="-20"/>
               <geom fromto="0.0 0.0 0.0 -0.1176 0.0679 -.1" name="ankle_3" rgba="0 1 0 1"/>
               <site name="ankle_3a" pos="0 0 0"/>
