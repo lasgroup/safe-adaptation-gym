@@ -34,7 +34,7 @@ def disable_joints(
   ]
 
 
-def cripple_leg(rs: np.random.RandomState):
+def cripple_leg(rs: np.random.RandomState, disable_motors: bool = False):
   leg_id_to_cripple = rs.randint(5) + 1
   # Randomly don't cripple leg.
   if leg_id_to_cripple > 4:
@@ -48,9 +48,14 @@ def cripple_leg(rs: np.random.RandomState):
   ankle = utils.convert_to_text(ankle)
   hip_zeros = append_zeros(hip)
   ankle_zeros = append_zeros(ankle)
-  return [(('geom', hip_id), ('fromto', hip_zeros)),
-          (('geom', hip_id), ('rgba', _CRIPPLED_LEG_COLOR)),
-          (('body', hip_id), ('pos', hip)),
-          (('geom', ankle_id), ('fromto', ankle_zeros)),
-          (('geom', ankle_id), ('rgba', _CRIPPLED_LEG_COLOR)),
-          (('site', ankle_id + 'b'), ('pos', ankle))]
+  mujoco_commands = [(('geom', hip_id), ('fromto', hip_zeros)),
+                     (('geom', hip_id), ('rgba', _CRIPPLED_LEG_COLOR)),
+                     (('body', hip_id), ('pos', hip)),
+                     (('geom', ankle_id), ('fromto', ankle_zeros)),
+                     (('geom', ankle_id), ('rgba', _CRIPPLED_LEG_COLOR)),
+                     (('site', ankle_id + 'b'), ('pos', ankle))]
+  if disable_motors:
+    mujoco_commands += [(('actuator', hip_id + '_z'), ('gear', [0.])),
+                        (('actuator', hip_id + '_y'), ('gear', [0.])),
+                        (('actuator', ankle_id), ('gear', [0.]))]
+  return mujoco_commands
