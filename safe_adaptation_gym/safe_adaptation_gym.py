@@ -1,3 +1,4 @@
+from re import T
 from typing import Tuple, Union, Optional, List, Dict
 
 import dm_control.rl.control
@@ -51,7 +52,7 @@ class SafeAdaptationGym(gym.Env):
 
   def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
     """ Take a step and return observation, reward, done, and info """
-    action = np.array(action, copy=False)
+    action = np.array(action, copy=True)
     action_range = self.mujoco_bridge.actuator_ctrlrange
     # Action space is in [-1, 1] by definition. Each time we sample a new
     # world (a.k.a. CMDP), we sample a new scale (see _build_world_config) to
@@ -74,7 +75,7 @@ class SafeAdaptationGym(gym.Env):
     observation = self.observation
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(self.lidar_observations, cost)
-    return observation, reward, terminal, info
+    return observation, reward, terminal, False, info
 
   def reset(
       self,
