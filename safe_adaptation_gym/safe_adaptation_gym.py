@@ -50,7 +50,7 @@ class SafeAdaptationGym(gym.Env):
     if 'doggo' in robot_base:
       self._sensors_names += self.DOGGO_EXTRA_SENSORS
 
-  def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
+  def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
     """ Take a step and return observation, reward, done, and info """
     action = np.array(action, copy=True)
     action_range = self.mujoco_bridge.actuator_ctrlrange
