@@ -111,7 +111,6 @@ def safety_gym(request):
     seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
     name = type(request.param).__name__
     arena.seed(seeds[name])
-    # request.param._obstacle_scales = np.asarray([0.25] * len(consts.OBSTACLES))
     arena.set_task(request.param)
     arena.seed(seeds[name])
     return arena

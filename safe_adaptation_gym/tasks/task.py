@@ -87,7 +87,7 @@ class Task(abc.ABC):
       self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
     return self._obstacle_scales
 
-  def joints(self, rs: np.random.RandomState, max_joints_to_disable: int):
+  def joints(self, rs: np.random.RandomState, max_joints_to_disable: int, cripple_leg: bool):
     if self._joints is None:
       if max_joints_to_disable == 0:
         self._joints = []
@@ -95,7 +95,8 @@ class Task(abc.ABC):
         num_joints_to_disable = rs.randint(max_joints_to_disable + 1)
         self._joints = doggo_joints_sampler.disable_joints(
             rs, num_joints_to_disable)
-      self._joints += doggo_joints_sampler.cripple_leg(rs)
+      if cripple_leg:
+        self._joints += doggo_joints_sampler.cripple_leg(rs)
     return self._joints
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):

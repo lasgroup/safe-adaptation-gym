@@ -27,6 +27,7 @@ class World:
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
       'max_joints_to_disable': 3,
+      'cripple_leg': True,
       'action_noise': 0.01,
       'max_bound': 25,
       'random_bound': False
@@ -115,7 +116,7 @@ class World:
             utils.random_rot(self.rs),
         'bodies': {},
         'modify_tree':
-            self.task.joints(self.rs, self.config.max_joints_to_disable)
+            self.task.joints(self.rs, self.config.max_joints_to_disable, self.config.cripple_leg)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:
