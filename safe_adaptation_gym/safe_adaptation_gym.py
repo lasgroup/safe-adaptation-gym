@@ -8,10 +8,10 @@ from gym.core import ActType, ObsType
 
 from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 from safe_adaptation_gym.tasks.task import Task
-from safe_adaptation_gym.world import World
 from safe_adaptation_gym.robot import Robot
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.render import make_additional_render_objects
+
 
 
 class SafeAdaptationGym(gym.Env):
@@ -25,30 +25,26 @@ class SafeAdaptationGym(gym.Env):
   ]
 
   def __init__(self,
-               robot_base: str,
                rgb_observation: bool = False,
                config: Optional[Dict] = None,
                render_lidars_and_collision: bool = False,
                render_options: Optional[Dict] = None):
-    self._world: Optional[World] = None
+    self._world = None
     self.base_config = config
     self._rgb_observation = rgb_observation
-    self.robot = Robot(robot_base)
     self._render_lidars_and_collision = render_lidars_and_collision
     self._render_options = render_options if render_options is not None else {}
     visualization_objects = None
     if render_lidars_and_collision:
       visualization_objects = make_additional_render_objects(
           self.NUM_LIDAR_BINS)
-    self.mujoco_bridge = MujocoBridge(self.robot, visualization_objects)
+    self.mujoco_bridge = MujocoBridge(visualization_objects)
     self._seed = np.random.randint(2**32)
     self.rs = np.random.RandomState(self._seed)
     self._action_space = gym.spaces.Box(
         -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32)
     self._observation_space = None
     self._sensors_names = self.BASE_SENSORS
-    if 'doggo' in robot_base:
-      self._sensors_names += self.DOGGO_EXTRA_SENSORS
 
   def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
     """ Take a step and return observation, reward, done, and info """
@@ -56,24 +52,27 @@ class SafeAdaptationGym(gym.Env):
     action_range = self.mujoco_bridge.actuator_ctrlrange
     # Action space is in [-1, 1] by definition. Each time we sample a new
     # world (a.k.a. CMDP), we sample a new scale (see _build_world_config) to
-    # accomodate variability in the dynamics.
-    action += (
-        self._world.config.action_noise *
-        self.rs.normal(size=self.mujoco_bridge.nu))
+    # # accomodate variability in the dynamics.
+    # action += (
+    #     self._world.config.action_noise *
+    #     self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
     try:
-      self._world.set_mocaps(self.mujoco_bridge)
+      # self._world.set_mocaps(self.mujoco_bridge)
       self.mujoco_bridge.physics.step(nstep=5)
     except dm_control.rl.control.PhysicsError as er:
       print('PhysicsError', er)
       return self.observation, -10., True, {'cost': 0.}
     self.mujoco_bridge.physics.forward()
-    reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
-    cost = self._world.compute_cost(self.mujoco_bridge)
-    info = {'cost': cost, 'bound': self._world.bound}
+    # reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
+    # cost = self._world.compute_cost(self.mujoco_bridge)
+    reward, terminal, info = 0., False, {}
+    cost = 0.
+    # info = {'cost': cost, 'bound': self._world.bound}
+    info = {'cost': 0., 'bound': 25}
     observation = self.observation
-    if self._render_lidars_and_collision:
+    if self._render_lidars_and_collision and False:
       self._update_lidars_and_collision(self.lidar_observations, cost)
     return observation, reward, terminal, info
 
@@ -85,10 +84,10 @@ class SafeAdaptationGym(gym.Env):
       options: Optional[dict] = None,
   ) -> Union[ObsType, Tuple[ObsType, dict]]:
     """ Reset the physics simulation and return observation """
-    assert self._world is not None or (options is not None and
-                                       'task' in options), ('A task should be '
-                                                            'first set before '
-                                                            'reset.')
+    # assert self._world is not None or (options is not None and
+                                      #  'task' in options), ('A task should be '
+                                                            # 'first set before '
+                                                            # 'reset.')
     if seed is not None:
       self._seed = seed
     else:
@@ -97,7 +96,7 @@ class SafeAdaptationGym(gym.Env):
     if options is not None and 'task' in options:
       self.set_task(options['task'])
       return self.observation
-    self._world.rs = self.rs
+    # self._world.rs = self.rs
     self._build_world()
     return self.observation
 
@@ -120,14 +119,15 @@ class SafeAdaptationGym(gym.Env):
       image = np.clip(image, 0, 255).astype(np.uint8)
       return image
     sensors = self._sensors()
-    sensors = np.concatenate([s[:, None] for s in sensors]).squeeze()
+    # sensors = np.concatenate([s[:, None] for s in sensors]).squeeze()
     lidars = self.lidar_observations
     obs = np.concatenate([lidars, sensors])
     return obs
 
   @property
   def lidar_observations(self) -> np.ndarray:
-    obstacles, objects, goal = self._world.body_positions(self.mujoco_bridge)
+    # obstacles, objects, goal = self._world.body_positions(self.mujoco_bridge)
+    obstacles, objects, goal = [], [], []
     obstacles_lidar = self._lidar(obstacles)
     goal_lidar = self._lidar(goal)
     objects_lidar = self._lidar(objects)
@@ -159,12 +159,13 @@ class SafeAdaptationGym(gym.Env):
 
   def set_task(self, task: Task):
     """ Sets a new task to be solved """
-    self._world = World(self.rs, task, self.robot, self.base_config)
+    # self._world = World(self.rs, task, self.robot, self.base_config)
     self._build_world()
 
   def _build_world(self):
-    self.mujoco_bridge.rebuild(self._world.sample_layout())
-    self._world.reset(self.mujoco_bridge)
+    # self.mujoco_bridge.rebuild(self._world.sample_layout())
+    # self._world.reset(self.mujoco_bridge)
+    pass
 
   def _lidar(self, positions: List[np.ndarray]) -> np.ndarray:
     """
@@ -220,16 +221,17 @@ class SafeAdaptationGym(gym.Env):
   def _sensors(self) -> List[np.ndarray]:
     """ Returns all robot-attached sensors """
     sensors = []
-    for sensor in (self._sensors_names + self.robot.hinge_vel_names +
-                   self.robot.ballangvel_names):
-      sensors.append(self.mujoco_bridge.get_sensor(sensor))
-    for sensor in self.robot.hinge_pos_names:
-      theta = float(self.mujoco_bridge.get_sensor(sensor))
-      sensors.append(np.array([np.sin(theta), np.cos(theta)]))
-    for sensor in self.robot.ballquat_names:
-      quat = self.mujoco_bridge.get_sensor(sensor)
-      sensors.append(utils.quat2mat(quat).ravel())
     return sensors
+    # for sensor in (self._sensors_names + self.robot.hinge_vel_names +
+    #                self.robot.ballangvel_names):
+    #   sensors.append(self.mujoco_bridge.get_sensor(sensor))
+    # for sensor in self.robot.hinge_pos_names:
+    #   theta = float(self.mujoco_bridge.get_sensor(sensor))
+    #   sensors.append(np.array([np.sin(theta), np.cos(theta)]))
+    # for sensor in self.robot.ballquat_names:
+    #   quat = self.mujoco_bridge.get_sensor(sensor)
+    #   sensors.append(utils.quat2mat(quat).ravel())
+    # return sensors
 
   def _update_lidars_and_collision(self, observations, cost):
     obstacles_lidar, objects_lidar, goal_lidar = np.split(observations, 3)

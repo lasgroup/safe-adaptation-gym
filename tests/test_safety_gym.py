@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import glfw
-from dm_control import viewer
+from dm_control import viewer, mujoco
 from dm_env import specs, TimeStep, StepType
 from gym.wrappers import TimeLimit
 
@@ -45,14 +45,9 @@ def car_controller(*args, **kwargs):
 
 
 class ViewerWrapper:
-    def __init__(self, env):
+    def __init__(self, env: SafeAdaptationGym):
         self.env = env
-        self._action_spec = specs.BoundedArray(
-            shape=env.action_space.shape,
-            dtype=np.float32,
-            minimum=env.action_space.low,
-            maximum=env.action_space.high,
-        )
+        self._action_spec = mujoco.action_spec(env.mujoco_bridge.physics)
         self.sum_rewards = None
 
     @property
@@ -90,7 +85,6 @@ class ViewerWrapper:
 def safety_gym(request):
     arena = TimeLimit(
         SafeAdaptationGym(
-            f"xmls/{ROBOT}.xml",
             render_lidars_and_collision=True,
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
             config={"obstacles_size_noise_scale": 1.0, "max_joints_to_disable": 0},
