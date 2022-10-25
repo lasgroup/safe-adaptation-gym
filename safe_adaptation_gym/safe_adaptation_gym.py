@@ -67,7 +67,7 @@ class SafeAdaptationGym(gym.Env):
       self.mujoco_bridge.physics.step(nstep=5)
     except dm_control.rl.control.PhysicsError as er:
       print('PhysicsError', er)
-      return self.observation, -10., True, False, {'cost': 0.}
+      return self.observation, -10., True, {'cost': 0.}
     self.mujoco_bridge.physics.forward()
     reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
     cost = self._world.compute_cost(self.mujoco_bridge)
@@ -75,7 +75,7 @@ class SafeAdaptationGym(gym.Env):
     observation = self.observation
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(self.lidar_observations, cost)
-    return observation, reward, terminal, False, info
+    return observation, reward, terminal, info
 
   def reset(
       self,

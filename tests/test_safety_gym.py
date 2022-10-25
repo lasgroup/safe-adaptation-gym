@@ -1,4 +1,3 @@
-from os import truncate
 import numpy as np
 import pytest
 import glfw
@@ -70,8 +69,8 @@ class ViewerWrapper:
         return self._action_spec
 
     def step(self, action):
-        obs, reward, terminal, truncated, info = self.env.step(action)
-        t = StepType.LAST if terminal or truncated else StepType.MID
+        obs, reward, terminal, _ = self.env.step(action)
+        t = StepType.LAST if terminal else StepType.MID
         self.sum_rewards += reward
         return TimeStep(t, reward, 1.0, obs)
 
