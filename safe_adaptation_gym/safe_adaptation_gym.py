@@ -54,10 +54,9 @@ class SafeAdaptationGym(gym.Env):
         self.mujoco_bridge.physics.forward()
         reward = self.task.compute_reward(self.mujoco_bridge)
         cost = self.task.compute_cost(self.mujoco_bridge)
-        reward, terminal, info = 0.0, False, {}
         info = {"cost": cost, "bound": self.task.bound}
         observation = self.observation
-        return observation, reward, terminal, info
+        return observation, reward, False, info
 
     def reset(
         self,
