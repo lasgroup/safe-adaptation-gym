@@ -114,6 +114,18 @@ class Fetch(Task):
         target_position = mujoco_bridge.physics.target_position()
         return ball_state, target_position
 
+    def reset(self, rs: np.random.RandomState, mujoco_bridge: MujocoBridge):
+        # Initial quadruped position.
+        super().reset(rs, mujoco_bridge)
+        # Initial ball state.
+        physics = mujoco_bridge.physics
+        spawn_radius = 0.9 * physics.named.model.geom_size['floor', 0]
+        physics.named.data.qpos["ball_root"][:2] = rs.uniform(
+            -spawn_radius, spawn_radius, size=(2,)
+        )
+        physics.named.data.qpos["ball_root"][2] = 2
+        physics.named.data.qvel["ball_root"][:2] = 5 * rs.randn(2)
+
     def compute_reward(
         self,
         mujoco_bridge: MujocoBridge,

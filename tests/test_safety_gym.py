@@ -41,9 +41,7 @@ class ViewerWrapper:
 def safety_gym(request):
     arena = TimeLimit(
         SafeAdaptationGym(
-            render_lidars_and_collision=False,
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
-            config={"obstacles_size_noise_scale": 1.0, "max_joints_to_disable": 0},
         ),
         1000,
     )

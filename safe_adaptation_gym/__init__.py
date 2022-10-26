@@ -8,16 +8,16 @@ def make(
     task_name: Optional[str] = None,
     seed: int = 666,
     rgb_observation: bool = False,
-    render_options: Optional[Dict] = None,
+    render_options: Optional[Dict] = dict(),
     render_lidar_and_collision=True,
-    max_bound: float = 25.,
+    max_bound: float = 25.0,
 ):
     from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
     env = SafeAdaptationGym(
         rgb_observation=rgb_observation,
         render_options=render_options,
-        max_bound=max_bound
+        max_bound=max_bound,
     )
     env.seed(seed)
     if task_name is not None:

@@ -7,6 +7,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from safe_adaptation_gym.tasks import Task
+
     TaskFactory = Callable[[np.random.RandomState, float], Task]
 
 

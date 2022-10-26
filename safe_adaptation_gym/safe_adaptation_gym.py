@@ -17,7 +17,7 @@ class SafeAdaptationGym(gym.Env):
         self,
         rgb_observation: bool = False,
         max_bound: float = 25,
-        render_options={},
+        render_options=dict(),
     ):
         self.max_bound = max_bound
         self.render_options = render_options
@@ -30,10 +30,10 @@ class SafeAdaptationGym(gym.Env):
             -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32
         )
         if self._rgb_observation:
-            self._observation_space = spaces.Box(0, 255, (64, 64, 3), np.float32)
+            self.observation_space = spaces.Box(0, 255, (64, 64, 3), np.float32)
         else:
-            self._observation_space = spaces.Box(
-                -100, 1000, shape=(90,), dtype=np.float32
+            self.observation_space = spaces.Box(
+                -np.inf, np.inf, shape=(90,), dtype=np.float32
             )
 
     def step(self, action: Action) -> Tuple[Observation, float, bool, dict]:
