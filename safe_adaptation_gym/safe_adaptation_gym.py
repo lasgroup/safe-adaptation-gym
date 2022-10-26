@@ -1,13 +1,15 @@
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import dm_control.rl.control
 import gym
+from gym import spaces
 import numpy as np
-from gym.core import ActType, ObsType
 
 from safe_adaptation_gym.mujoco_bridge import MujocoBridge
-from safe_adaptation_gym.render import make_additional_render_objects
-from safe_adaptation_gym.tasks.task import Task
+from safe_adaptation_gym.tasks import Task
+
+Action = np.ndarray
+Observation = np.ndarray
 
 
 class SafeAdaptationGym(gym.Env):
@@ -26,19 +28,20 @@ class SafeAdaptationGym(gym.Env):
         self._render_lidars_and_collision = render_lidars_and_collision
         self._render_options = render_options if render_options is not None else {}
         visualization_objects = None
-        if render_lidars_and_collision:
-            visualization_objects = make_additional_render_objects(self.NUM_LIDAR_BINS)
         self.mujoco_bridge = MujocoBridge(visualization_objects)
         self.task: Optional[Task] = None
         self._seed = np.random.randint(2**32)
         self.rs = np.random.RandomState(self._seed)
-        self._action_space = gym.spaces.Box(
+        self._action_space = spaces.Box(
             -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32
         )
         self._observation_space = None
 
-    def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
+    def step(self, action: Action) -> Tuple[Observation, float, bool, dict]:
         """Take a step and return observation, reward, done, and info"""
+        assert (
+            self.task is not None
+        ), "Should set a task and reset before stepping in the environment."
         action = np.array(action, copy=True)
         action_range = self.mujoco_bridge.actuator_ctrlrange
         self.mujoco_bridge.set_control(
@@ -56,7 +59,7 @@ class SafeAdaptationGym(gym.Env):
         info = {"cost": cost, "bound": self.task.bound}
         observation = self.observation
         if self._render_lidars_and_collision:
-            self._update_lidars_and_collision(self.lidar_observations, cost)
+            pass
         return observation, reward, terminal, info
 
     def reset(
@@ -65,7 +68,7 @@ class SafeAdaptationGym(gym.Env):
         seed: Optional[int] = None,
         _: bool = False,
         options: Optional[dict] = None,
-    ) -> Union[ObsType, Tuple[ObsType, dict]]:
+    ) -> Union[Observation, Tuple[Observation, dict]]:
         """Reset the physics simulation and return observation"""
         assert self.task is not None or (
             options is not None and "task" in options
@@ -78,6 +81,8 @@ class SafeAdaptationGym(gym.Env):
         if options is not None and "task" in options:
             self.set_task(options["task"](self.rs))
             return self.observation
+        assert self.task is not None, "Set task before reset."
+        self.task.reset(self.rs, self.mujoco_bridge)
         return self.observation
 
     def render(self, mode="human"):
@@ -93,7 +98,7 @@ class SafeAdaptationGym(gym.Env):
     def observation(self) -> np.ndarray:
         if self._rgb_observation:
             image = self.mujoco_bridge.physics.render(
-                height=64, width=64, camera_id="egocentric"
+                height=64, width=64, camera_id="egocentric"  # type: ignore
             )
             image = np.clip(image, 0, 255).astype(np.uint8)
             return image()
@@ -105,119 +110,25 @@ class SafeAdaptationGym(gym.Env):
         proprio = np.concatenate(
             [ego, torso_velocity, torso_upright[None], imu, force_torque]
         )
-        lidars = self.lidar_observations
-        obs = np.concatenate([lidars, proprio])
+        task_observation = self.task_observations
+        obs = np.concatenate([task_observation, proprio])
         return obs
 
     @property
-    def lidar_observations(self) -> np.ndarray:
-        obstacles, objects, goal = self.task.body_positions(self.mujoco_bridge)
-        obstacles, objects, goal = [], [], []
-        obstacles_lidar = self._lidar(obstacles)
-        goal_lidar = self._lidar(goal)
-        objects_lidar = self._lidar(objects)
-        return np.concatenate([obstacles_lidar, objects_lidar, goal_lidar])
+    def task_observations(self) -> np.ndarray:
+        assert self.task is not None
+        ball, goal = self.task.body_positions(self.mujoco_bridge)
+        return np.concatenate([ball, goal])
 
     @property
-    def action_space(self) -> gym.spaces.Box:
+    def action_space(self) -> spaces.Box:
         return self._action_space
 
     @property
-    def observation_space(self) -> gym.spaces.Box:
-        if self._observation_space is None:
-            if self._rgb_observation:
-                self._observation_space = gym.spaces.Box(0, 255, (64, 64, 3), np.uint8)
-            else:
-                sensors = self._sensors()
-                # Lidar for (1) obstacles, (2) objects and (3) goal.
-                lidar_size = 3 * self.NUM_LIDAR_BINS
-                sensors_flat_size = int(
-                    sum(np.prod(sensor.shape) for sensor in sensors)
-                )
-                low = np.array([0.0] * lidar_size + [-np.inf] * sensors_flat_size)
-                high = np.array([1.0] * lidar_size + [np.inf] * sensors_flat_size)
-                self._observation_space = gym.spaces.Box(
-                    low, high, shape=(lidar_size + sensors_flat_size,), dtype=np.float32
-                )
-        return self._observation_space
+    def observation_space(self) -> spaces.Box:
+        pass
 
     def set_task(self, task_ctor: Callable[[np.random.RandomState], Task]):
         """Sets a new task to be solved"""
         self.task = task_ctor(self.rs)
-        self.mujoco_bridge.rebuild(self.task)
-
-    def _lidar(self, positions: List[np.ndarray]) -> np.ndarray:
-        """
-        Return a robot-centric lidar observation of a list of positions.
-
-        Lidar is a set of bins around the robot (divided evenly in a circle).
-        The detection directions are exclusive and exhaustive for a full 360 view.
-        Each bin reads 0 if there are no objects in that direction.
-        If there are multiple objects, the distance to the closest one is used.
-        Otherwise, the bin reads the fraction of the distance towards the robot.
-
-        E.g. if the object is 90% of lidar_max_dist away, the bin will read 0.1,
-        and if the object is 10% of lidar_max_dist away, the bin will read 0.9.
-        (The reading can be thought of as "closeness" or inverse distance)
-
-        This encoding has some desirable properties:
-            - bins read 0 when empty
-            - bins smoothly increase as objects get close
-            - maximum reading is 1.0 (where the object overlaps the robot)
-            - close objects occlude far objects
-            - constant size observation with variable numbers of objects
-        """
-        obs = np.zeros(self.NUM_LIDAR_BINS)
-
-        def ego_xy(pos):
-            robot_3vec = self.mujoco_bridge.robot_pos()
-            robot_mat = self.mujoco_bridge.robot_mat()
-            pos_3vec = np.concatenate([pos, [0]])  # Add a zero z-coordinate
-            world_3vec = pos_3vec - robot_3vec
-            return np.matmul(world_3vec, robot_mat)[:2]
-
-        for pos in positions:
-            pos = np.asarray(pos)
-            if pos.shape == (3,):
-                pos = pos[:2]  # Truncate Z coordinate
-            z = complex(*ego_xy(pos))  # X, Y as real, imaginary components
-            dist = np.abs(z)
-            angle = np.angle(z) % (np.pi * 2)
-            bin_size = (np.pi * 2) / self.NUM_LIDAR_BINS
-            bin_ = int(angle / bin_size)
-            bin_angle = bin_size * bin_
-            sensor = max(0, self.LIDAR_MAX_DIST - dist) / self.LIDAR_MAX_DIST
-            obs[bin_] = max(obs[bin_], sensor)
-            alias = (angle - bin_angle) / bin_size
-            assert 0 <= alias <= 1, (
-                f"bad alias {alias}, dist {dist}, angle " f"{angle}, bin {bin_}"
-            )
-            bin_plus = (bin_ + 1) % self.NUM_LIDAR_BINS
-            bin_minus = (bin_ - 1) % self.NUM_LIDAR_BINS
-            obs[bin_plus] = max(obs[bin_plus], alias * sensor)
-            obs[bin_minus] = max(obs[bin_minus], (1 - alias) * sensor)
-        return obs
-
-    def _update_lidars_and_collision(self, observations, cost):
-        obstacles_lidar, objects_lidar, goal_lidar = np.split(observations, 3)
-
-        def update_lidar_alpha(name, lidar, color):
-            for i, value in enumerate(lidar):
-                alpha = min(1.0, value + 0.1)
-                self.mujoco_bridge.site_rgba["{}lidar/{}".format(name, i)] = (
-                    color * alpha
-                )
-
-        for i, (name, lidar) in enumerate(
-            zip(
-                ["obstacles", "goal", "objects"],
-                [obstacles_lidar, goal_lidar, objects_lidar],
-            )
-        ):
-            color = np.array([0.0, 0.0, 0.0, 1.0])
-            color[i] = 1.0
-            update_lidar_alpha(name, lidar, color)
-        if cost > 0.0:
-            self.mujoco_bridge.site_rgba["collision/indicator"][-1] = 0.5
-        else:
-            self.mujoco_bridge.site_rgba["collision/indicator"][-1] = 0.0
+        self.mujoco_bridge.build(self.task)

@@ -6,7 +6,6 @@ from typing import Iterator, Tuple
 import numpy as np
 
 from safe_adaptation_gym import tasks
-from safe_adaptation_gym.tasks.task import Task
 from safe_adaptation_gym.benchmark import task_sampler as sampler
 
 BENCHMARKS = {"multitask", "task_adaptation"}
@@ -32,7 +31,7 @@ class Benchmark:
         self._batch_size = batch_size
 
     @property
-    def train_tasks(self) -> Iterator[Tuple[str, Task]]:
+    def train_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
         """
         Genereates the next task to train on. The user is in charge of (and has
         the flexibility to) calling this function after enough episodes per task.
@@ -44,7 +43,7 @@ class Benchmark:
             yield sample
 
     @property
-    def test_tasks(self) -> Iterator[Tuple[str, Task]]:
+    def test_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
         """
         Genereates the next task to test on. The user is in charge of (and has
         the flexibility to) calling this function after enough episodes per task.
@@ -78,3 +77,5 @@ def make(benchmark_name: str, batch_size: int = 16, seed: int = 666) -> Benchmar
         train_sampler = sampler.TaskSampler(rs, train_tasks)
         test_sampler = sampler.TaskSampler(rs, heldout_tasks)
         return Benchmark(train_sampler, test_sampler, batch_size)
+    else:
+        raise NotImplementedError

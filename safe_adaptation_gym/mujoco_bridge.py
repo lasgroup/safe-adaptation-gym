@@ -1,28 +1,30 @@
-from typing import Iterable
+from typing import Iterable, Optional
 
 import numpy as np
-from dm_control.suite import quadruped
+
+from safe_adaptation_gym.tasks import Task
 
 
 class MujocoBridge:
     def __init__(self, addition_render_objects_specs=None):
-        self.physics = None
+        from dm_control.suite import quadruped
+        xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
+        self.physics = quadruped.Physics.from_xml_string(
+            xml_string, quadruped.common.ASSETS
+        )
         self._addition_render_objects_specs = addition_render_objects_specs
-        self._build()
+        self.build()
 
     def get_sensor(self, name: str) -> np.ndarray:
         return self.physics.named.data.sensordata[name]
 
-    def _build(self):
-        xml_string = quadruped.make_model(walls_and_ball=True)
+    def build(self, task: Optional[Task] = None):
+        from dm_control.suite import quadruped
+        xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
         self.physics = quadruped.Physics.from_xml_string(
             xml_string, quadruped.common.ASSETS
         )
         self.physics.forward()
-
-    def rebuild(self, config):
-        """Build a new physics from a model if the model changed"""
-        self._build()
 
     def robot_contacts(self, group_geom_names: Iterable[str]) -> int:
         """
@@ -57,7 +59,7 @@ class MujocoBridge:
 
     @property
     def time(self):
-        return self.physics.data.time
+        return self.physics.data.time  # type: ignore
 
     @property
     def nu(self):
@@ -66,11 +68,3 @@ class MujocoBridge:
     @property
     def actuator_ctrlrange(self):
         return self.physics.model.actuator_ctrlrange
-
-    @property
-    def user_groups(self):
-        return self.physics.named.model.geom_user
-
-    @property
-    def site_rgba(self):
-        return self.physics.named.model.site_rgba

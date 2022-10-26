@@ -1,15 +1,17 @@
+from __future__ import annotations
 import abc
-from typing import List, Tuple, TypeVar
-
-import numpy as np
-
-from dm_control.utils import rewards
-
-from safe_adaptation_gym import consts
+from typing import TYPE_CHECKING, List, Tuple
 
 # Define as generic type instead of import the actual mujoco_bridge as it
 # loads resources (e.g. GPU pointers) that should not exist on a parent process.
-MujocoBridge = TypeVar("MujocoBridge")
+if TYPE_CHECKING:
+    from safe_adaptation_gym.mujoco_bridge import MujocoBridge
+
+import numpy as np
+from dm_control.suite.quadruped import _find_non_contacting_height
+from dm_control.utils import rewards
+
+from safe_adaptation_gym import consts
 
 
 class Task(abc.ABC):
@@ -31,7 +33,7 @@ class Task(abc.ABC):
     def compute_reward(
         self,
         mujoco_bridge: MujocoBridge,
-    ) -> Tuple[float, bool, dict]:
+    ) -> float:
         """
         Computes the task-specific reward. Exposes the layout and placements for
         goal/object position resampling
@@ -44,7 +46,9 @@ class Task(abc.ABC):
         return 0.0
 
     @abc.abstractmethod
-    def body_positions(self, mujoco_bridge: MujocoBridge) -> Tuple[List, List, List]:
+    def body_positions(
+        self, mujoco_bridge: MujocoBridge
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Queries mujoco_bridge for current positions of task-relevant bodies.
         """
@@ -58,7 +62,6 @@ class Task(abc.ABC):
         Not sure about this yet. But should allow an interface to build to task
         specific stuff
         """
-        from dm_control.suite.quadruped import _find_non_contacting_height
 
         azimuth = rs.uniform(0, 2 * np.pi)
         orientation = np.array((np.cos(azimuth / 2), 0, 0, np.sin(azimuth / 2)))
@@ -110,3 +113,54 @@ def upright_reward(physics, deviation_angle=0):
         margin=1 + deviation,
         value_at_margin=0,
     )
+
+
+class Fetch(Task):
+
+    def body_positions(
+        self, mujoco_bridge: MujocoBridge
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        ball_state = mujoco_bridge.physics.ball_state()
+        target_position = mujoco_bridge.physics.target_position()
+        return ball_state, target_position
+
+    # Copyright 2019 The dm_control Authors.
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #    http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+    # ============================================================================
+    def compute_reward(
+        self,
+        mujoco_bridge: MujocoBridge,
+    ) -> float:
+        physics = mujoco_bridge.physics
+        arena_radius = physics.named.model.geom_size["floor", 0] * np.sqrt(2)
+        workspace_radius = physics.named.model.site_size["workspace", 0]
+        ball_radius = physics.named.model.geom_size["ball", 0]
+        reach_reward = rewards.tolerance(
+            physics.self_to_ball_distance(),
+            bounds=(0, workspace_radius + ball_radius),
+            sigmoid="linear",
+            margin=arena_radius,
+            value_at_margin=0,
+        )
+        # Reward for bringing the ball to the target.
+        target_radius = physics.named.model.site_size["target", 0]
+        fetch_reward = rewards.tolerance(
+            physics.ball_to_target_distance(),
+            bounds=(0, target_radius),
+            sigmoid="linear",
+            margin=arena_radius,
+            value_at_margin=0,
+        )
+        reach_then_fetch = reach_reward * (0.5 + 0.5 * fetch_reward)
+        return float(upright_reward(physics) * reach_then_fetch)
