@@ -6,13 +6,12 @@ from safe_adaptation_gym.tasks import Task
 
 
 class MujocoBridge:
-    def __init__(self, addition_render_objects_specs=None):
+    def __init__(self):
         from dm_control.suite import quadruped
         xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
         self.physics = quadruped.Physics.from_xml_string(
             xml_string, quadruped.common.ASSETS
         )
-        self._addition_render_objects_specs = addition_render_objects_specs
         self.build()
 
     def get_sensor(self, name: str) -> np.ndarray:

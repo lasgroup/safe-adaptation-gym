@@ -1,22 +1,23 @@
-import re
-import inspect
-
-from typing import Iterator, Tuple
+from __future__ import annotations
+from typing import TYPE_CHECKING, Iterator, Tuple
 
 import numpy as np
 
-from safe_adaptation_gym import tasks
+if TYPE_CHECKING:
+    from safe_adaptation_gym import tasks
+
 from safe_adaptation_gym.benchmark import task_sampler as sampler
 
 BENCHMARKS = {"multitask", "task_adaptation"}
 
-pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
-TASKS = {
-    pattern.sub("_", name).lower(): task
-    for name, task in inspect.getmembers(tasks, inspect.isclass)
-    if name not in ["Task"]
-}
+def fetch(random_state: np.random.RandomState, max_bound: float) -> tasks.Task:
+    from safe_adaptation_gym import tasks
+
+    return tasks.Fetch(random_state, max_bound)
+
+
+TASKS = {name: eval(name) for name in ["fetch"]}
 
 
 class Benchmark:
@@ -31,7 +32,7 @@ class Benchmark:
         self._batch_size = batch_size
 
     @property
-    def train_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
+    def train_tasks(self) -> Iterator[Tuple[str, sampler.TaskFactory]]:
         """
         Genereates the next task to train on. The user is in charge of (and has
         the flexibility to) calling this function after enough episodes per task.
@@ -43,7 +44,7 @@ class Benchmark:
             yield sample
 
     @property
-    def test_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
+    def test_tasks(self) -> Iterator[Tuple[str, sampler.TaskFactory]]:
         """
         Genereates the next task to test on. The user is in charge of (and has
         the flexibility to) calling this function after enough episodes per task.

@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Optional, Tuple, Union
 
 import dm_control.rl.control
 import gym
@@ -13,29 +13,28 @@ Observation = np.ndarray
 
 
 class SafeAdaptationGym(gym.Env):
-    NUM_LIDAR_BINS = 16
-    LIDAR_MAX_DIST = 5.0
-
     def __init__(
         self,
         rgb_observation: bool = False,
-        config: Optional[Dict] = None,
-        render_lidars_and_collision: bool = False,
-        render_options: Optional[Dict] = None,
+        max_bound: float = 25,
+        render_options={},
     ):
-        self.base_config = config
+        self.max_bound = max_bound
+        self.render_options = render_options
         self._rgb_observation = rgb_observation
-        self._render_lidars_and_collision = render_lidars_and_collision
-        self._render_options = render_options if render_options is not None else {}
-        visualization_objects = None
-        self.mujoco_bridge = MujocoBridge(visualization_objects)
+        self.mujoco_bridge = MujocoBridge()
         self.task: Optional[Task] = None
         self._seed = np.random.randint(2**32)
         self.rs = np.random.RandomState(self._seed)
         self._action_space = spaces.Box(
             -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32
         )
-        self._observation_space = None
+        if self._rgb_observation:
+            self._observation_space = spaces.Box(0, 255, (64, 64, 3), np.float32)
+        else:
+            self._observation_space = spaces.Box(
+                -100, 1000, shape=(90,), dtype=np.float32
+            )
 
     def step(self, action: Action) -> Tuple[Observation, float, bool, dict]:
         """Take a step and return observation, reward, done, and info"""
@@ -58,15 +57,13 @@ class SafeAdaptationGym(gym.Env):
         reward, terminal, info = 0.0, False, {}
         info = {"cost": cost, "bound": self.task.bound}
         observation = self.observation
-        if self._render_lidars_and_collision:
-            pass
         return observation, reward, terminal, info
 
     def reset(
         self,
         *,
         seed: Optional[int] = None,
-        _: bool = False,
+        return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[Observation, Tuple[Observation, dict]]:
         """Reset the physics simulation and return observation"""
@@ -79,7 +76,7 @@ class SafeAdaptationGym(gym.Env):
             self._seed += 1
         self.rs = np.random.RandomState(self._seed)
         if options is not None and "task" in options:
-            self.set_task(options["task"](self.rs))
+            self.set_task(options["task"])
             return self.observation
         assert self.task is not None, "Set task before reset."
         self.task.reset(self.rs, self.mujoco_bridge)
@@ -87,7 +84,7 @@ class SafeAdaptationGym(gym.Env):
 
     def render(self, mode="human"):
         """Renders the mujoco simulator"""
-        return self.mujoco_bridge.physics.render(**self._render_options)
+        return self.mujoco_bridge.physics.render(**self.render_options)
 
     def seed(self, seed=None):
         """Set internal random state seeds"""
@@ -101,7 +98,7 @@ class SafeAdaptationGym(gym.Env):
                 height=64, width=64, camera_id="egocentric"  # type: ignore
             )
             image = np.clip(image, 0, 255).astype(np.uint8)
-            return image()
+            return image
         ego = self.mujoco_bridge.physics.egocentric_state()
         torso_velocity = self.mujoco_bridge.physics.torso_velocity()
         torso_upright = self.mujoco_bridge.physics.torso_upright()
@@ -124,11 +121,7 @@ class SafeAdaptationGym(gym.Env):
     def action_space(self) -> spaces.Box:
         return self._action_space
 
-    @property
-    def observation_space(self) -> spaces.Box:
-        pass
-
-    def set_task(self, task_ctor: Callable[[np.random.RandomState], Task]):
+    def set_task(self, task_ctor: Callable[[np.random.RandomState, float], Task]):
         """Sets a new task to be solved"""
-        self.task = task_ctor(self.rs)
+        self.task = task_ctor(self.rs, self.max_bound)
         self.mujoco_bridge.build(self.task)
