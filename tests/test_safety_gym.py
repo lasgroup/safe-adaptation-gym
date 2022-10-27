@@ -11,7 +11,7 @@ class ViewerWrapper:
     def __init__(self, env: SafeAdaptationGym):
         self.env = env
         self._action_spec = mujoco.action_spec(env.mujoco_bridge.physics)
-        self.sum_rewards = None
+        self.sum_rewards = 0.
 
     @property
     def physics(self):
@@ -45,7 +45,7 @@ def safety_gym(request):
         ),
         1000,
     )
-    arena.set_task(request.param)
+    arena.unwrapped.set_task(request.param)
     return arena
 
 

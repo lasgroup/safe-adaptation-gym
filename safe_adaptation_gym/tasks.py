@@ -119,7 +119,7 @@ class Fetch(Task):
         super().reset(rs, mujoco_bridge)
         # Initial ball state.
         physics = mujoco_bridge.physics
-        spawn_radius = 0.9 * physics.named.model.geom_size['floor', 0]
+        spawn_radius = 0.9 * physics.named.model.geom_size["floor", 0]
         physics.named.data.qpos["ball_root"][:2] = rs.uniform(
             -spawn_radius, spawn_radius, size=(2,)
         )
