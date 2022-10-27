@@ -47,9 +47,9 @@ class SafeAdaptationGym(gym.Env):
             np.clip(action, action_range[:, 0], action_range[:, 1])
         )
         try:
-            self.mujoco_bridge.physics.step()
-        except dm_control.rl.control.PhysicsError as er:
-            print("PhysicsError", er)
+            self.mujoco_bridge.physics.step(nstep=4)
+        except dm_control.rl.control.PhysicsError as error:
+            print("PhysicsError", error)
             return self.observation, -10.0, True, {"cost": 0.0}
         self.mujoco_bridge.physics.forward()
         reward = self.task.compute_reward(self.mujoco_bridge)
@@ -98,23 +98,8 @@ class SafeAdaptationGym(gym.Env):
             )
             image = np.clip(image, 0, 255).astype(np.uint8)
             return image
-        ego = self.mujoco_bridge.physics.egocentric_state()
-        torso_velocity = self.mujoco_bridge.physics.torso_velocity()
-        torso_upright = self.mujoco_bridge.physics.torso_upright()
-        imu = self.mujoco_bridge.physics.imu()
-        force_torque = self.mujoco_bridge.physics.force_torque()
-        proprio = np.concatenate(
-            [ego, torso_velocity, torso_upright[None], imu, force_torque]
-        )
-        task_observation = self.task_observations
-        obs = np.concatenate([task_observation, proprio])
-        return obs
-
-    @property
-    def task_observations(self) -> np.ndarray:
-        assert self.task is not None
-        ball, goal = self.task.body_positions(self.mujoco_bridge)
-        return np.concatenate([ball, goal])
+        assert self.task
+        return self.task.observation(self.mujoco_bridge)
 
     @property
     def action_space(self) -> spaces.Box:
