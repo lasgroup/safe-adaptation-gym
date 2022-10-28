@@ -69,6 +69,8 @@ class Fetch(Task):
     def __init__(self, rs: np.random.RandomState, max_bound: float):
         super().__init__(rs, max_bound)
         self.task = quadruped.Fetch(rs)
+        self._last_target_ball_distance = None
+        self._last_robot_ball_distance = None
 
     def observation(self, mujoco_bridge: MujocoBridge) -> np.ndarray:
         obs_dict = self.task.get_observation(mujoco_bridge.physics)
@@ -79,10 +81,24 @@ class Fetch(Task):
 
     def reset(self, rs: np.random.RandomState, mujoco_bridge: MujocoBridge):
         self.task.initialize_episode(mujoco_bridge.physics)
+        self._last_robot_ball_distance = mujoco_bridge.physics.self_to_ball_distance()
+        self._last_target_ball_distance = (
+            mujoco_bridge.physics.ball_to_target_distance()
+        )
 
     def compute_reward(
         self,
         mujoco_bridge: MujocoBridge,
     ) -> float:
         physics = mujoco_bridge.physics
-        return float(self.task.get_reward(physics))
+        assert self._last_target_ball_distance and self._last_robot_ball_distance
+        self_to_ball = physics.self_to_ball_distance()
+        reach_reward = self._last_robot_ball_distance - self_to_ball
+        target_to_ball = physics.ball_to_target_distance()
+        fetch_reward = self._last_target_ball_distance - target_to_ball
+        reward = fetch_reward + reach_reward
+        self._last_target_ball_distance = target_to_ball
+        self._last_robot_ball_distance = self_to_ball
+        if target_to_ball <= physics.named.model.site_size["target", 0]:
+            reward += 1.0
+        return float(quadruped._upright_reward(physics) * reward)
