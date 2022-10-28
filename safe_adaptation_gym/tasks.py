@@ -91,7 +91,10 @@ class Fetch(Task):
         mujoco_bridge: MujocoBridge,
     ) -> float:
         physics = mujoco_bridge.physics
-        assert self._last_target_ball_distance and self._last_robot_ball_distance
+        assert (
+            self._last_target_ball_distance is not None
+            and self._last_robot_ball_distance is not None
+        )
         self_to_ball = physics.self_to_ball_distance()
         reach_reward = self._last_robot_ball_distance - self_to_ball
         target_to_ball = physics.ball_to_target_distance()
