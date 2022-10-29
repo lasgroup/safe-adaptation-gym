@@ -99,7 +99,17 @@ class Fetch(Task):
         reach_reward = self._last_robot_ball_distance - self_to_ball
         target_to_ball = physics.ball_to_target_distance()
         fetch_reward = self._last_target_ball_distance - target_to_ball
-        reward = fetch_reward + reach_reward
+        arena_radius = physics.named.model.geom_size["floor", 0] * np.sqrt(2)
+        workspace_radius = physics.named.model.site_size["workspace", 0]
+        ball_radius = physics.named.model.geom_size["ball", 0]
+        reach_prob = quadruped.rewards.tolerance(
+            self_to_ball,
+            bounds=(0, workspace_radius + ball_radius),
+            sigmoid="linear",
+            margin=arena_radius,
+            value_at_margin=0,
+        )
+        reward = fetch_reward * reach_prob + reach_reward
         self._last_target_ball_distance = target_to_ball
         self._last_robot_ball_distance = self_to_ball
         if target_to_ball <= physics.named.model.site_size["target", 0]:
