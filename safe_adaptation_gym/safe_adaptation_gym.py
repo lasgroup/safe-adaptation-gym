@@ -26,7 +26,13 @@ class SafeAdaptationGym(gym.Env):
         self.task: Optional[Task] = None
         self._seed = np.random.randint(2**32)
         self.rs = np.random.RandomState(self._seed)
-        self._action_space = None
+        low, upper = self.mujoco_bridge.actuator_ctrlrange.T
+        self._action_space = spaces.Box(
+            low,
+            upper,
+            (self.mujoco_bridge.nu,),
+            dtype=np.float32,
+        )
         if self._rgb_observation:
             self.observation_space = spaces.Box(0, 255, (64, 64, 3), np.float32)
         else:
@@ -98,17 +104,9 @@ class SafeAdaptationGym(gym.Env):
 
     @property
     def action_space(self) -> spaces.Box:
-        assert self._action_space is not None
         return self._action_space
 
     def set_task(self, task_ctor: Callable[[np.random.RandomState, float], Task]):
         """Sets a new task to be solved"""
         self.task = task_ctor(self.rs, self.max_bound)
         self.mujoco_bridge.build(self.task)
-        low, upper = self.mujoco_bridge.actuator_ctrlrange.T
-        self._action_space = spaces.Box(
-            low,
-            upper,
-            (self.mujoco_bridge.nu,),
-            dtype=np.float32,
-        )
