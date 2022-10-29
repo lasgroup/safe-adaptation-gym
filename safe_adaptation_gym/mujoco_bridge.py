@@ -8,9 +8,13 @@ from safe_adaptation_gym.tasks import Task
 class MujocoBridge:
     def __init__(self):
         from dm_control.suite import quadruped
+        from lxml import etree
         xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
+        parser = etree.XMLParser(remove_blank_text=True)
+        mjcf = etree.XML(xml_string, parser)
+        mjcf.find('option').attrib['timestep'] = '0.01'
         self.physics = quadruped.Physics.from_xml_string(
-            xml_string, quadruped.common.ASSETS
+            etree.tostring(mjcf, pretty_print=True), quadruped.common.ASSETS
         )
         self.build()
 
@@ -19,9 +23,14 @@ class MujocoBridge:
 
     def build(self, task: Optional[Task] = None):
         from dm_control.suite import quadruped
+        from dm_control.suite import quadruped
+        from lxml import etree
         xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
+        parser = etree.XMLParser(remove_blank_text=True)
+        mjcf = etree.XML(xml_string, parser)
+        mjcf.find('option').attrib['timestep'] = '0.01'
         self.physics = quadruped.Physics.from_xml_string(
-            xml_string, quadruped.common.ASSETS
+            etree.tostring(mjcf, pretty_print=True), quadruped.common.ASSETS
         )
         self.physics.forward()
 
