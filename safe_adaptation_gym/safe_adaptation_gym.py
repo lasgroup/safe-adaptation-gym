@@ -48,7 +48,7 @@ class SafeAdaptationGym(gym.Env):
         action = np.array(action, copy=True)
         self.mujoco_bridge.set_control(action)
         try:
-            self.mujoco_bridge.physics.step(nstep=4)
+            self.mujoco_bridge.physics.step(nstep=8)
         except dm_control.rl.control.PhysicsError as error:
             print("PhysicsError", error)
             return self.observation, -10.0, True, {"cost": 0.0}

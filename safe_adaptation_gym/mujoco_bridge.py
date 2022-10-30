@@ -1,3 +1,4 @@
+from itertools import product
 from typing import Iterable, Optional
 
 import numpy as np
@@ -5,32 +6,37 @@ import numpy as np
 from safe_adaptation_gym.tasks import Task
 
 
+def _load_model():
+    from dm_control.suite import quadruped
+    from lxml import etree
+    from dm_control import mjcf
+
+    xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
+    parser = etree.XMLParser(remove_blank_text=True)
+    xml_tree = etree.XML(xml_string, parser)
+    xml_tree.find('.//map').attrib.pop('znear')
+    xml_string = etree.tostring(xml_tree)
+    model = mjcf.from_xml_string(xml_string, assets=quadruped.common.ASSETS)
+    model.option.timestep = 0.01
+    for wall_name, (sign, loc) in zip(quadruped._WALLS, product((-1, 1), (0, 1))):
+        wall = model.find('geom', wall_name)
+        wall.pos[loc] = sign * 10.
+        wall.size[1 - loc] = 10.
+    model.find("geom", "floor").size[:2] = 10.0
+    model.visual.map.znear = 0.005
+    return quadruped.Physics.from_xml_string(model.to_xml_string(), assets=quadruped.common.ASSETS)
+
+
 class MujocoBridge:
     def __init__(self):
-        from dm_control.suite import quadruped
-        from lxml import etree
-        xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
-        parser = etree.XMLParser(remove_blank_text=True)
-        mjcf = etree.XML(xml_string, parser)
-        mjcf.find('option').attrib['timestep'] = '0.01'
-        self.physics = quadruped.Physics.from_xml_string(
-            etree.tostring(mjcf), quadruped.common.ASSETS
-        )
+        self.physics = _load_model()
         self.build()
 
     def get_sensor(self, name: str) -> np.ndarray:
         return self.physics.named.data.sensordata[name]
 
     def build(self, task: Optional[Task] = None):
-        from dm_control.suite import quadruped
-        from lxml import etree
-        xml_string = quadruped.make_model(walls_and_ball=True, rangefinders=True)
-        parser = etree.XMLParser(remove_blank_text=True)
-        mjcf = etree.XML(xml_string, parser)
-        mjcf.find('option').attrib['timestep'] = '0.01'
-        self.physics = quadruped.Physics.from_xml_string(
-            etree.tostring(mjcf), quadruped.common.ASSETS
-        )
+        self.physics = _load_model()
         self.physics.forward()
 
     def robot_contacts(self, group_geom_names: Iterable[str]) -> int:
