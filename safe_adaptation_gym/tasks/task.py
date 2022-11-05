@@ -4,7 +4,6 @@ from typing import Dict, Tuple, List, TypeVar
 import numpy as np
 
 from safe_adaptation_gym import consts
-from safe_adaptation_gym.tasks import doggo_joints_sampler
 
 # Define as generic type instead of import the actual mujoco_bridge as it
 # loads resources (e.g. GPU pointers) that should not exist on a parent process.
@@ -86,18 +85,6 @@ class Task(abc.ABC):
       # https://keisan.casio.com/exec/system/1180573169
       self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
     return self._obstacle_scales
-
-  def joints(self, rs: np.random.RandomState, max_joints_to_disable: int, cripple_leg: bool):
-    if self._joints is None:
-      if max_joints_to_disable == 0:
-        self._joints = []
-      else:
-        num_joints_to_disable = rs.randint(max_joints_to_disable + 1)
-        self._joints = doggo_joints_sampler.disable_joints(
-            rs, num_joints_to_disable)
-      if cripple_leg:
-        self._joints += doggo_joints_sampler.cripple_leg(rs)
-    return self._joints
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
     if self._bound is None:
