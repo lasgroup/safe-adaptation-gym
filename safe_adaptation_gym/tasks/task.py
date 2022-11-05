@@ -11,82 +11,91 @@ MujocoBridge = TypeVar("MujocoBridge")
 
 
 class Task(abc.ABC):
+    def __init__(self):
+        self._obstacle_scales = None
+        self._joints = None
+        self._bound = None
 
-  def __init__(self):
-    self._obstacle_scales = None
-    self._joints = None
-    self._bound = None
+    @abc.abstractmethod
+    def setup_placements(self) -> Dict[str, tuple]:
+        """
+        Setups the task specific placements (e.g., goals or other obstacles).
+        """
 
-  @abc.abstractmethod
-  def setup_placements(self) -> Dict[str, tuple]:
-    """
-    Setups the task specific placements (e.g., goals or other obstacles).
-    """
+    @abc.abstractmethod
+    def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
+        """
+        Defines the placements physical and visual attributes to be loaded by
+        mujoco.
+        """
 
-  @abc.abstractmethod
-  def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
-    """
-    Defines the placements physical and visual attributes to be loaded by
-    mujoco.
-    """
+    @abc.abstractmethod
+    def compute_reward(
+        self,
+        layout: dict,
+        placements: dict,
+        rs: np.random.RandomState,
+        mujoco_bridge: MujocoBridge,
+    ) -> Tuple[float, bool, dict]:
+        """
+        Computes the task-specific reward. Exposes the layout and placements for
+        goal/object position resampling
+        """
 
-  @abc.abstractmethod
-  def compute_reward(self, layout: dict, placements: dict,
-                     rs: np.random.RandomState,
-                     mujoco_bridge: MujocoBridge) -> Tuple[float, bool, dict]:
-    """
-    Computes the task-specific reward. Exposes the layout and placements for
-    goal/object position resampling
-    """
+    def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
+        """
+        Computes the task specific costs.
+        """
+        return 0.0
 
-  def compute_cost(self, mujoco_bridge: MujocoBridge) -> float:
-    """
-    Computes the task specific costs.
-    """
-    return 0.
+    @abc.abstractmethod
+    def set_mocaps(self, mujoco_bridge: MujocoBridge):
+        """
+        Sets up the task specific mocap objects.
+        """
 
-  @abc.abstractmethod
-  def set_mocaps(self, mujoco_bridge: MujocoBridge):
-    """
-    Sets up the task specific mocap objects.
-    """
+    @abc.abstractmethod
+    def reset(
+        self,
+        layout: dict,
+        placements: dict,
+        rs: np.random.RandomState,
+        mujoco_bridge: MujocoBridge,
+    ):
+        """
+        Not sure about this yet. But should allow an interface to build to task
+        specific stuff
+        """
 
-  @abc.abstractmethod
-  def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
-            mujoco_bridge: MujocoBridge):
-    """
-    Not sure about this yet. But should allow an interface to build to task
-    specific stuff
-    """
+    @property
+    def obstacles_distribution(self) -> List[float]:
+        """
+        How many obstacle instances are sampled for each obstacle type.
+        Type order follows: 'hazards', 'vases', 'gremlins', 'pillars',
+        as in consts.OBSTACLES
+        """
+        return [1 / len(consts.OBSTACLES)] * len(consts.OBSTACLES)
 
-  @property
-  def obstacles_distribution(self) -> List[float]:
-    """
-    How many obstacle instances are sampled for each obstacle type.
-    Type order follows: 'hazards', 'vases', 'gremlins', 'pillars',
-    as in consts.OBSTACLES
-    """
-    return [1 / len(consts.OBSTACLES)] * len(consts.OBSTACLES)
+    @property
+    def num_obstacles(self) -> int:
+        return 20
 
-  @property
-  def num_obstacles(self) -> int:
-    return 20
+    @property
+    def placement_extents(self) -> Tuple[float, float, float, float]:
+        return consts.PLACEMENT_EXTENTS
 
-  @property
-  def placement_extents(self) -> Tuple[float, float, float, float]:
-    return consts.PLACEMENT_EXTENTS
+    @property
+    def arena_radius(self):
+        return (self.placement_extents[2]) * np.sqrt(2.0)
 
-  @property
-  def arena_radius(self):
-    return (self.placement_extents[2]) * np.sqrt(2.)
+    def obstacle_scales(self, rs: np.random.RandomState):
+        if self._obstacle_scales is None:
+            # https://keisan.casio.com/exec/system/1180573169
+            self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
+        return self._obstacle_scales
 
-  def obstacle_scales(self, rs: np.random.RandomState):
-    if self._obstacle_scales is None:
-      # https://keisan.casio.com/exec/system/1180573169
-      self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
-    return self._obstacle_scales
 
-  def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
-    if self._bound is None:
-      self._bound = rs.uniform(0., max_bound)
-    return self._bound
+    def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
+        if self._bound is None:
+            self._bound = rs.uniform(0.0, max_bound)
+        return self._bound
