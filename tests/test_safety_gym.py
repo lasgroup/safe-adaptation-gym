@@ -8,17 +8,6 @@ from gym.wrappers import TimeLimit
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
-ROBOT = "doggo"
-
-
-def controller(action_space):
-    if ROBOT == "car":
-        return car_controller
-    elif ROBOT == "point":
-        return point_controller
-    else:
-        return lambda *_: action_space.sample()
-
 
 def point_controller(*args, **kwargs):
     action = np.zeros((2,))
@@ -29,18 +18,6 @@ def point_controller(*args, **kwargs):
     x = -cmd[0] if np.abs(cmd[0]) > 0.05 else 0.0
     action[0] = np.clip(y, -1.0, 1.0)
     action[1] = x
-    return action
-
-
-def car_controller(*args, **kwargs):
-    action = np.zeros((2,))
-    if not glfw.joystick_present(glfw.JOYSTICK_1):
-        return action
-    cmd = glfw.get_joystick_axes(glfw.JOYSTICK_1)[0]
-    x = -cmd[1] if np.abs(cmd[1]) > 0.05 else 0.0
-    y = -cmd[0] if np.abs(cmd[0]) > 0.05 else 0.0
-    action[0] = (x + y) / 2.0
-    action[1] = (x - y) / 2.0
     return action
 
 
@@ -90,10 +67,10 @@ class ViewerWrapper:
 def safety_gym(request):
     arena = TimeLimit(
         SafeAdaptationGym(
-            f"xmls/{ROBOT}.xml",
+            "xmls/point.xml",
             render_lidars_and_collision=True,
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
-            config={"obstacles_size_noise_scale": 1.0, "max_joints_to_disable": 0},
+            config={"obstacles_size_noise_scale": 1.0, "damping_scale": 0.005, "damping_shift": 0.01},
         ),
         1000,
     )
@@ -120,7 +97,7 @@ def test_viewer(safety_gym):
     policy = (
         (lambda *_: safety_gym.action_space.sample())
         if not glfw.joystick_present(glfw.JOYSTICK_1)
-        else controller(safety_gym.action_space)
+        else point_controller
     )
     viewer.launch(ViewerWrapper(safety_gym), policy)
 
@@ -142,7 +119,7 @@ def test_episode(safety_gym):
     policy = (
         (lambda *_: safety_gym.action_space.sample())
         if not glfw.joystick_present(glfw.JOYSTICK_1)
-        else controller(safety_gym.action_space)
+        else point_controller
     )
     safety_gym.reset()
     done = False

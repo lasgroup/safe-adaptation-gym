@@ -13,7 +13,7 @@ MujocoBridge = TypeVar("MujocoBridge")
 class Task(abc.ABC):
     def __init__(self):
         self._obstacle_scales = None
-        self._joints = None
+        self._damping = None
         self._bound = None
 
     @abc.abstractmethod
@@ -94,8 +94,14 @@ class Task(abc.ABC):
             self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
         return self._obstacle_scales
 
-
     def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
         if self._bound is None:
             self._bound = rs.uniform(0.0, max_bound)
         return self._bound
+
+    def modify_tree(self, rs: np.random.RandomState, shift: float, scale: float):
+        if self._damping is None:
+            self._damping = rs.uniform(-1., 1.) * scale + shift
+        return [(('joint', 'y'), ('damping', self._damping))]
+
+

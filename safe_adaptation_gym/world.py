@@ -26,7 +26,8 @@ class World:
       'pillars_keepout': 0.3,
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
-      'max_joints_to_disable': 3,
+      'damping_shift': 0.01,
+      'damping_scale': 0.005,
       'cripple_leg': True,
       'action_noise': 0.01,
       'max_bound': 25,
@@ -114,7 +115,9 @@ class World:
             self.robot.z_height,
         'robot_rot':
             utils.random_rot(self.rs),
-        'bodies': {}
+        'bodies': {},
+        'modify_tree': self.task.modify_tree(self.rs, self.config.damping_shift,
+          self.config.damping_scale)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:

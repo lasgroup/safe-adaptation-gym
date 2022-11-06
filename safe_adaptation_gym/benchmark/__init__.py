@@ -9,7 +9,6 @@ from safe_adaptation_gym import tasks
 from safe_adaptation_gym.benchmark import task_sampler as sampler
 
 BENCHMARKS = {'multitask', 'task_adaptation'}
-ROBOTS = {'point', 'car', 'doggo'}
 
 pattern = re.compile(r'(?<!^)(?=[A-Z])')
 
@@ -19,10 +18,7 @@ TASKS = {
     if name not in ['Task', 'DribbleBall', 'RollRod']
 }
 
-_BASE = 'xmls/'
-ROBOTS_BASENAMES = {
-    name: _BASE + name + '.xml' for name in ['point', 'car', 'doggo']
-}
+ROBOT_BASENAME = 'xmls/point.xml'
 
 
 class Benchmark:
