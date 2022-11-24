@@ -70,7 +70,11 @@ def safety_gym(request):
             "xmls/point.xml",
             render_lidars_and_collision=True,
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
-            config={"obstacles_size_noise_scale": 1.0, "damping_scale": 0.005, "damping_shift": 0.01},
+            config={
+                "obstacles_size_noise_scale": 1.0,
+                "damping_scale": 0.005,
+                "damping_shift": 0.01,
+            },
         ),
         1000,
     )

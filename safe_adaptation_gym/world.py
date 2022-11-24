@@ -28,7 +28,6 @@ class World:
       'obstacles_size_noise_scale': 0.025,
       'damping_shift': 0.01,
       'damping_scale': 0.005,
-      'cripple_leg': True,
       'action_noise': 0.01,
       'max_bound': 25,
       'random_bound': False
