@@ -101,7 +101,6 @@ class Task(abc.ABC):
 
     def modify_tree(self, rs: np.random.RandomState, min_damping: float, scale: float):
         if self._damping is None:
-            self._damping = np.clip(
-                rs.uniform(-1.0, 1.0) * scale + 0.01, min_damping, np.inf
-            )
+            self._damping = rs.uniform(min_damping, 0.01)
+
         return [(("joint", "y"), ("damping", self._damping))]
