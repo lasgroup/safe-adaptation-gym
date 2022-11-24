@@ -36,6 +36,5 @@ class CatchGoal(tasks.GoToGoal):
   def reset(self, layout: dict, placements: dict, rs: np.random.RandomState,
             mujoco_bridge: tasks.task.MujocoBridge):
     self.rs = rs
-    if self._origin is None:
-        super(CatchGoal, self).reset(layout, placements, rs, mujoco_bridge)
-        self._origin = mujoco_bridge.body_pos('goal')[:2].copy()
+    super(CatchGoal, self).reset(layout, placements, rs, mujoco_bridge)
+    self._origin = mujoco_bridge.body_pos('goal')[:2].copy()
