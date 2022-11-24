@@ -115,7 +115,7 @@ class World:
         'robot_rot':
             utils.random_rot(self.rs),
         'bodies': {},
-        'modify_tree': self.task.modify_tree(self.rs, self.config.damping_shift,
+        'modify_tree': self.task.modify_tree(self.rs, self.config.min_damping,
           self.config.damping_scale)
     }
     for name, xy in self._layout.items():

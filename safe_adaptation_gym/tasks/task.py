@@ -99,7 +99,9 @@ class Task(abc.ABC):
             self._bound = rs.uniform(0.0, max_bound)
         return self._bound
 
-    def modify_tree(self, rs: np.random.RandomState, shift: float, scale: float):
+    def modify_tree(self, rs: np.random.RandomState, min_damping: float, scale: float):
         if self._damping is None:
-            self._damping = rs.uniform(-1.0, 1.0) * scale + shift
+            self._damping = np.clip(
+                rs.uniform(-1.0, 1.0) * scale + 0.01, min_damping, np.inf
+            )
         return [(("joint", "y"), ("damping", self._damping))]

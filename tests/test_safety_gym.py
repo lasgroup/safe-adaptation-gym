@@ -72,8 +72,8 @@ def safety_gym(request):
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
             config={
                 "obstacles_size_noise_scale": 1.0,
-                "damping_scale": 0.005,
-                "damping_shift": 0.01,
+                "damping_scale": 0.015,
+                "min_damping": 0.001,
             },
         ),
         1000,
