@@ -9,6 +9,8 @@ from safe_adaptation_gym import consts
 # loads resources (e.g. GPU pointers) that should not exist on a parent process.
 MujocoBridge = TypeVar("MujocoBridge")
 
+_DEFAULT_DAMPING = 0.01
+
 
 class Task(abc.ABC):
     def __init__(self):
@@ -99,9 +101,11 @@ class Task(abc.ABC):
             self._bound = rs.uniform(0.0, max_bound)
         return self._bound
 
-    def modify_tree(self, rs: np.random.RandomState, min_damping: float, scale: float):
+    def modify_tree(self, rs: np.random.RandomState, min_damping: float):
         if self._damping is None:
-            self._damping = rs.uniform(min(0.01, min_damping), 0.01)
+            self._damping = rs.uniform(
+                min(_DEFAULT_DAMPING, min_damping), _DEFAULT_DAMPING
+            )
         return [
             (("joint", "y"), ("damping", self._damping)),
             (("joint", "x"), ("damping", self._damping)),
