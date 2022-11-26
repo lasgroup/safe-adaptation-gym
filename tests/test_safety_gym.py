@@ -72,13 +72,12 @@ def safety_gym(request):
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
             config={
                 "obstacles_size_noise_scale": 1.0,
-                "damping_scale": 0.015,
-                "min_damping": 0.001,
+                "min_damping": 0.000,
             },
         ),
         1000,
     )
-    seeds = {
+    seeds = [
         "Collect",
         "GoToGoal",
         "HaulBox",
@@ -87,7 +86,7 @@ def safety_gym(request):
         "PressButtons",
         "CatchGoal",
         "RollRod",
-    }
+    ]
     seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
     name = type(request.param).__name__
     arena.seed(seeds[name])
