@@ -104,9 +104,9 @@ class Task(abc.ABC):
     def modify_tree(self, rs: np.random.RandomState, min_damping: float):
         if self._damping is None:
             self._damping = rs.uniform(
-                min(_DEFAULT_DAMPING, min_damping), _DEFAULT_DAMPING
+                min(_DEFAULT_DAMPING, min_damping), _DEFAULT_DAMPING, 2
             )
         return [
-            (("joint", "y"), ("damping", self._damping)),
-            (("joint", "x"), ("damping", self._damping)),
+            (("joint", "y"), ("damping", self._damping[0])),
+            (("joint", "x"), ("damping", self._damping[1])),
         ]
