@@ -19,7 +19,8 @@ class MujocoBridge:
       'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
       'bodies': {},
       'others': {},
-      'modify_tree': []
+      'modify_tree': [],
+      'gravity': np.array((0., 0., -9.81))
   }
 
   def __init__(self, robot, addition_render_objects_specs=None, config=None):
@@ -48,6 +49,7 @@ class MujocoBridge:
         robot_site.attach(creat_fn(**specs))
     for (namespace, id_), (attribute, value) in self.config.modify_tree:
       setattr(arena_mjcf.find(namespace, id_), attribute, value)
+    setattr(arena_mjcf.option, 'gravity', self.config.gravity)
     robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
     # Convenience accessor for xml dictionary
@@ -112,7 +114,6 @@ class MujocoBridge:
             '@size': utils.convert_to_text(self.config.floor_size),
             '@rgba': '1 1 1 1',
             '@material': 'MatPlane',
-            '@zaxis': utils.convert_to_text(np.asarray((0.0, 0., 1.)))
         })
     # Add cameras to the XML dictionary
     cameras = xmltodict.parse("""<b>

@@ -2,6 +2,7 @@ import abc
 from typing import Dict, Tuple, List, TypeVar
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 from safe_adaptation_gym import consts
 
@@ -17,6 +18,7 @@ class Task(abc.ABC):
         self._obstacle_scales = None
         self._damping = None
         self._bound = None
+        self._gravity = None
 
     @abc.abstractmethod
     def setup_placements(self) -> Dict[str, tuple]:
@@ -95,6 +97,12 @@ class Task(abc.ABC):
             # https://keisan.casio.com/exec/system/1180573169
             self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
         return self._obstacle_scales
+
+    def gravity(self, rs: np.random.RandomState, max_angle: float) -> np.ndarray:
+        if self._gravity is None:
+            x, y = rs.uniform(0.0, max_angle, 2)
+            self._gravity = Rotation.from_euler("xy", [x, y], degrees=True)
+        return self._gravity.apply([0., 0., -9.81])
 
     def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
         if self._bound is None:

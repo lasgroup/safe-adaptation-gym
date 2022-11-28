@@ -73,6 +73,7 @@ def safety_gym(request):
             config={
                 "obstacles_size_noise_scale": 1.0,
                 "min_damping": 0.000,
+                "max_angle": 10.
             },
         ),
         1000,
@@ -98,7 +99,7 @@ def safety_gym(request):
 @pytest.mark.interactive
 def test_viewer(safety_gym):
     policy = (
-        (lambda *_: safety_gym.action_space.sample())
+        (lambda *_: np.zeros_like(safety_gym.action_space.sample()))
         if not glfw.joystick_present(glfw.JOYSTICK_1)
         else point_controller
     )

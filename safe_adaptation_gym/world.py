@@ -27,6 +27,7 @@ class World:
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
       'min_damping': 0.01,
+      'max_angle': 10.,
       'action_noise': 0.01,
       'max_bound': 25,
       'random_bound': False
@@ -114,7 +115,8 @@ class World:
         'robot_rot':
             utils.random_rot(self.rs),
         'bodies': {},
-        'modify_tree': self.task.modify_tree(self.rs, self.config.min_damping)
+        'modify_tree': self.task.modify_tree(self.rs, self.config.min_damping),
+        'gravity': self.task.gravity(self.rs, self.config.max_angle)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:
