@@ -107,8 +107,8 @@ class Task(abc.ABC):
 
     def ctrl_scale(self, rs: np.random.RandomState):
         if self._scale is None:
-            scale = np.where(rs.binomial(1, 0.5, 2), 1., -1.)
-            self._scale = np.diag(scale)
+            scale = np.where(rs.binomial(1, 0.5), 1., -1.)
+            self._scale = np.eye(2) * scale
         return self._scale
 
     def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
