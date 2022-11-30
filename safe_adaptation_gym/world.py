@@ -75,6 +75,7 @@ class World:
       self.bound = self.task.constraint_bound(self.rs, self.config.max_bound)
     else:
       self.bound = self.config.max_bound
+    self.ctrl_scale = self.task.ctrl_scale(self.rs)
 
   def _setup_placements(self):
     """ Build a dict of placements. """
