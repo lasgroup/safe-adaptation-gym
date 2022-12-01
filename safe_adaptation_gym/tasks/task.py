@@ -105,10 +105,10 @@ class Task(abc.ABC):
             self._gravity = Rotation.from_euler("xy", [x, y], degrees=True)
         return self._gravity.apply([0., 0., -9.81])
 
-    def ctrl_scale(self, rs: np.random.RandomState):
+    def ctrl_scale(self, rs: np.random.RandomState) -> float:
         if self._scale is None:
-            scale = np.where(rs.binomial(1, 0.5), 1., -1.)
-            self._scale = np.eye(2) * scale
+            scale = rs.choice((-1., 1.))
+            self._scale = scale
         return self._scale
 
     def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
