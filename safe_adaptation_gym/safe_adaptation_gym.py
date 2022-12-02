@@ -60,7 +60,6 @@ class SafeAdaptationGym(gym.Env):
     action += (
         self._world.config.action_noise *
         self.rs.normal(size=self.mujoco_bridge.nu))
-    action = self._world.ctrl_scale.dot(action)
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
     try:

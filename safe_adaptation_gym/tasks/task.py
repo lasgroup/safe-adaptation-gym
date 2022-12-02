@@ -19,7 +19,6 @@ class Task(abc.ABC):
         self._damping = None
         self._bound = None
         self._gravity = None
-        self._scale = None
 
     @abc.abstractmethod
     def setup_placements(self) -> Dict[str, tuple]:
@@ -104,12 +103,6 @@ class Task(abc.ABC):
             x, y = rs.uniform(0.0, max_angle, 2)
             self._gravity = Rotation.from_euler("xy", [x, y], degrees=True)
         return self._gravity.apply([0., 0., -9.81])
-
-    def ctrl_scale(self, rs: np.random.RandomState):
-        if self._scale is None:
-            scale = np.where(rs.binomial(1, 0.5, 2), 1., -1.)
-            self._scale = np.diag(scale)
-        return self._scale
 
     def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
         if self._bound is None:
