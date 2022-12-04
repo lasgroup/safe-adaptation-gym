@@ -10,13 +10,12 @@ from safe_adaptation_gym.mujoco_bridge import MujocoBridge
 from safe_adaptation_gym.tasks.task import Task
 from safe_adaptation_gym.world import World
 from safe_adaptation_gym.robot import Robot
-import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.render import make_additional_render_objects
 
 
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
-  LIDAR_MAX_DIST = 5.
+  LIDAR_MAX_DIST = 20.
 
   def __init__(self,
                robot_base: str,
