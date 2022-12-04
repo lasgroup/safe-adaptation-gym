@@ -10,8 +10,8 @@ from safe_adaptation_gym.tasks.task import MujocoBridge
 class Collect(PressButtons):
   NUM_BUTTONS = 8
 
-  def __init__(self):
-    super(PressButtons, self).__init__()
+  def __init__(self, train):
+    super(PressButtons, self).__init__(train)
     self._active_buttons = set(
         'buttons{}'.format(i) for i in range(self.NUM_BUTTONS))
 

@@ -116,7 +116,7 @@ class World:
             utils.random_rot(self.rs),
         'bodies': {},
         'modify_tree':
-            self.task.joints(self.rs, self.config.max_joints_to_disable, self.config.cripple_leg)
+            self.task.joints(self.rs, self.config.cripple_leg)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:

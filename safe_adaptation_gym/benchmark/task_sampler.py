@@ -16,4 +16,4 @@ class TaskSampler:
     if len(self.tasks) == 0:
       return
     task_name, task = self.rs.permutation(list(self.tasks.items()))[0]
-    return task_name, task()
+    return task_name, task

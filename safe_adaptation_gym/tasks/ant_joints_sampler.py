@@ -12,14 +12,14 @@ _JOINTS = [
 ]
 
 _LEGS_DEFAULT_GEOMS = {
-    'hip_1': np.array([0.098, 0.0566, -.05]),
-    'ankle_1': np.array([-0.1176, -0.0679, -.1]),
-    'hip_4': np.array([0.098, -0.0566, -.05]),
-    'ankle_4': np.array([-0.1176, 0.0679, -.1]),
-    'hip_2': np.array([0.098, 0.0566, -.05]),
-    'ankle_2': np.array([-0.1176, -0.0679, -.1]),
-    'hip_3': np.array([0.098, -0.0566, -.05]),
-    'ankle_3': np.array([-0.1176, 0.0679, -.1])
+    'hip_1': np.array([0.2, 0.2, 0.]),
+    'ankle_1': np.array([0.4, 0.4, 0.]),
+    'hip_2': np.array([-0.2, 0.2, 0.]),
+    'ankle_2': np.array([-0.4, 0.4, 0.]),
+    'hip_3': np.array([-0.2, -0.2, 0.]),
+    'ankle_3': np.array([-0.4, -0.4, 0.]),
+    'hip_4': np.array([0.2, -0.2, 0.]),
+    'ankle_4': np.array([0.4, -0.4, 0.]),
 }
 
 _CRIPPLED_LEG_COLOR = utils.convert_to_text(np.array([1., 165 / 255, 0, 1]))
@@ -34,15 +34,19 @@ def disable_joints(
   ]
 
 
-def cripple_leg(rs: np.random.RandomState, disable_motors: bool = False):
-  leg_id_to_cripple = rs.randint(5) + 1
-  # Randomly don't cripple leg.
-  if leg_id_to_cripple > 4:
-    return []
+def cripple_leg(rs: np.random.RandomState, train: bool):
+  if train:
+    leg_id_to_cripple = rs.randint(4) + 1
+    # Randomly don't cripple leg, leave one leg for test
+    if leg_id_to_cripple > 3:
+      return []
+  else:
+    leg_id_to_cripple = 4
   hip_id = f'hip_{leg_id_to_cripple}'
   ankle_id = f'ankle_{leg_id_to_cripple}'
-  hip = _LEGS_DEFAULT_GEOMS[hip_id] * rs.uniform(0.3, 1.)
-  ankle = _LEGS_DEFAULT_GEOMS[ankle_id] * rs.uniform(0.3, 1.)
+  sample = rs.uniform(0.5, 0.5)
+  hip = _LEGS_DEFAULT_GEOMS[hip_id] * sample
+  ankle = _LEGS_DEFAULT_GEOMS[ankle_id] * sample
   append_zeros = lambda x: f'0.0 0.0 0.0 {x}'
   hip = utils.convert_to_text(hip)
   ankle = utils.convert_to_text(ankle)
@@ -50,12 +54,9 @@ def cripple_leg(rs: np.random.RandomState, disable_motors: bool = False):
   ankle_zeros = append_zeros(ankle)
   mujoco_commands = [(('geom', hip_id), ('fromto', hip_zeros)),
                      (('geom', hip_id), ('rgba', _CRIPPLED_LEG_COLOR)),
-                     (('body', hip_id), ('pos', hip)),
+                     (('geom', hip_id), ('size', str(0.08 * sample))),
                      (('geom', ankle_id), ('fromto', ankle_zeros)),
                      (('geom', ankle_id), ('rgba', _CRIPPLED_LEG_COLOR)),
-                     (('site', ankle_id + 'b'), ('pos', ankle))]
-  if disable_motors:
-    mujoco_commands += [(('actuator', hip_id + '_z'), ('gear', [0.])),
-                        (('actuator', hip_id + '_y'), ('gear', [0.])),
-                        (('actuator', ankle_id), ('gear', [0.]))]
+                     (('geom', ankle_id), ('size', str(0.08 * sample))),
+                     (('body', ankle_id), ('pos', hip))]
   return mujoco_commands

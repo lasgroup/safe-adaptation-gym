@@ -14,8 +14,8 @@ class PushBox(GoToGoal):
   BOX_COLOR = np.array([1, 1, 0, 0.25])
   BOX_DENSITY = 0.001
 
-  def __init__(self):
-    super(PushBox, self).__init__()
+  def __init__(self, train):
+    super(PushBox, self).__init__(train)
     self._last_goal_distance = None
     self._last_box_distance = None
     self._last_box_goal_distance = None
