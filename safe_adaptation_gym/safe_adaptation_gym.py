@@ -211,8 +211,8 @@ class SafeAdaptationGym(gym.Env):
   def _sensors(self) -> List[np.ndarray]:
     """ Returns all robot-attached sensors """
     return np.concatenate([
-            self.mujoco_bridge.physics.named.data.qpos.flat,
-            self.mujoco_bridge.physics.named.data.qvel.flat,
+            self.mujoco_bridge.physics.named.data.qpos.flat[:15],
+            self.mujoco_bridge.physics.named.data.qvel.flat[:15],
             self.mujoco_bridge.robot_mat().flat,
             self.mujoco_bridge.body_com("robot"),
         ]).reshape(-1)
