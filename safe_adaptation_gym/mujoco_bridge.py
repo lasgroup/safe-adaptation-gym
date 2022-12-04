@@ -116,8 +116,8 @@ class MujocoBridge:
         })
     # Add cameras to the XML dictionary
     cameras = xmltodict.parse("""<b>
-            <camera name="fixednear" pos="0 -2 2" zaxis="0 -1 1"/>
-            <camera name="fixedfar" pos="0 -5 5" zaxis="0 -1 1"/>
+            <camera name="fixednear" pos="0 -15 15" zaxis="0 -1 1"/>
+            <camera name="fixedfar" pos="0 -20 20" zaxis="0 -1 1"/>
             </b>""")
     worldbody['camera'] = cameras['b']['camera']
     # Build and add a tracking camera (logic needed to ensure orientation
