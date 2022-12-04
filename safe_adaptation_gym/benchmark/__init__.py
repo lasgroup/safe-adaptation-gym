@@ -18,7 +18,7 @@ TASKS = {
     if name not in ['Task', 'DribbleBall', 'RollRod']
 }
 
-ROBOT_BASENAME = 'xmls/doggo.xml'
+ROBOT_BASENAME = 'xmls/ant.xml'
 
 
 class Benchmark:

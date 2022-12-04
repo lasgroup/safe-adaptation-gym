@@ -16,7 +16,7 @@ class MujocoBridge:
   DEFAULT = {
       'robot_xy': np.zeros(2),  # Robot XY location
       'robot_rot': 0,  # Robot rotation about Z axis
-      'floor_size': [3.5, 3.5, .1],  # Used for displaying the floor
+      'floor_size': [15, 15, .1],  # Used for displaying the floor
       'bodies': {},
       'others': {},
       'modify_tree': []

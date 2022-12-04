@@ -8,8 +8,8 @@ from safe_adaptation_gym.tasks.task import Task, MujocoBridge
 
 
 class GoToGoal(Task):
-  GOAL_SIZE = 0.3
-  GOAL_KEEPOUT = 0.4
+  GOAL_SIZE = 1.2
+  GOAL_KEEPOUT = 1.6
 
   def __init__(self):
     super(GoToGoal, self).__init__()
@@ -78,4 +78,4 @@ class GoToGoal(Task):
 
   @property
   def placement_extents(self) -> Tuple[float, float, float, float]:
-    return -2.25, -2.25, 2.25, 2.25
+    return -12.5, -12.5, 12.5, 12.5

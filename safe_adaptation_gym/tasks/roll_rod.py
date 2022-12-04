@@ -44,4 +44,4 @@ class RollRod(PushBox):
 
   @property
   def placement_extents(self) -> Tuple[float, float, float, float]:
-    return -1.75, -1.75, 1.75, 1.75
+    return -7, -7, 7, 7

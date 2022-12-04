@@ -5,8 +5,8 @@ from safe_adaptation_gym import tasks
 
 class CatchGoal(tasks.GoToGoal):
 
-  MIN_RADIUS = 0.2
-  MAX_RADIUS = 1.0
+  MIN_RADIUS = 0.8
+  MAX_RADIUS = 4.
   SAMPLE_POINTS = 10
 
   def __init__(self):

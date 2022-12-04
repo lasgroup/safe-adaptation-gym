@@ -8,8 +8,8 @@ from safe_adaptation_gym.utils import merge, convert_to_text
 
 
 class DribbleBall(PushBox):
-  SPHERE_RADIUS = 0.14
-  BOX_KEEPOUT = 0.2
+  SPHERE_RADIUS = 0.66
+  BOX_KEEPOUT = 0.8
   BOX_SIZE = SPHERE_RADIUS
 
   def __init__(self):

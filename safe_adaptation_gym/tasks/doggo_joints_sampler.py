@@ -41,8 +41,8 @@ def cripple_leg(rs: np.random.RandomState, disable_motors: bool = False):
     return []
   hip_id = f'hip_{leg_id_to_cripple}'
   ankle_id = f'ankle_{leg_id_to_cripple}'
-  hip = _LEGS_DEFAULT_GEOMS[hip_id] * rs.uniform(0.4, 1.)
-  ankle = _LEGS_DEFAULT_GEOMS[ankle_id] * rs.uniform(0.4, 1.)
+  hip = _LEGS_DEFAULT_GEOMS[hip_id] * rs.uniform(0.3, 1.)
+  ankle = _LEGS_DEFAULT_GEOMS[ankle_id] * rs.uniform(0.3, 1.)
   append_zeros = lambda x: f'0.0 0.0 0.0 {x}'
   hip = utils.convert_to_text(hip)
   ankle = utils.convert_to_text(ankle)

@@ -9,8 +9,8 @@ from safe_adaptation_gym.tasks.task import MujocoBridge
 
 
 class PushBox(GoToGoal):
-  BOX_SIZE = 0.2
-  BOX_KEEPOUT = 0.5
+  BOX_SIZE = 0.8
+  BOX_KEEPOUT = 2.
   BOX_COLOR = np.array([1, 1, 0, 0.25])
   BOX_DENSITY = 0.001
 

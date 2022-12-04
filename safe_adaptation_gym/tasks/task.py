@@ -88,16 +88,17 @@ class Task(abc.ABC):
     return self._obstacle_scales
 
   def joints(self, rs: np.random.RandomState, max_joints_to_disable: int, cripple_leg: bool):
-    if self._joints is None:
-      if max_joints_to_disable == 0:
-        self._joints = []
-      else:
-        num_joints_to_disable = rs.randint(max_joints_to_disable + 1)
-        self._joints = doggo_joints_sampler.disable_joints(
-            rs, num_joints_to_disable)
-      if cripple_leg:
-        self._joints += doggo_joints_sampler.cripple_leg(rs)
-    return self._joints
+    # if self._joints is None:
+    #   if max_joints_to_disable == 0:
+    #     self._joints = []
+    #   else:
+    #     num_joints_to_disable = rs.randint(max_joints_to_disable + 1)
+    #     self._joints = doggo_joints_sampler.disable_joints(
+    #         rs, num_joints_to_disable)
+    #   if cripple_leg:
+    #     self._joints += doggo_joints_sampler.cripple_leg(rs)
+    # return self._joints
+    return []
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):
     if self._bound is None:
