@@ -66,7 +66,7 @@ class SafeAdaptationGym(gym.Env):
     info = {'cost': cost, 'bound': self._world.bound}
     observation = self.observation
     diff = self.mujoco_bridge.robot_pos()[0] - x
-    reward = diff + 0.05 * (0.2 <= self.mujoco_bridge.robot_pos()[2] <= 1)
+    reward = diff / 0.1 + 0.05 * (0.2 <= self.mujoco_bridge.robot_pos()[2] <= 1)
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(self.lidar_observations, cost)
     return observation, reward, terminal, info
