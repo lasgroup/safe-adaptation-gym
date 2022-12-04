@@ -208,8 +208,8 @@ class MujocoBridge:
   def body_vel(self, name: str) -> np.ndarray:
     """ Get the velocity of a named body in the simulator world reference
     frame """
-    vel = self.physics.named.object_velocity(name, 'body')
-    return vel[0]
+    vel = self.physics.named.data.subtree_linvel['robot']
+    return vel
 
   def set_body_pos(self, name: str, pos: np.ndarray):
     """ Sets position for a given body name """
