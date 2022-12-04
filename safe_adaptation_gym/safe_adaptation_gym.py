@@ -17,12 +17,6 @@ from safe_adaptation_gym.render import make_additional_render_objects
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
   LIDAR_MAX_DIST = 5.
-  BASE_SENSORS = ['velocimeter', 'gyro', 'magnetometer']
-  DOGGO_EXTRA_SENSORS = [
-      'accelerometer', 'touch_ankle_1a', 'touch_ankle_2a', 'touch_ankle_3a',
-      'touch_ankle_4a', 'touch_ankle_1b', 'touch_ankle_2b', 'touch_ankle_3b',
-      'touch_ankle_4b'
-  ]
 
   def __init__(self,
                robot_base: str,
@@ -46,9 +40,7 @@ class SafeAdaptationGym(gym.Env):
     self._action_space = gym.spaces.Box(
         -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32)
     self._observation_space = None
-    self._sensors_names = self.BASE_SENSORS
-    if 'doggo' in robot_base:
-      self._sensors_names += self.DOGGO_EXTRA_SENSORS
+
 
   def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
     """ Take a step and return observation, reward, done, and info """
@@ -120,7 +112,6 @@ class SafeAdaptationGym(gym.Env):
       image = np.clip(image, 0, 255).astype(np.uint8)
       return image
     sensors = self._sensors()
-    sensors = np.concatenate([s[:, None] for s in sensors]).squeeze()
     lidars = self.lidar_observations
     obs = np.concatenate([lidars, sensors])
     return obs
@@ -219,17 +210,12 @@ class SafeAdaptationGym(gym.Env):
 
   def _sensors(self) -> List[np.ndarray]:
     """ Returns all robot-attached sensors """
-    sensors = []
-    for sensor in (self._sensors_names + self.robot.hinge_vel_names +
-                   self.robot.ballangvel_names):
-      sensors.append(self.mujoco_bridge.get_sensor(sensor))
-    for sensor in self.robot.hinge_pos_names:
-      theta = float(self.mujoco_bridge.get_sensor(sensor))
-      sensors.append(np.array([np.sin(theta), np.cos(theta)]))
-    for sensor in self.robot.ballquat_names:
-      quat = self.mujoco_bridge.get_sensor(sensor)
-      sensors.append(utils.quat2mat(quat).ravel())
-    return sensors
+    return np.concatenate([
+            self.mujoco_bridge.physics.named.data.qpos.flat,
+            self.mujoco_bridge.physics.named.data.qvel.flat,
+            self.mujoco_bridge.robot_mat().flat,
+            self.mujoco_bridge.body_com("robot"),
+        ]).reshape(-1)
 
   def _update_lidars_and_collision(self, observations, cost):
     obstacles_lidar, objects_lidar, goal_lidar = np.split(observations, 3)

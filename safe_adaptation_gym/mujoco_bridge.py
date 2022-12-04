@@ -193,7 +193,7 @@ class MujocoBridge:
   def body_com(self, name: str) -> np.ndarray:
     """ Get the center of mass of a named body in the simulator world
     reference frame """
-    return self.physics.named.subtree_com[name]
+    return self.physics.named.data.subtree_com[name]
 
   def body_pos(self, name: str) -> np.ndarray:
     """ Get the position of a named body in the simulator world reference
