@@ -72,7 +72,6 @@ class SafeAdaptationGym(gym.Env):
     in_bounds = np.logical_and(0 <= upright, upright <= np.inf)
     up = np.where(in_bounds, 1., np.where(abs(d) < 1, 0.0, 0.))
     reward = diff / 0.1 * up
-    print(up, 'ddkdkdkd')
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(self.lidar_observations, cost)
     return observation, reward, terminal, info
