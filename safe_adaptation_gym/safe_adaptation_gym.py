@@ -138,8 +138,8 @@ class SafeAdaptationGym(gym.Env):
         # Lidar for (1) obstacles, (2) objects and (3) goal.
         lidar_size = 3 * self.NUM_LIDAR_BINS
         sensors_flat_size = sensors.size
-        low = np.array([0.] * lidar_size + [-np.inf] * sensors_flat_size)
-        high = np.array([1.] * lidar_size + [np.inf] * sensors_flat_size)
+        low = np.array([-np.inf] * (sensors_flat_size + lidar_size))
+        high = np.array([np.inf] * (sensors_flat_size + lidar_size))
         self._observation_space = gym.spaces.Box(
             low,
             high,
@@ -210,9 +210,9 @@ class SafeAdaptationGym(gym.Env):
   def _sensors(self) -> List[np.ndarray]:
     """ Returns all robot-attached sensors """
     return np.concatenate([
-            self.mujoco_bridge.physics.named.data.qpos.flat[:15],
-            self.mujoco_bridge.physics.named.data.qvel.flat[:15],
-            self.mujoco_bridge.robot_mat().flat,
+            self.mujoco_bridge.physics.named.data.qpos[2:15],
+            self.mujoco_bridge.physics.named.data.qvel[:14],
+            self.mujoco_bridge.robot_mat().flatten(),
         ]).reshape(-1)
 
   def _update_lidars_and_collision(self, observations, cost):
