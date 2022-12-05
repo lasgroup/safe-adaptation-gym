@@ -53,7 +53,6 @@ class SafeAdaptationGym(gym.Env):
         self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
-    x = self.mujoco_bridge.robot_pos()[0]
     try:
       self._world.set_mocaps(self.mujoco_bridge)
       self.mujoco_bridge.physics.step(nstep=10)
@@ -65,13 +64,12 @@ class SafeAdaptationGym(gym.Env):
     cost = self._world.compute_cost(self.mujoco_bridge)
     info = {'cost': cost, 'bound': self._world.bound}
     observation = self.observation
-    diff = self.mujoco_bridge.robot_pos()[0] - x
     deviation = np.cos(np.deg2rad(0))
     upright = np.asarray(self.mujoco_bridge.physics.named.data.xmat['robot', 'zz'])
     d = np.where(upright < 0, 0 - upright, upright - np.inf) / (1 + deviation)
     in_bounds = np.logical_and(0 <= upright, upright <= np.inf)
     up = np.where(in_bounds, 1., np.where(abs(d) < 1, 0.0, 0.))
-    reward = diff / 0.1 * up
+    reward = reward * up
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(self.lidar_observations, cost)
     return observation, reward, terminal, info
