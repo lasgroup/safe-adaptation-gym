@@ -70,9 +70,11 @@ class Task(abc.ABC):
     """
     return [1 / len(consts.OBSTACLES)] * len(consts.OBSTACLES)
 
-  @property
-  def num_obstacles(self) -> int:
-    return 20
+  def num_obstacles(self, rs: np.random.RandomState) -> int:
+    if self.train:
+      return rs.randint(10, 15)
+    else:
+      return 20
 
   @property
   def placement_extents(self) -> Tuple[float, float, float, float]:

@@ -97,9 +97,11 @@ class PressButtons(Task):
   def obstacles_distribution(self):
     return [0.3, 0.3, 0.3, 0.1]
 
-  @property
-  def num_obstacles(self) -> int:
-    return 12
+  def num_obstacles(self, rs: np.random.RandomState) -> int:
+    if self.train:
+      return rs.randint(6, 10)
+    else:
+      return 12
 
 
 class State(Enum):

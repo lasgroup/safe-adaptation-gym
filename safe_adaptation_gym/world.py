@@ -78,7 +78,7 @@ class World:
 
   def _setup_placements(self):
     """ Build a dict of placements. """
-    obstacle_samples = self.rs.multinomial(self.task.num_obstacles,
+    obstacle_samples = self.rs.multinomial(self.task.num_obstacles(self.rs),
                                            self.task.obstacles_distribution)
     placements = {
         **self._placement_dict_from_object('robot', 1),

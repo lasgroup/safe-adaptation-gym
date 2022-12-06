@@ -103,9 +103,11 @@ class PushBox(GoToGoal):
   def obstacles_distribution(self):
     return [0.5, 0.46, 0., 0.04]
 
-  @property
-  def num_obstacles(self) -> int:
-    return 10
+  def num_obstacles(self, rs: np.random.RandomState) -> int:
+    if self.train:
+      return rs.randint(6, 8)
+    else:
+      return 10
 
   @property
   def placement_extents(self) -> Tuple[float, float, float, float]:
