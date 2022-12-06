@@ -22,7 +22,7 @@ _LEGS_DEFAULT_GEOMS = {
     'ankle_4': np.array([0.4, -0.4, 0.]),
 }
 
-_CRIPPLED_LEG_COLOR = utils.convert_to_text(np.array([1., 165 / 255, 0, 1]))
+_CRIPPLED_LEG_COLOR = utils.convert_to_text(np.array([165 / 255, 0.1, 0, 1]))
 
 
 def disable_joints(
