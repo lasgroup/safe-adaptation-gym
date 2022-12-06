@@ -36,11 +36,12 @@ def disable_joints(
 
 def cripple_leg(rs: np.random.RandomState, train: bool):
   if train:
-    leg_id_to_cripple = rs.randint(4) + 1
-    # Randomly don't cripple leg, leave one leg for test
-    if leg_id_to_cripple > 3:
+    # Randomly don't cripple leg
+    if rs.binomial(1, 0.05):
       return []
+    leg_id_to_cripple = rs.randint(3) + 1
   else:
+    # Leave one leg for test
     leg_id_to_cripple = 4
   hip_id = f'hip_{leg_id_to_cripple}'
   ankle_id = f'ankle_{leg_id_to_cripple}'
