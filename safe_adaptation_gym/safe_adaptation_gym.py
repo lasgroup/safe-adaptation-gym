@@ -64,12 +64,6 @@ class SafeAdaptationGym(gym.Env):
     cost = self._world.compute_cost(self.mujoco_bridge)
     info = {'cost': cost, 'bound': self._world.bound}
     observation = self.observation
-    deviation = np.cos(np.deg2rad(0))
-    upright = np.asarray(self.mujoco_bridge.physics.named.data.xmat['robot', 'zz'])
-    d = np.where(upright < 0, 0 - upright, upright - np.inf) / (1 + deviation)
-    in_bounds = np.logical_and(0 <= upright, upright <= np.inf)
-    up = np.where(in_bounds, 1., np.where(abs(d) < 1, 0.0, 0.))
-    reward = reward * up
     if self._render_lidars_and_collision:
       self._update_lidars_and_collision(self.lidar_observations, cost)
     return observation, reward, terminal, info

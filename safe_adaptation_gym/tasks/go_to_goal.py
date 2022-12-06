@@ -39,14 +39,15 @@ class GoToGoal(Task):
         goal_pos = np.asarray(mujoco_bridge.body_pos("goal"))
         robot_pos = mujoco_bridge.body_pos("robot")
         distance = np.linalg.norm(robot_pos - goal_pos)
-        reward = tolerance(
-            distance,
-            bounds=(0, self.GOAL_SIZE),
-            sigmoid="linear",
-            margin=self.arena_radius,
-            value_at_margin=0,
-        )
-        return reward, False, dict()
+        reward = self._last_goal_distance - distance
+        self._last_goal_distance = distance
+        info = {}
+        if distance <= self.GOAL_SIZE:
+            info["goal_met"] = True
+            utils.update_layout(layout, mujoco_bridge)
+            self.reset(layout, placements, rs, mujoco_bridge)
+            reward += 1.0
+        return reward, False, info
 
     def set_mocaps(self, mujoco_bridge: MujocoBridge):
         pass
