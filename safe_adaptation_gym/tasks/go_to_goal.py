@@ -90,4 +90,4 @@ class GoToGoal(Task):
 
     @property
     def placement_extents(self) -> Tuple[float, float, float, float]:
-        return -12.5, -12.5, 12.5, 12.5
+        return -8.5, -8.5, 8.5, 8.5
