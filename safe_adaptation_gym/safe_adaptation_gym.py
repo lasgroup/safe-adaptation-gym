@@ -15,7 +15,7 @@ from safe_adaptation_gym.render import make_additional_render_objects
 
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
-  LIDAR_MAX_DIST = 17.5
+  LIDAR_MAX_DIST = 14
 
   def __init__(self,
                robot_base: str,
