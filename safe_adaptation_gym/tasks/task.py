@@ -92,7 +92,7 @@ class Task(abc.ABC):
     if self._joints is None:
       self._joints = []
       if cripple_leg:
-        self._joints += doggo_joints_sampler.cripple_leg(rs)
+        self._joints += doggo_joints_sampler.cripple_leg(rs, self.train)
     return self._joints
 
   def constraint_bound(self, rs: np.random.RandomState, max_bound: float):

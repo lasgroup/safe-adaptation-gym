@@ -84,7 +84,7 @@ class ViewerWrapper:
         tasks.RollRod(True),
         tasks.DribbleBall(True),
         tasks.PressButtons(True),
-        tasks.GoToGoal(True),
+        tasks.GoToGoal(False),
     ]
 )
 def safety_gym(request):
