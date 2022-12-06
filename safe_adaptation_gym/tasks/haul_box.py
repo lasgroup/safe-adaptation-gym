@@ -9,8 +9,8 @@ from safe_adaptation_gym.tasks import task
 
 class HaulBox(push_box.PushBox):
 
-  def __init__(self):
-    super(HaulBox, self).__init__()
+  def __init__(self, train):
+    super(HaulBox, self).__init__(train)
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     from dm_control import mjcf

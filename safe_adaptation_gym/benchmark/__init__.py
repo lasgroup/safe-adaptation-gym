@@ -15,7 +15,7 @@ pattern = re.compile(r'(?<!^)(?=[A-Z])')
 TASKS = {
     pattern.sub('_', name).lower(): task
     for name, task in inspect.getmembers(tasks, inspect.isclass)
-    if name not in ['Task', 'DribbleBall', 'RollRod']
+    if name == 'GoToGoal'
 }
 
 ROBOT_BASENAME = 'xmls/doggo.xml'
@@ -39,7 +39,8 @@ class Benchmark:
       sample = self._train_tasks_sampler.sample()
       if sample is None:
         return
-      yield sample
+      task_name, task = sample
+      yield task_name, task(True)
 
   @property
   def test_tasks(self) -> Iterator[Tuple[str, tasks.Task]]:
@@ -51,7 +52,8 @@ class Benchmark:
       sample = self._test_tasks_sampler.sample()
       if sample is None:
         return
-      yield sample
+      task_name, task = sample
+      yield task_name, task(False)
 
 
 def make(benchmark_name: str,

@@ -77,14 +77,14 @@ class ViewerWrapper:
 
 @pytest.fixture(
     params=[
-        tasks.CatchGoal(),
-        tasks.HaulBox(),
-        tasks.Collect(),
-        tasks.PushBox(),
-        tasks.RollRod(),
-        tasks.DribbleBall(),
-        tasks.PressButtons(),
-        tasks.GoToGoal(),
+        tasks.CatchGoal(True),
+        tasks.HaulBox(True),
+        tasks.Collect(True),
+        tasks.PushBox(True),
+        tasks.RollRod(True),
+        tasks.DribbleBall(True),
+        tasks.PressButtons(True),
+        tasks.GoToGoal(True),
     ]
 )
 def safety_gym(request):

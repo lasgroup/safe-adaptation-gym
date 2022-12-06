@@ -13,10 +13,11 @@ MujocoBridge = TypeVar("MujocoBridge")
 
 class Task(abc.ABC):
 
-  def __init__(self):
+  def __init__(self, train: bool):
     self._obstacle_scales = None
     self._joints = None
     self._bound = None
+    self.train = train
 
   @abc.abstractmethod
   def setup_placements(self) -> Dict[str, tuple]:
@@ -87,14 +88,9 @@ class Task(abc.ABC):
       self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
     return self._obstacle_scales
 
-  def joints(self, rs: np.random.RandomState, max_joints_to_disable: int, cripple_leg: bool):
+  def joints(self, rs: np.random.RandomState, cripple_leg: bool):
     if self._joints is None:
-      if max_joints_to_disable == 0:
-        self._joints = []
-      else:
-        num_joints_to_disable = rs.randint(max_joints_to_disable + 1)
-        self._joints = doggo_joints_sampler.disable_joints(
-            rs, num_joints_to_disable)
+      self._joints = []
       if cripple_leg:
         self._joints += doggo_joints_sampler.cripple_leg(rs)
     return self._joints
