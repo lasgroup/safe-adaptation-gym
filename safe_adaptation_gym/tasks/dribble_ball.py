@@ -8,7 +8,7 @@ from safe_adaptation_gym.utils import merge, convert_to_text
 
 
 class DribbleBall(PushBox):
-  SPHERE_RADIUS = 0.14
+  SPHERE_RADIUS = 0.15
   BOX_KEEPOUT = 0.2
   BOX_SIZE = SPHERE_RADIUS
 
@@ -28,10 +28,10 @@ class DribbleBall(PushBox):
         name='box',
         type='sphere',
         size=convert_to_text(np.array([self.SPHERE_RADIUS])),
-        density=self.BOX_DENSITY / 2.,
-        friction=[1.2, 0.003, 0.05],
+        # density=self.BOX_DENSITY / 2.,
+        friction=".7 .005 .005",
         user=[c.GROUP_OBJECTS],
-        solref=[0.018, 0.2],
+        solref="-10000 -30",
         condim=6,
         rgba=np.ones((4,)),
         material='interactobj',
