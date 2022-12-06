@@ -1,24 +1,20 @@
 from typing import Optional, Dict
 
-
 from safe_adaptation_gym.benchmark import TASKS
 
 
-def make(
-    task_name: Optional[str] = None,
+def make(task_name: Optional[str] = None,
     seed: int = 666,
+         config: Optional[Dict] = None,
     rgb_observation: bool = False,
-    render_options: Optional[Dict] = dict(),
-    render_lidar_and_collision=True,
-    max_bound: float = 25.0,
-):
+         render_options: Optional[Dict] = None,
+         render_lidar_and_collision=True):
     from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
-
     env = SafeAdaptationGym(
+      config=config,
         rgb_observation=rgb_observation,
-        render_options=render_options,
-        max_bound=max_bound,
-    )
+      render_lidars_and_collision=render_lidar_and_collision,
+      render_options=render_options)
     env.seed(seed)
     if task_name is not None:
         task = TASKS[task_name.lower()]
