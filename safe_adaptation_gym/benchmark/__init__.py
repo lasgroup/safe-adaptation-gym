@@ -15,7 +15,7 @@ pattern = re.compile(r'(?<!^)(?=[A-Z])')
 TASKS = {
     pattern.sub('_', name).lower(): task
     for name, task in inspect.getmembers(tasks, inspect.isclass)
-    if name == 'GoToGoal'
+    if name not in ['Task', 'DribbleBall', 'RollRod']
 }
 
 ROBOT_BASENAME = 'xmls/doggo.xml'
