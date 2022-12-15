@@ -9,8 +9,8 @@ class CatchGoal(tasks.GoToGoal):
   MAX_RADIUS = 1.0
   SAMPLE_POINTS = 10
 
-  def __init__(self):
-    super(CatchGoal, self).__init__()
+  def __init__(self, train):
+    super(CatchGoal, self).__init__(train)
     self.rs = None
     self._current_radius = self.MAX_RADIUS
     self._next_radius = self.MIN_RADIUS

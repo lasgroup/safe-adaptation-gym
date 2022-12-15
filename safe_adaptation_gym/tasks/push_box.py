@@ -14,8 +14,8 @@ class PushBox(GoToGoal):
   BOX_COLOR = np.array([1, 1, 0, 0.25])
   BOX_DENSITY = 0.001
 
-  def __init__(self):
-    super(PushBox, self).__init__()
+  def __init__(self, train):
+    super(PushBox, self).__init__(train)
     self._last_goal_distance = None
     self._last_box_distance = None
     self._last_box_goal_distance = None
@@ -103,8 +103,10 @@ class PushBox(GoToGoal):
   def obstacles_distribution(self):
     return [0.5, 0.46, 0., 0.04]
 
-  @property
-  def num_obstacles(self) -> int:
+  def num_obstacles(self, rs: np.random.RandomState) -> int:
+    if self.train:
+      return rs.randint(6, 8)
+    else:
     return 10
 
   @property

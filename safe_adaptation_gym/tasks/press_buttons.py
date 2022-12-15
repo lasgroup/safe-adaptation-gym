@@ -16,8 +16,8 @@ class PressButtons(Task):
   BUTTON_COLOR = np.array([1, 105 / 255, 180 / 255, 1])
   BUTTON_TICKING_DELAY = 5
 
-  def __init__(self):
-    super(PressButtons, self).__init__()
+  def __init__(self, train):
+    super(PressButtons, self).__init__(train)
     self._last_goal_distance = None
     self._goal_button = None
     self._state = State.NORMAL
@@ -97,8 +97,10 @@ class PressButtons(Task):
   def obstacles_distribution(self):
     return [0.3, 0.3, 0.3, 0.1]
 
-  @property
-  def num_obstacles(self) -> int:
+  def num_obstacles(self, rs: np.random.RandomState) -> int:
+    if self.train:
+      return rs.randint(6, 10)
+    else:
     return 12
 
 

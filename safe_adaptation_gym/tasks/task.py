@@ -14,11 +14,13 @@ _DEFAULT_DAMPING = 0.01
 
 
 class Task(abc.ABC):
-    def __init__(self):
+
+  def __init__(self, train: bool):
         self._obstacle_scales = None
         self._damping = None
         self._bound = None
         self._gravity = None
+        self.train = train
 
     @abc.abstractmethod
     def setup_placements(self) -> Dict[str, tuple]:
@@ -80,8 +82,10 @@ class Task(abc.ABC):
         """
         return [1 / len(consts.OBSTACLES)] * len(consts.OBSTACLES)
 
-    @property
-    def num_obstacles(self) -> int:
+  def num_obstacles(self, rs: np.random.RandomState) -> int:
+    if self.train:
+      return rs.randint(10, 15)
+    else:
         return 20
 
     @property

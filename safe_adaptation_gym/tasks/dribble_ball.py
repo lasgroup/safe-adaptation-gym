@@ -12,8 +12,8 @@ class DribbleBall(PushBox):
   BOX_KEEPOUT = 0.2
   BOX_SIZE = SPHERE_RADIUS
 
-  def __init__(self):
-    super(DribbleBall, self).__init__()
+  def __init__(self, train):
+    super(DribbleBall, self).__init__(train)
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     # Import mjcf here so that rendering with multiple process works.
