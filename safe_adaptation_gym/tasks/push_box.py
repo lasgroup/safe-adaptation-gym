@@ -107,7 +107,7 @@ class PushBox(GoToGoal):
     if self.train:
       return rs.randint(6, 8)
     else:
-    return 10
+      return 10
 
   @property
   def placement_extents(self) -> Tuple[float, float, float, float]:
