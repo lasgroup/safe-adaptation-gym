@@ -105,7 +105,7 @@ class PushBox(GoToGoal):
 
   def num_obstacles(self, rs: np.random.RandomState) -> int:
     if self.train:
-      return rs.randint(6, 8)
+      return rs.randint(4, 6)
     else:
       return 10
 

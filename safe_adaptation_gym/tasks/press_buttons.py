@@ -99,9 +99,9 @@ class PressButtons(Task):
 
   def num_obstacles(self, rs: np.random.RandomState) -> int:
     if self.train:
-      return rs.randint(6, 10)
+      return rs.randint(6, 8)
     else:
-    return 12
+      return 12
 
 
 class State(Enum):

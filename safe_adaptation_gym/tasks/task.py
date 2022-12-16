@@ -104,6 +104,8 @@ class Task(abc.ABC):
 
   def gravity(self, rs: np.random.RandomState, max_angle: float) -> np.ndarray:
     if self._gravity is None:
+        if self.train:
+            max_angle /= 2
         x, y = rs.uniform(0.0, max_angle, 2)
         self._gravity = Rotation.from_euler("xy", [x, y], degrees=True)
     return self._gravity.apply([0., 0., -9.81])
@@ -115,6 +117,8 @@ class Task(abc.ABC):
 
   def modify_tree(self, rs: np.random.RandomState, min_damping: float):
     if self._damping is None:
+        if self.train:
+            min_damping *= 2.
         self._damping = rs.uniform(
             min(_DEFAULT_DAMPING, min_damping), _DEFAULT_DAMPING, 2
             )
