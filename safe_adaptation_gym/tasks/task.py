@@ -106,7 +106,7 @@ class Task(abc.ABC):
     if self._gravity is None:
         if self.train:
             max_angle /= 2
-        x, y = rs.uniform(0.0, max_angle, 2)
+        x, y = rs.uniform(-max_angle, max_angle, 2)
         self._gravity = Rotation.from_euler("xy", [x, y], degrees=True)
     return self._gravity.apply([0., 0., -9.81])
 
