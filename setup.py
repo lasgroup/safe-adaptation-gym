@@ -9,14 +9,13 @@ required = [
 
 extras = {'dev': ['pytest>=4.4.0', 'Pillow', 'matplotlib']}
 
-package_data = {'safe-adaptation-gym': ['assets/*']}
+package_data = {'safe_adaptation_gym': ['assets/xmls/*.xml']}
 
 setup(
     name='safe-adaptation-gym',
     version='0.0.0',
     packages=find_packages(),
     python_requires='>3.8',
-    include_package_data=True,
     install_requires=required,
     extras_require=extras,
     package_data=package_data)
