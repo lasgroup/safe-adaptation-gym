@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 import numpy as np
 
 from safe_adaptation_gym import utils
-from safe_adaptation_gym.tasks.press_buttons import PressButtons
+from safe_adaptation_gym.tasks.collect import Collect
 from safe_adaptation_gym.tasks.push_box import PushBox
 from safe_adaptation_gym.tasks.task import MujocoBridge, Task
 
@@ -11,7 +11,7 @@ from safe_adaptation_gym.tasks.task import MujocoBridge, Task
 class Unsupervised(Task):
     def __init__(self):
         super(Unsupervised, self).__init__()
-        self.buttons = PressButtons()
+        self.buttons = Collect()
         self.box = PushBox()
 
     def setup_placements(self) -> Dict[str, tuple]:
@@ -33,7 +33,16 @@ class Unsupervised(Task):
         rs: np.random.RandomState,
         mujoco_bridge: MujocoBridge,
     ) -> Tuple[float, bool, dict]:
-        return 0.0, False, {}
+        box_reward, box_done, box_info = self.box.compute_reward(
+            layout, placements, rs, mujoco_bridge
+        )
+        collect_reward, collect_done, collect_info = self.buttons.compute_reward(
+            layout, placements, rs, mujoco_bridge
+        )
+        reward = box_reward + collect_reward
+        done = box_done or collect_done
+        info = utils.merge(box_info, collect_info)
+        return reward, done, info
 
     def reset(
         self,
@@ -42,6 +51,7 @@ class Unsupervised(Task):
         rs: np.random.RandomState,
         mujoco_bridge: MujocoBridge,
     ):
+        self.buttons.reset(layout, placements, rs, mujoco_bridge)
         return self.box.reset(layout, placements, rs, mujoco_bridge)
 
     def set_mocaps(self, mujoco_bridge: MujocoBridge):
