@@ -62,7 +62,7 @@ class SafeAdaptationGym(gym.Env):
         np.clip(action, action_range[:, 0], action_range[:, 1]))
     try:
       self._world.set_mocaps(self.mujoco_bridge)
-      self.mujoco_bridge.physics.step(nstep=5)
+      self.mujoco_bridge.physics.step(nstep=5 if 'point' in self.robot.base_path else 10)
     except dm_control.rl.control.PhysicsError as er:
       print('PhysicsError', er)
       return self.observation, -10., True, {'cost': 0.}
