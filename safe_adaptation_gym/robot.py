@@ -10,6 +10,7 @@ class Robot:
 
   def __init__(self, path):
     self.base_path = os.path.join(c.BASE_DIR, path)
+    self.name = _get_robot_name(path)
     self.sim = mujoco.Physics.from_xml_path(self.base_path)
     self.sim.forward()
 
@@ -56,3 +57,6 @@ class Robot:
           # (That we are invariant to relative whole-world transforms)
           # If slide joints are added we sould ensure this stays true!
           raise ValueError('Slide joints in robots not currently supported')
+
+def _get_robot_name(path):
+  return os.path.splitext(os.path.basename(path))[0]

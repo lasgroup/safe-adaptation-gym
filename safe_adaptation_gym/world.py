@@ -41,6 +41,8 @@ class World:
       config = {}
     tmp_config = deepcopy(self.DEFAULT)
     tmp_config.update(config)
+    if robot.name == "doggo":
+      tmp_config['placements_margin'] += 0.1
     self.config = SimpleNamespace(**tmp_config)
     self.task = task
     self.rs = rs
@@ -190,11 +192,14 @@ class World:
       return True
 
     layout = {}
+    extents = self.task.placement_extents
+    if self.robot.name == "doggo":
+      extents = tuple(np.asarray(extents) * 1.25)
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
       for _ in range(100):
         xy = utils.draw_placement(self.rs, placements,
-                                  self.task.placement_extents, keepout)
+                                  extents, keepout)
         if placement_is_valid(xy):
           conflicted = False
           break

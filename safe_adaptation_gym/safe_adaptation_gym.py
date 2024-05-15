@@ -45,7 +45,7 @@ class SafeAdaptationGym(gym.Env):
         -1, 1, (self.mujoco_bridge.nu,), dtype=np.float32)
     self._observation_space = None
     self._sensors_names = self.BASE_SENSORS
-    if 'doggo' in robot_base:
+    if self.robot.name == "doggo":
       self._sensors_names += self.DOGGO_EXTRA_SENSORS
 
   def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
