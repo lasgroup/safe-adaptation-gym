@@ -58,8 +58,9 @@ class GoToGoal(Task):
   def _resample_goal_position(self, layout: dict, placements: dict,
                               rs: np.random.RandomState):
     layout.pop('goal')
+    goal_extents = tuple(np.asarray(self.placement_extents) * 0.75)
     for _ in range(10000):
-      goal_xy = utils.draw_placement(rs, None, self.placement_extents,
+      goal_xy = utils.draw_placement(rs, None, goal_extents,
                                      self.GOAL_KEEPOUT)
       valid_placement = True
       for other_name, other_xy in layout.items():

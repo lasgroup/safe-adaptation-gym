@@ -26,8 +26,8 @@ class World:
       'pillars_keepout': 0.3,
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.025,
-      'robot_ctrl_range_scale': 0.05,
-      'action_noise': 0.01,
+      'robot_ctrl_range_scale': 0.0,
+      'action_noise': 0.0,
       'max_bound': 25,
       'random_bound': False
   }

@@ -1,6 +1,5 @@
 from typing import Tuple, Union, Optional, List, Dict
 
-import dm_control.rl.control
 import gym
 import numpy as np
 from gym.core import ActType, ObsType
@@ -12,6 +11,11 @@ from safe_adaptation_gym.robot import Robot
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.render import make_additional_render_objects
 
+_ROBOT_TO_CONTROL_FREQUENCY = {
+  'doggo': 15,
+  'point': 5,
+  'car': 10
+}
 
 class SafeAdaptationGym(gym.Env):
   NUM_LIDAR_BINS = 16
@@ -60,12 +64,10 @@ class SafeAdaptationGym(gym.Env):
         self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
-    try:
+    iters = _ROBOT_TO_CONTROL_FREQUENCY[self.robot.name]
+    for _ in range(iters):
       self._world.set_mocaps(self.mujoco_bridge)
-      self.mujoco_bridge.physics.step(nstep=5 if 'point' in self.robot.base_path else 10)
-    except dm_control.rl.control.PhysicsError as er:
-      print('PhysicsError', er)
-      return self.observation, -10., True, {'cost': 0.}
+      self.mujoco_bridge.physics.step()
     self.mujoco_bridge.physics.forward()
     reward, terminal, info = self._world.compute_reward(self.mujoco_bridge)
     cost = self._world.compute_cost(self.mujoco_bridge)
