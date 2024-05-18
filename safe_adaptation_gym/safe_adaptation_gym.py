@@ -12,7 +12,7 @@ import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.render import make_additional_render_objects
 
 _ROBOT_TO_CONTROL_FREQUENCY = {
-  'doggo': 15,
+  'doggo': 13,
   'point': 5,
   'car': 10
 }
