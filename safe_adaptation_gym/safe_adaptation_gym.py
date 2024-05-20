@@ -60,7 +60,7 @@ class SafeAdaptationGym(gym.Env):
     # world (a.k.a. CMDP), we sample a new scale (see _build_world_config) to
     # accomodate variability in the dynamics.
     action = (
-        action * action_range[:, 1] + self._world.config.action_noise *
+        action + self._world.config.action_noise *
         self.rs.normal(size=self.mujoco_bridge.nu))
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
