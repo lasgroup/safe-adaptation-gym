@@ -193,8 +193,6 @@ class World:
 
     layout = {}
     extents = self.task.placement_extents
-    if self.robot.name == "doggo":
-      extents = tuple(np.asarray(extents) * 1.25)
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
       for _ in range(100):
