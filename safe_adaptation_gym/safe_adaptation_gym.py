@@ -114,6 +114,7 @@ class SafeAdaptationGym(gym.Env):
 
   @property
   def observation(self) -> np.ndarray:
+    self.mujoco_bridge.physics.forward()
     if self._rgb_observation:
       image = self.mujoco_bridge.physics.render(
           height=64, width=64, camera_id='vision')
