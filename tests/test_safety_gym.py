@@ -8,7 +8,7 @@ from gym.wrappers import TimeLimit
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
-ROBOT = "point"
+ROBOT = "doggo"
 
 
 def controller(action_space):
@@ -92,7 +92,7 @@ def safety_gym(request):
     arena = TimeLimit(
         SafeAdaptationGym(
             f"xmls/{ROBOT}.xml",
-            render_lidars_and_collision=True,
+            render_lidars_and_collision=False,
             render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
             config={"obstacles_size_noise_scale": 1.0},
         ),

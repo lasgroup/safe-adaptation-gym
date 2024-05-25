@@ -22,7 +22,7 @@ class PushBox(GoToGoal):
 
   def setup_placements(self) -> Dict[str, tuple]:
     placements = super(PushBox, self).setup_placements()
-    placements.update({'box': (None, self.BOX_KEEPOUT)})
+    placements.update({'box': ([(-1.5, -1.5, 1.5, 1.5)], self.BOX_KEEPOUT)})
     return placements
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
@@ -106,7 +106,3 @@ class PushBox(GoToGoal):
   @property
   def num_obstacles(self) -> int:
     return 10
-
-  @property
-  def placement_extents(self) -> Tuple[float, float, float, float]:
-    return c.PLACEMENT_EXTENTS

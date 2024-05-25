@@ -193,11 +193,14 @@ class World:
 
     layout = {}
     extents = self.task.placement_extents
+    if isinstance(extents, tuple):
+      extents = {k: extents for k in self._placements.keys()}
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
       for _ in range(100):
+        object_extents = extents[name]
         xy = utils.draw_placement(self.rs, placements,
-                                  extents, keepout)
+                                  object_extents, keepout)
         if placement_is_valid(xy):
           conflicted = False
           break
