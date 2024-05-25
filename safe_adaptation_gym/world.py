@@ -42,7 +42,7 @@ class World:
     tmp_config = deepcopy(self.DEFAULT)
     tmp_config.update(config)
     if robot.name == "doggo":
-      tmp_config['placements_margin'] += 0.1
+      tmp_config['placements_margin'] += 0.15
     self.config = SimpleNamespace(**tmp_config)
     self.task = task
     self.rs = rs
