@@ -6,7 +6,7 @@ import safe_adaptation_gym
 
 BASE_DIR = os.path.join(os.path.dirname(safe_adaptation_gym.__file__), 'assets')
 
-PLACEMENT_EXTENTS = (-2, -2, 2, 2)
+PLACEMENT_EXTENTS = (-2.25, -2.25, 2.25, 2.25)
 
 OBSTACLES = ['hazards', 'vases', 'gremlins', 'pillars']
 

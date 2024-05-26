@@ -16,7 +16,7 @@ class GoToGoal(Task):
     self._last_goal_distance = None
 
   def setup_placements(self) -> Dict[str, tuple]:
-    return {'goal': ([(-1.5, -1.5, 1.5, 1.5)], self.GOAL_KEEPOUT)}
+    return {'goal': ([(-1.25, -1.25, 1.25, 1.25)], self.GOAL_KEEPOUT)}
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     return {
@@ -76,7 +76,3 @@ class GoToGoal(Task):
   @property
   def obstacles_distribution(self):
     return [0.4, 0.4, 0.1, 0.1]
-
-  @property
-  def placement_extents(self) -> Tuple[float, float, float, float]:
-    return -2.25, -2.25, 2.25, 2.25
