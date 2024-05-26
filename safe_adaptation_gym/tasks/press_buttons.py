@@ -95,7 +95,7 @@ class PressButtons(Task):
 
   @property
   def obstacles_distribution(self):
-    return [0.3, 0.3, 0.1, 0.3]
+    return [0.4, 0.4, 0.1, 0.1]
 
   @property
   def num_obstacles(self) -> int:
