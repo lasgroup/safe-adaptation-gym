@@ -173,14 +173,22 @@ class World:
 
   def _generate_new_layout(self):
     """ Rejection sample a placement of objects to find a layout. """
+    extents = self.task.placement_extents
     for _ in range(10000):
-      new_layout = self._sample_layout()
-      if new_layout is not None:
-        return new_layout
-    else:
-      raise utils.ResamplingError('Failed to sample layout of objects')
+      for _ in range(10000):
+        new_layout = self._sample_layout(extents)
+        if new_layout is not None:
+          return new_layout
+      increase_extents = lambda extents: tuple(np.asarray(extents) * 1.05)
+      extents = increase_extents(extents)
+      new_placements = {}
+      for name, (placements, keepout) in self._placements.items():
+        if placements is not None:
+          new_placements[name] = ([increase_extents(extents for extents in placements)], keepout)
+      self._placements = new_placements
+    raise utils.ResamplingError()
 
-  def _sample_layout(self) -> Union[dict, None]:
+  def _sample_layout(self, extents) -> Union[dict, None]:
     """ Sample a single layout, returning True if successful, else False. """
 
     def placement_is_valid(xy: np.ndarray):
@@ -192,12 +200,11 @@ class World:
       return True
 
     layout = {}
-    extents = self.task.placement_extents
     if isinstance(extents, tuple):
       extents = {k: extents for k in self._placements.keys()}
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
-      for _ in range(100):
+      for _ in range(1000):
         object_extents = extents[name]
         xy = utils.draw_placement(self.rs, placements,
                                   object_extents, keepout)

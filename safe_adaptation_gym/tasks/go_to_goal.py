@@ -6,6 +6,7 @@ import safe_adaptation_gym.primitive_objects as po
 import safe_adaptation_gym.utils as utils
 from safe_adaptation_gym.tasks.task import Task, MujocoBridge
 
+_GOAL_PLACEMENT = [(-1.5, -1.5, 1.5, 1.5)]
 
 class GoToGoal(Task):
   GOAL_SIZE = 0.3
@@ -16,7 +17,7 @@ class GoToGoal(Task):
     self._last_goal_distance = None
 
   def setup_placements(self) -> Dict[str, tuple]:
-    return {'goal': ([(-1.25, -1.25, 1.25, 1.25)], self.GOAL_KEEPOUT)}
+    return {'goal': (_GOAL_PLACEMENT, self.GOAL_KEEPOUT)}
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
     return {
@@ -58,9 +59,8 @@ class GoToGoal(Task):
   def _resample_goal_position(self, layout: dict, placements: dict,
                               rs: np.random.RandomState):
     layout.pop('goal')
-    goal_extents = tuple(np.asarray(self.placement_extents) * 0.75)
     for _ in range(10000):
-      goal_xy = utils.draw_placement(rs, None, goal_extents,
+      goal_xy = utils.draw_placement(rs, _GOAL_PLACEMENT, self.placement_extents,
                                      self.GOAL_KEEPOUT)
       valid_placement = True
       for other_name, other_xy in layout.items():
