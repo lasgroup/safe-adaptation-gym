@@ -114,3 +114,6 @@ def quat2mat(quat):
   m = np.zeros(9, dtype='float64')
   mujoco.mju_quat2Mat(m, q)
   return m.reshape((3, 3))
+
+def increase_extents(extents, scale=1.05):
+      return tuple(np.asarray(extents) * scale)

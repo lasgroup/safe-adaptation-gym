@@ -42,7 +42,7 @@ class World:
     tmp_config = deepcopy(self.DEFAULT)
     tmp_config.update(config)
     if robot.name == "doggo":
-      tmp_config['placements_margin'] += 0.15
+      tmp_config['placements_margin'] += 0.25
     self.config = SimpleNamespace(**tmp_config)
     self.task = task
     self.rs = rs
@@ -174,12 +174,14 @@ class World:
   def _generate_new_layout(self):
     """ Rejection sample a placement of objects to find a layout. """
     extents = self.task.placement_extents
+    if self.robot.name == "doggo":
+        extents = utils.increase_extents(extents, 1.125)
     for _ in range(10000):
       for _ in range(10000):
         new_layout = self._sample_layout(extents)
         if new_layout is not None:
           return new_layout
-      increase_extents = lambda extents: tuple(np.asarray(extents) * 1.05)
+      increase_extents = utils.increase_extents(extents)
       extents = increase_extents(extents)
       new_placements = {}
       for name, (placements, keepout) in self._placements.items():

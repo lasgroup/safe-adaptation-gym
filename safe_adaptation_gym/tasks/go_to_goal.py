@@ -73,7 +73,7 @@ class GoToGoal(Task):
             break
         if valid_placement:
           return goal_xy
-      goal_placement = [tuple(np.asarray(goal_placement[0]) * 1.05)]
+      goal_placement = [utils.increase_extents(goal_placement[0])]
     raise utils.ResamplingError('Failed to generate goal')
 
   @property
