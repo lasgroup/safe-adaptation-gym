@@ -42,7 +42,7 @@ class World:
     tmp_config = deepcopy(self.DEFAULT)
     tmp_config.update(config)
     if robot.name == "doggo":
-      tmp_config['placements_margin'] += 0.25
+      tmp_config['placements_margin'] += 0.175
     self.config = SimpleNamespace(**tmp_config)
     self.task = task
     self.rs = rs
@@ -188,7 +188,7 @@ class World:
         if placements is not None:
           new_placements[name] = ([increase_extents(extents for extents in placements)], keepout)
       self._placements = new_placements
-    raise utils.ResamplingError()
+    raise utils.ResamplingError("Failed to generate layout")
 
   def _sample_layout(self, extents) -> Union[dict, None]:
     """ Sample a single layout, returning True if successful, else False. """
