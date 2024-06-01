@@ -99,7 +99,7 @@ class PressButtons(Task):
 
   @property
   def num_obstacles(self) -> int:
-    return 8
+    return 10
 
 
 class State(Enum):
