@@ -25,7 +25,7 @@ class World:
       'vases_keepout': 0.15,
       'pillars_keepout': 0.3,
       'gremlins_travel': 0.35,
-      'obstacles_size_noise_scale': 0.025,
+      'obstacles_size_noise_scale': 0.0,
       'robot_ctrl_range_scale': 0.0,
       'action_noise': 0.0,
       'max_bound': 25,
@@ -42,24 +42,21 @@ class World:
     tmp_config = deepcopy(self.DEFAULT)
     tmp_config.update(config)
     if robot.name == "doggo":
-      tmp_config['placements_margin'] += 0.175
+      tmp_config['placements_margin'] += 0.165
     self.config = SimpleNamespace(**tmp_config)
     self.task = task
     self.rs = rs
     self.robot = robot
-    obstacle_sizes_scale = self.task.obstacle_scales(
-        self.rs) * self.config.obstacles_size_noise_scale + 1.0
     # Make sure that there are no negative size scales (otherwise objects
     # would have a negative size, causing mujoco not to compile)
-    obstacle_sizes_scale = np.clip(obstacle_sizes_scale, 0.5, 1.25)
     self._obstacle_sizes = {
-        k: scale * value
-        for k, scale, value in zip(c.OBSTACLES, obstacle_sizes_scale, [
+        k: scale
+        for k, scale  in zip(c.OBSTACLES, [
             self.config.hazards_size, self.config.vases_size,
             self.config.gremlins_size, self.config.pillars_size
         ])
     }
-    keepouts = obstacle_sizes_scale * np.asarray([
+    keepouts = np.asarray([
         self.config.hazards_keepout, self.config.vases_keepout,
         self.config.gremlins_keepout, self.config.pillars_keepout
     ])
@@ -176,17 +173,16 @@ class World:
     extents = self.task.placement_extents
     if self.robot.name == "doggo":
         extents = utils.increase_extents(extents, 1.125)
-    for _ in range(10000):
+    for _ in range(50):
       for _ in range(10000):
         new_layout = self._sample_layout(extents)
         if new_layout is not None:
           return new_layout
-      increase_extents = utils.increase_extents(extents)
-      extents = increase_extents(extents)
+      extents = utils.increase_extents(extents)
       new_placements = {}
       for name, (placements, keepout) in self._placements.items():
         if placements is not None:
-          new_placements[name] = ([increase_extents(extents for extents in placements)], keepout)
+          new_placements[name] = ([utils.increase_extents(extents for extents in placements)], keepout)
       self._placements = new_placements
     raise utils.ResamplingError("Failed to generate layout")
 

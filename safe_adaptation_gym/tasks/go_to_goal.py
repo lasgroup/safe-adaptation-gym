@@ -60,7 +60,7 @@ class GoToGoal(Task):
                               rs: np.random.RandomState):
     layout.pop('goal')
     goal_placement = _GOAL_PLACEMENT
-    for _ in range(10000):
+    for _ in range(50):
       for _ in range(10000):
         goal_xy = utils.draw_placement(rs, goal_placement, self.placement_extents,
                                       self.GOAL_KEEPOUT)
@@ -78,4 +78,4 @@ class GoToGoal(Task):
 
   @property
   def obstacles_distribution(self):
-    return [0.4, 0.4, 0.1, 0.1]
+    return [0.4, 0.4, 0.0, 0.2]

@@ -82,7 +82,7 @@ class Task(abc.ABC):
 
   def obstacle_scales(self, rs: np.random.RandomState):
     if self._obstacle_scales is None:
-      self._obstacle_scales = rs.standard_cauchy(len(consts.OBSTACLES))
+      self._obstacle_scales = np.ones(len(consts.OBSTACLES))
     return self._obstacle_scales
 
   def ctrl_scale(self, rs: np.random.RandomState, control_size: int):

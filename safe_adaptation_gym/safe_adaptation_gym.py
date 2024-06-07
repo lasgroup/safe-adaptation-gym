@@ -13,7 +13,7 @@ from safe_adaptation_gym.render import make_additional_render_objects
 
 _ROBOT_TO_CONTROL_FREQUENCY = {
   'doggo': 12,
-  'point': 5,
+  'point': 10,
   'car': 10
 }
 
@@ -65,6 +65,7 @@ class SafeAdaptationGym(gym.Env):
     self.mujoco_bridge.set_control(
         np.clip(action, action_range[:, 0], action_range[:, 1]))
     iters = _ROBOT_TO_CONTROL_FREQUENCY[self.robot.name]
+    cost = 0.
     for _ in range(iters):
       self._world.set_mocaps(self.mujoco_bridge)
       self.mujoco_bridge.physics.step()

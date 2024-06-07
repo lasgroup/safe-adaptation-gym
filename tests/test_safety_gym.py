@@ -8,7 +8,7 @@ from gym.wrappers import TimeLimit
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
 
-ROBOT = "doggo"
+ROBOT = "point"
 
 
 def controller(action_space):
@@ -54,6 +54,7 @@ class ViewerWrapper:
             maximum=env.action_space.high,
         )
         self.sum_rewards = None
+        self.sum_costs = None
 
     @property
     def physics(self):
@@ -62,8 +63,11 @@ class ViewerWrapper:
     def reset(self):
         if self.sum_rewards is not None:
             print("Episode Return: {}".format(self.sum_rewards))
+        if self.sum_costs is not None:
+            print("Episode Cost: {}".format(self.sum_costs))
         self.env.reset()
         self.sum_rewards = 0.0
+        self.sum_costs = 0.0
 
     def action_spec(self):
         return self._action_spec
@@ -72,6 +76,7 @@ class ViewerWrapper:
         obs, reward, terminal, info = self.env.step(action)
         t = StepType.LAST if terminal else StepType.MID
         self.sum_rewards += reward
+        self.sum_costs += info.get("cost", 0)
         return TimeStep(t, reward, 1.0, obs)
 
 

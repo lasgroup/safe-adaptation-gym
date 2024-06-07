@@ -115,5 +115,5 @@ def quat2mat(quat):
   mujoco.mju_quat2Mat(m, q)
   return m.reshape((3, 3))
 
-def increase_extents(extents, scale=1.05):
+def increase_extents(extents, scale=1.01):
       return tuple(np.asarray(extents) * scale)
