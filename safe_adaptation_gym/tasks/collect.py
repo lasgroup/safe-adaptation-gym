@@ -42,4 +42,4 @@ class Collect(PressButtons):
 
   @property
   def obstacles_distribution(self):
-    return [0.3, 0.3, 0.3, 0.1]
+    return [0.4, 0.4, 0.0, 0.2]
