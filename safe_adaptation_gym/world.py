@@ -173,7 +173,7 @@ class World:
     extents = self.task.placement_extents
     if self.robot.name == "doggo":
         extents = utils.increase_extents(extents, 1.125)
-    for _ in range(50):
+    for i in range(50):
       for _ in range(10000):
         new_layout = self._sample_layout(extents)
         if new_layout is not None:
@@ -182,7 +182,10 @@ class World:
       new_placements = {}
       for name, (placements, keepout) in self._placements.items():
         if placements is not None:
-          new_placements[name] = ([utils.increase_extents(extents for extents in placements)], keepout)
+          if i == 48:
+            new_placements[name] = (None, keepout)
+          else:
+            new_placements[name] = ([utils.increase_extents(extents for extents in placements)], keepout)
       self._placements = new_placements
     raise utils.ResamplingError("Failed to generate layout")
 

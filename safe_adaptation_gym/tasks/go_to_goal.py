@@ -60,7 +60,7 @@ class GoToGoal(Task):
                               rs: np.random.RandomState):
     layout.pop('goal')
     goal_placement = _GOAL_PLACEMENT
-    for _ in range(50):
+    for i in range(50):
       for _ in range(10000):
         goal_xy = utils.draw_placement(rs, goal_placement, self.placement_extents,
                                       self.GOAL_KEEPOUT)
@@ -73,7 +73,10 @@ class GoToGoal(Task):
             break
         if valid_placement:
           return goal_xy
-      goal_placement = [utils.increase_extents(goal_placement[0])]
+        if i == 48:
+          goal_placement = None
+        else:
+          goal_placement = [utils.increase_extents(goal_placement[0])]
     raise utils.ResamplingError('Failed to generate goal')
 
   @property

@@ -26,7 +26,7 @@ class PressButtons(Task):
   def setup_placements(self) -> Dict[str, tuple]:
     placements = dict()
     for i in range(self.NUM_BUTTONS):
-      placements['buttons{}'.format(i)] = ([(-1.5, -1.5, 1.5, 1.5)], self.BUTTONS_KEEPOUT)
+      placements['buttons{}'.format(i)] = ([(-1.35, -1.35, 1.35, 1.35)], self.BUTTONS_KEEPOUT)
     return placements
 
   def build_world_config(self, layout: dict, rs: np.random.RandomState) -> dict:
@@ -99,7 +99,7 @@ class PressButtons(Task):
 
   @property
   def num_obstacles(self) -> int:
-    return 10
+    return 14
 
 
 class State(Enum):
