@@ -6,7 +6,7 @@ from typing import Iterable
 
 import numpy as np
 import xmltodict
-from dm_control import mujoco
+from dm_control import mujoco, mjcf
 
 import safe_adaptation_gym.consts as c
 import safe_adaptation_gym.utils as utils
@@ -41,8 +41,12 @@ class MujocoBridge:
     """ Build a world, including generating XML and moving objects """
     # Read in the base XML (contains robot, camera, floor, etc)
     robot_base_path = os.path.join(c.BASE_DIR, self.robot.base_path)
-    with open(robot_base_path) as f:
-        robot_base_xml = f.read()
+    arena_mjcf = mjcf.from_path(robot_base_path)
+    if self._addition_render_objects_specs is not None:
+      robot_site = arena_mjcf.find('site', 'robot')
+      for creat_fn, specs in self._addition_render_objects_specs:
+        robot_site.attach(creat_fn(**specs))
+    robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
 
     # Convenience accessor for xml dictionary

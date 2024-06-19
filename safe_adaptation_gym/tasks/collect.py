@@ -40,6 +40,3 @@ class Collect(PressButtons):
       mujoco_bridge.user_groups[name] = [c.GROUP_GOAL]
       self._active_buttons.add(name)
 
-  @property
-  def obstacles_distribution(self):
-    return [0.4, 0.4, 0.0, 0.2]

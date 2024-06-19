@@ -58,5 +58,5 @@ class Unsupervised(Task):
         self.buttons.set_mocaps(mujoco_bridge)
 
     @property
-    def num_obstacles(self) -> int:
-        return 12
+    def obstacles(self) -> int:
+        return [5, 6, 0, 1]

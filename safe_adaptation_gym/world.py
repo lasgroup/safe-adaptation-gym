@@ -27,7 +27,7 @@ class World:
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.0,
       'robot_ctrl_range_scale': 0.0,
-      'action_noise': 0.0,
+      'action_noise': 0.05,
       'max_bound': 25,
       'random_bound': False
   }
@@ -78,8 +78,7 @@ class World:
 
   def _setup_placements(self):
     """ Build a dict of placements. """
-    obstacle_samples = self.rs.multinomial(self.task.num_obstacles,
-                                           self.task.obstacles_distribution)
+    obstacle_samples = self.task.obstacles
     placements = {
         **self._placement_dict_from_object('robot', 1),
     }

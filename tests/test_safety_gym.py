@@ -91,7 +91,7 @@ class ViewerWrapper:
         tasks.PressButtons(),
         tasks.GoToGoal(),
         tasks.Unsupervised(),
-    ]
+    ], ids=lambda x: x.__class__.__name__
 )
 def safety_gym(request):
     arena = TimeLimit(
