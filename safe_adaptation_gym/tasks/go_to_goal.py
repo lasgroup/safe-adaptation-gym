@@ -83,6 +83,3 @@ class GoToGoal(Task):
   def obstacles(self):
     return [9, 10, 0, 1]
 
-  @property
-  def placement_extents(self) -> Tuple[float, float, float, float]:
-    return -2.25, -2.25, 2.25, 2.25

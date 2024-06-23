@@ -27,7 +27,7 @@ class World:
       'gremlins_travel': 0.35,
       'obstacles_size_noise_scale': 0.0,
       'robot_ctrl_range_scale': 0.0,
-      'action_noise': 0.05,
+      'action_noise': 0.01,
       'max_bound': 25,
       'random_bound': False
   }
@@ -170,8 +170,6 @@ class World:
   def _generate_new_layout(self):
     """ Rejection sample a placement of objects to find a layout. """
     extents = self.task.placement_extents
-    if self.robot.name == "doggo":
-        extents = utils.increase_extents(extents, 1.125)
     for i in range(50):
       for _ in range(10000):
         new_layout = self._sample_layout(extents)
