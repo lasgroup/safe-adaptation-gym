@@ -198,7 +198,7 @@ class World:
       return True
 
     layout = {}
-    if isinstance(extents, tuple):
+    if isinstance(extents, tuple) or isinstance(extents, list):
       extents = {k: extents for k in self._placements.keys()}
     for name, (placements, keepout) in self._placements.items():
       conflicted = True
