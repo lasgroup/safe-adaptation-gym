@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 
@@ -8,12 +8,18 @@ from safe_adaptation_gym.tasks.task import MujocoBridge
 
 
 class Collect(PressButtons):
-  NUM_BUTTONS = 8
+  NUM_BUTTONS = 6
 
   def __init__(self):
     super(PressButtons, self).__init__()
     self._active_buttons = set(
         'buttons{}'.format(i) for i in range(self.NUM_BUTTONS))
+
+  def setup_placements(self) -> Dict[str, tuple]:
+    placements = dict()
+    for i in range(self.NUM_BUTTONS):
+      placements['buttons{}'.format(i)] = ([(-1.5, -1.5, 1.5, 1.5)], self.BUTTONS_KEEPOUT)
+    return placements
 
   def compute_reward(self, layout: dict, placements: dict,
                      rs: np.random.RandomState,
@@ -40,3 +46,6 @@ class Collect(PressButtons):
       mujoco_bridge.user_groups[name] = [c.GROUP_GOAL]
       self._active_buttons.add(name)
 
+  @property
+  def placement_extents(self) -> Tuple[float, float, float, float]:
+    return [-2.25, -2.25, 2.25, 2.25]

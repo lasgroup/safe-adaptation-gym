@@ -68,7 +68,6 @@ class Task(abc.ABC):
     """
     return [4, 5, 0, 1]
 
-
   @property
   def placement_extents(self) -> Tuple[float, float, float, float]:
     return consts.PLACEMENT_EXTENTS
