@@ -3,12 +3,16 @@ from typing import Dict, Tuple
 import numpy as np
 
 from safe_adaptation_gym import utils
+from safe_adaptation_gym.primitive_objects import geom_attributes_to_xml
 from safe_adaptation_gym.tasks.collect import Collect
 from safe_adaptation_gym.tasks.push_box import PushBox
 from safe_adaptation_gym.tasks.task import MujocoBridge, Task
+import safe_adaptation_gym.consts as c
 
 
 class Unsupervised(Task):
+    _CIRCLE_RADIUS = 1.5
+
     def __init__(self):
         super(Unsupervised, self).__init__()
         self.buttons = Collect()
@@ -24,6 +28,27 @@ class Unsupervised(Task):
         buttons_config = self.buttons.build_world_config(layout, rs)
         box_config = self.box.build_world_config(layout, rs)
         utils.merge(box_config, buttons_config)
+        circle_dict = {
+            "name": "circle",
+            "size": np.array([self._CIRCLE_RADIUS, 1e-2]),
+            "pos": np.array([0, 0, 2e-2]),
+            "quat": utils.rot2quat(0),
+            "type": "cylinder",
+            "contype": 0,
+            "conaffinity": 0,
+            "rgba": np.array([0, 1, 0, 1]) * [1, 1, 1, 0.1],
+            "user": [c.GROUP_GOAL]
+        }
+        circle_xml = geom_attributes_to_xml(circle_dict)
+        circle = {
+            "bodies": {
+                "circle": (
+                    [circle_xml],
+                    "",
+                )
+            }
+        }
+        utils.merge(box_config, circle)
         return box_config
 
     def compute_reward(
@@ -33,15 +58,16 @@ class Unsupervised(Task):
         rs: np.random.RandomState,
         mujoco_bridge: MujocoBridge,
     ) -> Tuple[float, bool, dict]:
-        box_reward, box_done, box_info = self.box.compute_reward(
-            layout, placements, rs, mujoco_bridge
-        )
-        collect_reward, collect_done, collect_info = self.buttons.compute_reward(
-            layout, placements, rs, mujoco_bridge
-        )
-        reward = box_reward + collect_reward
-        done = box_done or collect_done
-        info = utils.merge(box_info, collect_info)
+        robot_com = mujoco_bridge.body_com("robot")
+        robot_vel = mujoco_bridge.robot_vel()
+        x, y = robot_com[:2]
+        u, v = robot_vel[:2]
+        radius = np.sqrt(x**2 + y**2)
+        reward = (
+            ((-u * y + v * x) / radius) / (1 + np.abs(radius - self._CIRCLE_RADIUS))
+        ) * 1e-1
+        done = False
+        info = {}
         return reward, done, info
 
     def reset(
