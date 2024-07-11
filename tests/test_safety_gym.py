@@ -55,6 +55,7 @@ class ViewerWrapper:
         )
         self.sum_rewards = None
         self.sum_costs = None
+        self.steps = 0
 
     @property
     def physics(self):
@@ -68,15 +69,17 @@ class ViewerWrapper:
         self.env.reset()
         self.sum_rewards = 0.0
         self.sum_costs = 0.0
+        self.steps = 0
 
     def action_spec(self):
         return self._action_spec
 
     def step(self, action):
         obs, reward, terminal, info = self.env.step(action)
-        t = StepType.LAST if terminal else StepType.MID
+        t = StepType.LAST if terminal or self.steps == 1000 else StepType.MID
         self.sum_rewards += reward
         self.sum_costs += info.get("cost", 0)
+        self.steps += 1
         return TimeStep(t, reward, 1.0, obs)
 
 
@@ -91,17 +94,15 @@ class ViewerWrapper:
         tasks.PressButtons(),
         tasks.GoToGoal(),
         tasks.Unsupervised(),
-    ], ids=lambda x: x.__class__.__name__
+    ],
+    ids=lambda x: x.__class__.__name__,
 )
 def safety_gym(request):
-    arena = TimeLimit(
-        SafeAdaptationGym(
-            f"xmls/{ROBOT}.xml",
-            render_lidars_and_collision=False,
-            render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
-            config={"obstacles_size_noise_scale": 1.0},
-        ),
-        1000,
+    arena = SafeAdaptationGym(
+        f"xmls/{ROBOT}.xml",
+        render_lidars_and_collision=False,
+        render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
+        config={"obstacles_size_noise_scale": 1.0},
     )
     seeds = {
         "Collect",
