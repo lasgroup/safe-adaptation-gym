@@ -3,7 +3,6 @@ import pytest
 import glfw
 from dm_control import viewer
 from dm_env import specs, TimeStep, StepType
-from gym.wrappers import TimeLimit
 
 from safe_adaptation_gym import tasks
 from safe_adaptation_gym.safe_adaptation_gym import SafeAdaptationGym
@@ -94,6 +93,7 @@ class ViewerWrapper:
         tasks.PressButtons(),
         tasks.GoToGoal(),
         tasks.Unsupervised(),
+        tasks.GoToGoalScarce(),
     ],
     ids=lambda x: x.__class__.__name__,
 )
@@ -114,6 +114,7 @@ def safety_gym(request):
         "CatchGoal",
         "RollRod",
         "Unsupervised",
+        "GoToGoalScarce",
     }
     seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
     name = type(request.param).__name__
