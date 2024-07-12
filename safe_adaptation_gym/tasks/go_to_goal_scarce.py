@@ -26,8 +26,8 @@ class GoToGoalScarce(GoToGoal):
         reward = tolerance(
             distance,
             (0, self.GOAL_SIZE),
-            margin=self.GOAL_KEEPOUT / 2.0,
-            value_at_margin=0.1,
+            margin=self.GOAL_KEEPOUT / 3.0,
+            value_at_margin=0.02,
         )
         if distance <= self.GOAL_SIZE:
             info["goal_met"] = True
