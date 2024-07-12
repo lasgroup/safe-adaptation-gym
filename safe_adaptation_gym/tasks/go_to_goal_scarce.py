@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
+from dm_control.utils.rewards import tolerance
 from safe_adaptation_gym import utils
 from safe_adaptation_gym.tasks.go_to_goal import GoToGoal
 from safe_adaptation_gym.tasks.task import MujocoBridge
@@ -22,10 +23,14 @@ class GoToGoalScarce(GoToGoal):
         robot_pos = mujoco_bridge.body_pos("robot")
         distance = np.linalg.norm(robot_pos - goal_pos)
         info = {}
-        reward = 0
+        reward = tolerance(
+            distance,
+            (0, self.GOAL_SIZE),
+            margin=self.GOAL_KEEPOUT / 2.0,
+            value_at_margin=0.1,
+        )
         if distance <= self.GOAL_SIZE:
             info["goal_met"] = True
             utils.update_layout(layout, mujoco_bridge)
             self.reset(layout, placements, rs, mujoco_bridge)
-            reward += 1.0
         return reward, False, info
