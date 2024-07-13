@@ -25,7 +25,7 @@ class GoToGoalScarce(GoToGoal):
         info = {}
         reward = tolerance(
             distance,
-            (0, self.GOAL_SIZE * 1.25),
+            (0, self.GOAL_SIZE * 1.5),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
