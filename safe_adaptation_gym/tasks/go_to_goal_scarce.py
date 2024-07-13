@@ -25,12 +25,15 @@ class GoToGoalScarce(GoToGoal):
         info = {}
         reward = tolerance(
             distance,
-            (0, self.GOAL_SIZE),
-            margin=self.GOAL_KEEPOUT / 4.0,
-            value_at_margin=0.015,
-        )
+            (0, self.GOAL_SIZE * 1.25),
+            margin=0.0,
+            value_at_margin=0.0,
+            sigmoid="linear",
+        ) * (self._last_goal_distance - distance)
+        self._last_goal_distance = distance
         if distance <= self.GOAL_SIZE:
             info["goal_met"] = True
             utils.update_layout(layout, mujoco_bridge)
             self.reset(layout, placements, rs, mujoco_bridge)
+            reward += 1
         return reward, False, info
