@@ -8,6 +8,7 @@ from safe_adaptation_gym.tasks.roll_rod import RollRod
 from safe_adaptation_gym.tasks.catch_goal import CatchGoal
 from safe_adaptation_gym.tasks.unsupervised import Unsupervised
 from safe_adaptation_gym.tasks.go_to_goal_scarce import GoToGoalScarce
+from safe_adaptation_gym.tasks.press_buttons_scarce import PressButtonsScarce
 from safe_adaptation_gym.tasks.task import Task
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
     "CatchGoal",
     "Unsupervised",
     "GoToGoalScarce",
+    "PressButtonsScarce",
 ]
