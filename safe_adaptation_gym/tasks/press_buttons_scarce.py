@@ -15,7 +15,7 @@ class PressButtonsScarce(PressButtons):
         placements = dict()
         for i in range(self.NUM_BUTTONS):
             placements["buttons{}".format(i)] = (
-                [(-1.5, -1.5, 1.5, 1.5)],
+                [(-2.5, -2.5, 2.5, 2.5)],
                 self.BUTTONS_KEEPOUT,
             )
         return placements
