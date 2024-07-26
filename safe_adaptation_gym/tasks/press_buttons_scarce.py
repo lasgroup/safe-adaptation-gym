@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 
@@ -10,6 +10,15 @@ from safe_adaptation_gym.tasks.task import MujocoBridge
 class PressButtonsScarce(PressButtons):
     def __init__(self):
         super(PressButtonsScarce, self).__init__()
+
+    def setup_placements(self) -> Dict[str, tuple]:
+        placements = dict()
+        for i in range(self.NUM_BUTTONS):
+            placements["buttons{}".format(i)] = (
+                [(-1.5, -1.5, 1.5, 1.5)],
+                self.BUTTONS_KEEPOUT,
+            )
+        return placements
 
     def compute_reward(
         self,
@@ -23,7 +32,7 @@ class PressButtonsScarce(PressButtons):
         distance = np.linalg.norm(robot_pos - goal_pos)
         reward = tolerance(
             distance,
-            (0, 0.3),
+            (0, 0.3 * 1.5),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
