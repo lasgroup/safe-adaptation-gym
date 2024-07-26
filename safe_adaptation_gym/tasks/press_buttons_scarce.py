@@ -15,7 +15,7 @@ class PressButtonsScarce(PressButtons):
         placements = dict()
         for i in range(self.NUM_BUTTONS):
             placements["buttons{}".format(i)] = (
-                [(-2.5, -2.5, 2.5, 2.5)],
+                [(-2.0, -2.0, 2.0, 2.0)],
                 self.BUTTONS_KEEPOUT,
             )
         return placements
@@ -32,7 +32,7 @@ class PressButtonsScarce(PressButtons):
         distance = np.linalg.norm(robot_pos - goal_pos)
         reward = tolerance(
             distance,
-            (0, 0.3 * 1.5),
+            (0, 0.4),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
