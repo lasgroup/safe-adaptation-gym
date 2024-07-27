@@ -23,7 +23,7 @@ class PressButtonsScarce(PressButtons):
         distance = np.linalg.norm(robot_pos - goal_pos)
         reward = tolerance(
             distance,
-            (0, 0.4),
+            (0, 0.35),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
