@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -10,15 +10,6 @@ from safe_adaptation_gym.tasks.task import MujocoBridge
 class PressButtonsScarce(PressButtons):
     def __init__(self):
         super(PressButtonsScarce, self).__init__()
-
-    def setup_placements(self) -> Dict[str, tuple]:
-        placements = dict()
-        for i in range(self.NUM_BUTTONS):
-            placements["buttons{}".format(i)] = (
-                [(-2.0, -2.0, 2.0, 2.0)],
-                self.BUTTONS_KEEPOUT,
-            )
-        return placements
 
     def compute_reward(
         self,
