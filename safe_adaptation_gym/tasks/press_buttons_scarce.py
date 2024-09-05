@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+from dm_control.utils.rewards import tolerance
 
 from safe_adaptation_gym.tasks.press_buttons import PressButtons, State
 from safe_adaptation_gym.tasks.task import MujocoBridge
@@ -21,7 +22,13 @@ class PressButtonsScarce(PressButtons):
         robot_pos = mujoco_bridge.body_pos("robot")[:2]
         distance = np.linalg.norm(robot_pos - goal_pos)
         self._last_goal_distance = distance
-        reward = 0.0
+        reward = tolerance(
+            distance,
+            (0, 0.30),
+            margin=0.0,
+            value_at_margin=0.0,
+            sigmoid="linear",
+        ) * (self._last_goal_distance - distance)
         info = {}
         if mujoco_bridge.robot_contacts([self._goal_button]):
             reward += 1.0
