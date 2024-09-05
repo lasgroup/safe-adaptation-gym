@@ -38,7 +38,7 @@ class PressButtonsScarce(PressButtons):
         elif mujoco_bridge.robot_contacts(
             [
                 f"button{i}"
-                for i in self.NUM_BUTTONS
+                for i in range(self.NUM_BUTTONS)
                 if f"button{i}" != self._goal_button
             ]
         ):
