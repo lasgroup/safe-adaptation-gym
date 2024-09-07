@@ -24,7 +24,7 @@ class PressButtonsScarce(PressButtons):
         self._last_goal_distance = distance
         reward = tolerance(
             distance,
-            (0, 0.30),
+            (0, 0.15),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
