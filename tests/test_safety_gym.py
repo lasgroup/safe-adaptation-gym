@@ -95,6 +95,7 @@ class ViewerWrapper:
         tasks.Unsupervised(),
         tasks.GoToGoalScarce(),
         tasks.PressButtonsScarce(),
+        tasks.PushBoxScarce(),
     ],
     ids=lambda x: x.__class__.__name__,
 )
@@ -117,6 +118,7 @@ def safety_gym(request):
         "Unsupervised",
         "GoToGoalScarce",
         "PressButtonsScarce",
+        "PushBoxScarce",
     }
     seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
     name = type(request.param).__name__
