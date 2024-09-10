@@ -29,7 +29,7 @@ class PushBoxScarce(PushBox):
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
-        ) * (self._last_goal_distance - box_distance)
+        ) * (self._last_box_distance - box_distance)
         self._last_box_distance = box_distance
         box_goal_distance = np.linalg.norm(box_pos - goal_pos)
         reward += self._last_box_goal_distance - box_goal_distance
