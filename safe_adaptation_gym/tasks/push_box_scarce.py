@@ -37,7 +37,7 @@ class PushBoxScarce(PushBox):
         info = {}
         if box_goal_distance <= self.GOAL_SIZE:
             info["goal_met"] = True
-        utils.update_layout(layout, mujoco_bridge)
-        self.reset(layout, placements, rs, mujoco_bridge)
-        reward += 1.0
+            utils.update_layout(layout, mujoco_bridge)
+            self.reset(layout, placements, rs, mujoco_bridge)
+            reward += 1.0
         return reward, False, info
