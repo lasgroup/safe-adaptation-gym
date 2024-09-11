@@ -1,7 +1,6 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 import numpy as np
-from dm_control.utils.rewards import tolerance
 
 from safe_adaptation_gym.tasks.press_buttons import PressButtons, State
 from safe_adaptation_gym.tasks.task import MujocoBridge
@@ -10,6 +9,15 @@ from safe_adaptation_gym.tasks.task import MujocoBridge
 class PressButtonsScarce(PressButtons):
     def __init__(self):
         super(PressButtonsScarce, self).__init__()
+
+    def setup_placements(self) -> Dict[str, tuple]:
+        placements = dict()
+        for i in range(self.NUM_BUTTONS):
+            placements["buttons{}".format(i)] = (
+                [(-1.75, -1.75, 1.75, 1.75)],
+                self.BUTTONS_KEEPOUT,
+            )
+        return placements
 
     def compute_reward(
         self,
@@ -22,13 +30,7 @@ class PressButtonsScarce(PressButtons):
         robot_pos = mujoco_bridge.body_pos("robot")[:2]
         distance = np.linalg.norm(robot_pos - goal_pos)
         self._last_goal_distance = distance
-        reward = tolerance(
-            distance,
-            (0, 0.05),
-            margin=0.0,
-            value_at_margin=0.0,
-            sigmoid="linear",
-        ) * (self._last_goal_distance - distance)
+        reward = 0.0
         info = {}
         if mujoco_bridge.robot_contacts([self._goal_button]):
             reward += 1.0
