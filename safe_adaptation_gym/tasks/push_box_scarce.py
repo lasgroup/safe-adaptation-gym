@@ -14,9 +14,7 @@ class PushBoxScarce(PushBox):
 
     def setup_placements(self) -> Dict[str, tuple]:
         placements = super(PushBox, self).setup_placements()
-        placements.update(
-            {"box": ([(-2.25, -2.25, 2.25, 2.25)], self.BOX_KEEPOUT * 1.2)}
-        )
+        placements.update({"box": ([(-3.5, -3.5, 3.5, 3.5)], self.BOX_KEEPOUT * 1.5)})
         return placements
 
     def compute_reward(
