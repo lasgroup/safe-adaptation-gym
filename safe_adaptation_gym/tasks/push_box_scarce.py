@@ -15,7 +15,7 @@ class PushBoxScarce(PushBox):
     def setup_placements(self) -> Dict[str, tuple]:
         placements = super(PushBox, self).setup_placements()
         placements.update(
-            {"box": ([(-2.25, -2.25, 2.25, 2.25)], self.BOX_KEEPOUT * 1.1)}
+            {"box": ([(-2.25, -2.25, 2.25, 2.25)], self.BOX_KEEPOUT * 1.2)}
         )
         return placements
 
@@ -32,7 +32,7 @@ class PushBoxScarce(PushBox):
         box_distance = np.linalg.norm(robot_pos - box_pos)
         reward = tolerance(
             box_distance,
-            (0, self.GOAL_SIZE * 1.75),
+            (0, self.GOAL_SIZE * 1.80),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
