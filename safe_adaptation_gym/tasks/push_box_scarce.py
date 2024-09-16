@@ -30,7 +30,7 @@ class PushBoxScarce(PushBox):
         box_distance = np.linalg.norm(robot_pos - box_pos)
         reward = tolerance(
             box_distance,
-            (0, self.GOAL_SIZE * 1.75),
+            (0, self.GOAL_SIZE * 1.5),
             margin=0.0,
             value_at_margin=0.0,
             sigmoid="linear",
