@@ -47,8 +47,9 @@ class MujocoBridge:
       robot_site = arena_mjcf.find('site', 'robot')
       for creat_fn, specs in self._addition_render_objects_specs:
         robot_site.attach(creat_fn(**specs))
-    for (namespace, id_), (attribute, value) in self.config.modify_tree:
-      setattr(arena_mjcf.find(namespace, id_), attribute, value)
+    if self.config.modify_tree is not None:
+      for (namespace, id_), (attribute, value) in self.config.modify_tree:
+        setattr(arena_mjcf.find(namespace, id_), attribute, value)
     robot_base_xml = arena_mjcf.to_xml_string()
     xml = xmltodict.parse(robot_base_xml)
 

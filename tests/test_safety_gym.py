@@ -104,7 +104,7 @@ def safety_gym(request):
         f"xmls/{ROBOT}.xml",
         render_lidars_and_collision=False,
         render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
-        config={"obstacles_size_noise_scale": 1.0},
+        config={"obstacles_size_noise_scale": 1.0, "min_damping": 0.01 * 50},
     )
     seeds = {
         "Collect",
