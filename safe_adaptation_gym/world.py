@@ -12,6 +12,8 @@ from safe_adaptation_gym.robot import Robot
 from safe_adaptation_gym.tasks.task import Task
 
 
+_DEFAULT_DAMPING = 0.01
+
 class World:
   DEFAULT = {
       'placements_margin': 0.0,
@@ -29,7 +31,8 @@ class World:
       'robot_ctrl_range_scale': 0.0,
       'action_noise': 0.01,
       'max_bound': 25,
-      'random_bound': False
+      'random_bound': False,
+      'min_damping': _DEFAULT_DAMPING,
   }
 
   def __init__(self,
@@ -112,7 +115,8 @@ class World:
         # https://keisan.casio.com/exec/system/1180573169
         'robot_ctrl_range_scale': self._robot_ctrl_range_scale,
         'robot_rot': utils.random_rot(self.rs),
-        'bodies': {}
+        'bodies': {},
+        'modify_tree': self.task.modify_tree(self.rs, self.config.min_damping)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:
