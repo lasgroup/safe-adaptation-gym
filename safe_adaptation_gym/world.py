@@ -112,7 +112,9 @@ class World:
         # https://keisan.casio.com/exec/system/1180573169
         'robot_ctrl_range_scale': self._robot_ctrl_range_scale,
         'robot_rot': utils.random_rot(self.rs),
-        'bodies': {}
+        'bodies': {},
+
+        'modify_tree': self.task.modify_tree(self.rs, self.config.min_damping),
     }
     for name, xy in self._layout.items():
       if 'vase' in name:
