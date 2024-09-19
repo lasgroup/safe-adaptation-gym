@@ -96,6 +96,7 @@ class ViewerWrapper:
         tasks.GoToGoalScarce(),
         tasks.PressButtonsScarce(),
         tasks.PushBoxScarce(),
+        tasks.GoToGoalSim(),
     ],
     ids=lambda x: x.__class__.__name__,
 )
@@ -104,7 +105,7 @@ def safety_gym(request):
         f"xmls/{ROBOT}.xml",
         render_lidars_and_collision=False,
         render_options={"camera_id": "fixedfar", "height": 320, "width": 320},
-        config={"obstacles_size_noise_scale": 1.0, "min_damping": 0.01 * 50},
+        config={"obstacles_size_noise_scale": 1.0},
     )
     seeds = {
         "Collect",
@@ -119,6 +120,7 @@ def safety_gym(request):
         "GoToGoalScarce",
         "PressButtonsScarce",
         "PushBoxScarce",
+        "GoToGoalSim",
     }
     seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
     name = type(request.param).__name__
