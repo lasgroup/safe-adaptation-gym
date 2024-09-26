@@ -96,7 +96,8 @@ class ViewerWrapper:
         tasks.GoToGoalScarce(),
         tasks.PressButtonsScarce(),
         tasks.PushBoxScarce(),
-        tasks.GoToGoalSim(),
+        tasks.GoToGoalDamping(),
+        tasks.GoToGoalMotor(),
     ],
     ids=lambda x: x.__class__.__name__,
 )
@@ -120,7 +121,8 @@ def safety_gym(request):
         "GoToGoalScarce",
         "PressButtonsScarce",
         "PushBoxScarce",
-        "GoToGoalSim",
+        "GoToGoalDamping",
+        "GoToGoalMotor",
     }
     seeds = {name: num for name, num in zip(seeds, range(len(seeds)))}
     name = type(request.param).__name__

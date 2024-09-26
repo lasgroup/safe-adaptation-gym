@@ -12,7 +12,6 @@ from safe_adaptation_gym.robot import Robot
 from safe_adaptation_gym.tasks.task import Task
 
 
-_DEFAULT_DAMPING = 0.01
 
 class World:
   DEFAULT = {
@@ -32,7 +31,6 @@ class World:
       'action_noise': 0.01,
       'max_bound': 25,
       'random_bound': False,
-      'min_damping': _DEFAULT_DAMPING,
   }
 
   def __init__(self,
@@ -116,7 +114,7 @@ class World:
         'robot_ctrl_range_scale': self._robot_ctrl_range_scale,
         'robot_rot': utils.random_rot(self.rs),
         'bodies': {},
-        'modify_tree': self.task.modify_tree(self.rs, self.config.min_damping)
+        'modify_tree': self.task.modify_tree(self.rs)
     }
     for name, xy in self._layout.items():
       if 'vase' in name:

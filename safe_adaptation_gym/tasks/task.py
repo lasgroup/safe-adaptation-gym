@@ -17,7 +17,6 @@ class Task(abc.ABC):
     self._obstacle_scales = None
     self._ctrl_scale = None
     self._bound = None
-    self._damping = None
 
   @abc.abstractmethod
   def setup_placements(self) -> Dict[str, tuple]:
@@ -94,7 +93,7 @@ class Task(abc.ABC):
       self._bound = rs.uniform(0., max_bound)
     return self._bound
 
-  def modify_tree(self, rs: np.random.RandomState, min_damping: float):
+  def modify_tree(self, rs: np.random.RandomState):
     return None
   
 

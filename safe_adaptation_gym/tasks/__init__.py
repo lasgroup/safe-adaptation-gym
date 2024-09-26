@@ -10,7 +10,8 @@ from safe_adaptation_gym.tasks.unsupervised import Unsupervised
 from safe_adaptation_gym.tasks.go_to_goal_scarce import GoToGoalScarce
 from safe_adaptation_gym.tasks.press_buttons_scarce import PressButtonsScarce
 from safe_adaptation_gym.tasks.push_box_scarce import PushBoxScarce
-from safe_adaptation_gym.tasks.go_to_goal_sim import GoToGoalSim
+from safe_adaptation_gym.tasks.go_to_goal_damping import GoToGoalDamping
+from safe_adaptation_gym.tasks.go_to_goal_motor import GoToGoalMotor
 from safe_adaptation_gym.tasks.task import Task
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "GoToGoalScarce",
     "PressButtonsScarce",
     "PushBoxScarce",
-    "GoToGoalSim",
+    "GoToGoalDamping",
+    "GoToGoalMotor",
 ]
